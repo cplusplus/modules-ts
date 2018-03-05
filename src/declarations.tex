@@ -1,0 +1,910 @@
+%!TEX root = std.tex
+\setcounter{chapter}{9}
+\rSec0[dcl.dcl]{Declarations}%
+%\indextext{declaration|(}
+
+%gram: \rSec1[gram.dcl]{Declarations}
+%gram:
+
+\noindent
+Add a new alternative to \term{declaration} in paragraph 10/1 as follows
+\begin{std.txt}
+  \begin{bnf}
+    \nonterminal{declaration}:\br
+      block-declaration\br
+      nodeclspec-function-declaration\br
+      function-definition\br
+      template-declaration\br
+      explicit-instantiation\br
+      explicit-specialization\br
+      linkage-specification\br
+      namespace-definition\br
+      empty-declaration\br
+      attribute-declaration\br
+      \color{addclr}
+      \added{export-declaration\br
+      module-import-declaration\br
+      proclaimed-ownership-declaration}
+  \end{bnf}
+  \end{std.txt}
+
+
+\setcounter{section}{0}
+\rSec1[dcl.spec]{Specifiers}%
+
+\setcounter{subsection}{1}
+\rSec2[dcl.fct.spec]{Function specifiers}%
+
+\noindent
+Add a new paragraph 10.1.2/7 as follows:
+\begin{std.txt}
+  \color{addclr}
+  \resetalinea[6]
+  \alinea
+  \added{An exported inline function shall be defined in the same translation
+  unit containing its export declaration.
+%  That semantic property
+%  is a reachable semantic property (\ref{dcl.module.reach}) even if
+%  the definition is not exported (\ref{dcl.module.interface}).
+  \enternote
+  There is no restriction on the linkage (or absence thereof)
+  of entities that the function body of an exported inline function
+  can reference. A constexpr function (10.1.5) is implicitly inline.
+  \exitnote}
+\end{std.txt}
+
+
+\setcounter{subsection}{5}
+\rSec6[dcl.inline]{The \tcode{inline} specifier}%
+
+\noindent
+Modify paragraph 10.1.6/6 as follows
+\begin{std.txt}
+  \resetalinea[5]
+  \alinea
+  \added{Some definition for}
+  \removed{A}\added{a}n inline function or variable shall be 
+  \removed{defined}\added{reachable} in every translation 
+  unit in which it is odr-used and \added{the function or variable} shall have exactly 
+  the same definition in every case (\ref{basic.link}).
+  \enternote
+  A call to the inline function or a use of 
+  the inline variable may be encountered before its definition appears 
+  in the translation unit.
+  \exitnote
+  If the definition of a function or variable appears in a translation unit 
+  before its first declaration as inline, the program is ill-formed. If a 
+  function or variable with external \added{or module} linkage is 
+  \removed{declared}\added{reachable via an} 
+  inline \added{declaration} in one translation 
+  unit, it shall be \removed{declared}\added{reachable via an} inline
+  \added{declaration} in all translation units in which it 
+  \removed{appears}\added{is reachable}; 
+  no diagnostic is required. An inline function or variable with 
+  external \added{or module} linkage 
+  shall have the same address in all translation units.
+  \enternote
+  A \tcode{static} local variable in an inline function with external 
+  \added{or module} linkage always refers to the same object. A type 
+  defined within the body 
+  of an inline function with external \added{or module} linkage is the 
+  same type in every translation unit.
+  \exitnote
+\end{std.txt}
+
+
+
+
+\setcounter{section}{2}
+\rSec1[basic.namespace]{Namespaces}%
+%\indextext{namespaces|(}
+
+\noindent
+Modify paragraph 10.3/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  A namespace is an optionally-named declarative region. The name of a
+  namespace can be used to access entities declared in that namespace;
+  that is, the members of the namespace. Unlike other declarative
+  regions, the definition of a namespace can be split over several
+  parts of one or more translation units.
+  \added{A namespace with external linkage is always 
+    exported regardless of whether any of its \term{namespace-definition}{s} is
+    introduced by \tcode{export}.
+    \enternote
+    There is no way to define a namespace with module linkage.
+    \exitnote
+  }\color{addclr}
+  \begin{example}
+  \begin{codeblock}
+    export module M;
+    namespace N {    // N has external linkage and is exported
+    }
+  \end{codeblock}
+  \end{example}
+\end{std.txt}
+
+\setcounter{subsection}{2}
+\rSec2[namespace.udecl]{The \tcode{using} declaration}
+
+Modify paragraph 10.3.3/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  Each \grammarterm{using-declarator} in a \grammarterm{using-declaration}
+  introduces a set of declarations \added{and citations} into the declarative 
+  region in which the
+  \grammarterm{using-declaration} appears.  The set of declarations
+  \added{and citations}
+   introduced by
+  the \grammarterm{using-declarator} is found by performing qualified name
+  lookup (6.4.3, 13.2) for the name in the \grammarterm{using-declarator},
+  excluding functions that are hidden as described below.  If the
+  \grammarterm{using-declarator} does not name a constructor, the 
+  \grammarterm{unqualified-id} is declared in the declarative region in which
+  the \grammarterm{using-declaration} appears as a synonym for each
+  declaration \added{or citation} 
+  introduced by the \grammarterm{using-declarator}. [...]
+\end{std.txt}
+
+
+\noindent
+Add a new subclause 10.7 titled ``\textbf{Modules}'' as follows:
+
+\setcounter{section}{6}
+\rSec1[dcl.module]{Modules}%
+
+\rSec2[dcl.module.unit]{Module units and purviews}
+
+\begin{std.txt}\color{addclr}
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-declaration}:\br
+       \terminal{export}\opt {} \terminal{module} module-name attribute-specifier-seq\opt \terminal{;}
+  \end{bnf}
+  
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-name}:\br
+      module-name-qualifier-seq\opt identifier
+  \end{bnf}
+  
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-name-qualifier-seq}:\br
+      module-name-qualifier  \terminal{.}\br
+      module-name-qualifier-seq identifier \terminal{.}
+  \end{bnf}
+  
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-name-qualifier}:\br
+      identifier
+  \end{bnf}
+  
+  \resetalinea[0]
+\alinea A \term{module unit} is a translation unit that contains
+a \grammarterm{module-declaration}. A \term{named module} is the
+collection of module units with the same \grammarterm{module-name}.
+A translation unit shall not contain more than
+one \grammarterm{module-declaration}. A \grammarterm{module-name}
+has external linkage but cannot be found by name lookup.
+
+\alinea
+A \term{module interface unit} is a module unit whose
+\grammarterm{module-declaration} contains the \texttt{export} keyword;
+any other module unit is a \term{module implementation unit}.  A named
+module shall contain exactly one module interface unit.
+
+\alinea
+A \term{module unit purview} starts at the \grammarterm{module-declaration}
+and extends to the end of the translation unit.
+The \term{purview} of a named module \tcode{M} is the set of module unit purviews
+of \tcode{M}'s module units. 
+
+\alinea
+The \term{global module} is the collection of all declarations
+not in the purview of any module.   By
+extension, such declarations  are said to be in the purview of the
+global module. 
+\enternote
+The global module has no name, no module interface unit, and is not
+  introduced by any 
+  \grammarterm{module-declaration}.
+\exitnote
+
+\alinea
+  A \term{module} is either a named module or the global module.
+  A \grammarterm{proclaimed-ownership-declaration} is
+  \term{attached} to the module it nominates; any other declaration
+  is attached to the module in whose purview it appears.
+
+  \alinea
+For a namespace-scope declaration $D$ of an entity (other than a
+namespace), if $D$ is within a \grammarterm{proclaimed-ownership-declaration}
+for a module $X$, the entity is said to be \term{owned} by $X$.
+Otherwise, if $D$ is the first declaration of that entity, then that entity is said
+to be \term{owned} by the module in whose purview $D$ appears. 
+
+  \alinea
+  If a declaration attached to some module
+  matches (according to the redeclaration rules) a reachable declaration
+  from a different module, 
+  the program is ill-formed.
+  \begin{example}
+    \begin{codeblock}
+      // module interface of M
+      int f();            // \#1
+      int g();            // \#2, owned by the global module
+      export module M;
+      export using ::f;   // OK: does not declare an entity
+      int g();            // error: matches \#2, but appears in the purview of M
+      export int h();     // \#3
+      export int k();     // \#4
+
+      // other translation unit
+      import M;
+      static int h();     // error: matches \#3
+      int k();            // error: matches \#4
+    \end{codeblock}
+  \end{example}
+
+  \alinea
+  The subgraph of the abstract semantics graph $G$ of a module $M$
+  generated by the nodes of $G$, excluding those introducing names
+  with internal linkage, is available to name lookup in the purview of every
+  module implementation unit of $M$.
+  The declsets made available by the \grammarterm{module-import-declaration}{s}
+   in the purview of the module
+  interface unit of $M$ are also available to name lookup in the purview of all 
+  module implementation units of $M$.
+\end{std.txt}
+
+\rSec2[dcl.module.interface]{Export declaration}%
+
+\begin{std.txt}\color{addclr}
+  \begin{bnf}\color{addclr}
+    \nonterminal{export-declaration}:\br
+      \terminal{export} declaration\br 
+      \terminal{export} \terminal{\{} declaration-seq${}_{opt}$ \terminal{\}} 
+  \end{bnf}
+
+  \resetalinea[0]
+  \alinea 
+  An \grammarterm{export-declaration} shall only appear
+  at namespace scope and only in the purview of a module interface unit. 
+  An \grammarterm{export-declaration} shall not appear directly
+  or indirectly within an unnamed namespace. 
+  An \grammarterm{exported-declaration}
+   has the declarative effects of its \grammarterm{declaration}
+  or its \grammarterm{declaration-seq} (if any).
+  An \grammarterm{export-declaration} does not
+  establish a scope and shall not contain more than one
+  \tcode{export} keyword.
+  The \term{interface} of a module \tcode{M} is the set of all
+  \grammarterm{export-declaration}{s} in its purview.
+
+  \alinea
+  In an \grammarterm{export-declaration} of the form
+  \begin{grammar}
+        @\tcode{export}@ @\term{declaration}@
+  \end{grammar}
+  the \grammarterm{declaration} shall be a \grammarterm{module-import-declaration},
+  or it shall declare at least one name,
+  and if that declaration declares an entity, the 
+  \grammarterm{decl-specifier-seq} (if any) of the 
+  \grammarterm{declaration} shall not contain \tcode{static}.
+  The \grammarterm{declaration} shall not be an
+  \grammarterm{unnamed-namespace-definition}
+  or a \grammarterm{proclaimed-ownership-declaration}.
+  \begin{example}
+    \begin{codeblock}
+      export int x;             // error: not in the purview of a module interface unit
+      export module M;
+      namespace {
+        export int a;           // error: export within unnamed namespace
+      }
+      export static int b;      // error: b explicitly declared static.
+      export int f();           // OK
+      export namespace N { }    // OK
+      export using namespace N; // error: does not declare a name
+    \end{codeblock}
+  \end{example}
+
+  If the \grammarterm{declaration} is a \grammarterm{using-declaration}
+  (\ref{namespace.udecl}), any entity to which the
+  \grammarterm{using-declarator} ultimately refers shall have been introduced
+  with a name having external linkage.
+  \begin{example}
+    \begin{codeblock}
+      int f()               // f has external linkage
+      export module M;
+      export using ::f;     // OK
+      struct S;
+      export using ::S;     // error: S has module linkage
+      namespace N {
+        int h();
+        static int h(int);  // \#1
+      }
+      export using N::h;    // error: \#1 has internal linkage
+    \end{codeblock}
+  \end{example}
+
+
+  \enternote
+  Names introduced by \tcode{typedef} declarations are not so constrained.
+  \begin{example}
+    \begin{codeblock}
+      export module M;
+      struct S;
+      export using T = S;   // OK: exports name T denoting type S
+    \end{codeblock}
+  \end{example}
+  \exitnote
+
+  \alinea
+
+  An \grammarterm{export-declaration} of the form
+  \begin{grammar}
+    @\tcode{export}@ @\tcode{\{} \term{declaration-seq${}_{opt}$} \tcode{\}}@ 
+  \end{grammar}
+  is equivalent to a sequence of declarations formed by prefixing each
+  \grammarterm{declaration} of the \grammarterm{declaration-seq} (if any) with
+  \tcode{export}.
+
+  \alinea
+  A namespace-scope or a class-scope declaration lexically
+  contained in an \grammarterm{export-declaration}, as well as the
+  entities and the names it introduces are said to be \term{exported}.
+  The exported declarations in the interface of a module are reachable from
+  any translation unit importing that module.  
+  \enternote
+  Exported names have either external linkage or no linkage; see \ref{basic.link}
+  \exitnote
+%  The declarations introducing names with linkage
+%  other than internal linkage introduced or made reachable
+%   (via an \grammarterm{import-declaration})
+%   in the purview of the module
+%  interface unit of a 
+%  module \tcode{M} are reachable from the purview of all module
+%  implementation units
+%  of \tcode{M}. 
+  \begin{example}
+    \begin{codeblock}
+      // Interface unit of M
+      export module M;
+      export struct X {
+        void f();
+        struct Y { };
+      };
+
+      namespace {
+        struct S { };
+      }
+      export void f(S);    // OK
+      struct T { };
+      export T id(T);      // OK
+  
+      export struct A;     // A exported as incomplete
+
+      export auto rootFinder(double a) {
+        return [=](double x) { return (x + a/x)/2; };
+      }
+
+      export const int n = 5; // OK: n has external linkage
+  
+      // Implementation unit of M
+      module M;
+      struct A {
+        int value;
+      };
+  
+      // main program
+      import M;
+      int main() {
+        X{}.f();                // OK: X and X::f are exported
+        X::Y y;                 // OK: X::Y is exported as a complete type
+        auto f = rootFinder(2); // OK
+        return A{45}.value;     // error: A is incomplete
+      }
+      \end{codeblock}
+  \end{example}
+
+
+  
+  \alinea
+  \enternote
+  Redeclaring a name in an \grammarterm{export-declaration}
+  cannot change the linkage of the name (10.1.1).
+  \begin{example}
+  \begin{codeblock}
+    // Interface unit of M
+    export module M;
+    static int f();             // \#1
+    export int f();             // error: \#1 gives internal linkage
+    struct S;                   // \#2
+    export struct S;            // error: \#2 gives module linkage
+    namespace {
+      namespace N {
+        extern int x;           // \#3
+      }
+    }
+    export int N::x;            // error: \#3 gives internal linkage
+  \end{codeblock}
+  \end{example}
+  \exitnote
+%% If the
+%% \term{export-declaration} introduces a function template or a variable
+%% template then the type of the corresponding current instantiation shall
+%% contain only types with external linkage.  If the
+%% \term{export-declaration} introduces a template alias then the aliased
+%% type shall have external linkage.  If the
+%% \term{export-declaration} defines a class template, then all
+%% non-internal members of the corresponding current instantiation shall
+%% contain only types with external linkage.
+
+%%   \alinea
+%%   In a \grammarterm{exported-fragment-group},
+%%    each \grammarterm{fragment} is processed
+%%   as an exported declaration.
+
+  \alinea
+  Declarations in an exported \grammarterm{namespace-definition} 
+  or in an exported \grammarterm{linkage-specification} (10.5)
+  are
+  implicitly exported and subject to the rules of exported declarations.
+  \begin{example}
+    \begin{codeblock}
+    export module M;
+    export namespace N {
+      int x;                    // OK
+      static_assert(1 == 1);    // error: does not declare a name
+    }
+    \end{codeblock}
+  \end{example}
+\end{std.txt}
+
+
+\rSec2[dcl.module.import]{Import declaration}%
+
+\begin{std.txt}\color{addclr}
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-import-declaration}:\br
+      \terminal{import} module-name attribute-specifier-seq\opt {} \terminal{;}
+  \end{bnf}
+
+  \resetalinea[0]
+  \alinea
+  A \grammarterm{module-import-declaration} shall appear only at
+  global scope, and not in a \grammarterm{linkage-specification}
+  or \grammarterm{proclaimed-ownership-declaration}.
+  A \grammarterm{module-import-declaration} nominating a module $M$
+  makes every citation and every exported declaration from the 
+  abstract semantics graph of $M$ available, as a citation,
+  %makes exported declarations from the interface of the nominated module visible
+  to name lookup in
+  the current translation unit, in the same namespaces and contexts
+  as in $M$.
+  % the nominated module.
+  A \term{citation} for a declaration attached to a module $M$ is a pair of
+  $M$ and the corresponding declset from the abstract semantics graph 
+  of $M$. 
+%  The \grammarterm{attribute-specifier-seq} appartain to the nominated module.
+  \enternote
+  The declarations in the declsets and the entities denoted by the declsets
+  are not redeclared in the translation unit
+    containing the \grammarterm{module-import-declaration}.
+  \exitnote
+  \begin{example}
+  \begin{Program}
+     // Interface unit of M
+     export module M;
+     export namespace N {
+        struct A { };
+     }
+     namespace N {
+        struct B { };
+        export struct C {
+           friend void f(C) { }  // exported, visible only through argument-dependent lookup
+        };
+     }
+
+     // Translation unit 2
+     import M;
+     N::A a { };                // OK.
+     N::B b { };                // error: `B' not found in N.
+     void h(N::C c) {
+        f(c);                   // OK: `N::f' found via argument-dependent lookup
+        N::f(c);                // error: `f' not found via qualified lookup in N.
+     }
+  \end{Program}
+  \end{example}
+
+  \alinea
+  A module \tcode{M1} \term{has a dependency} on a module \tcode{M2}
+  if any module unit of \tcode{M1} contains a \grammarterm{module-import-declaration}
+  nominating \tcode{M2}. A module shall not have a dependency on
+  itself.
+  \begin{example}
+  \begin{codeblock}
+     module M;
+     import M;          // error: cannot import M in its own unit.
+  \end{codeblock} 
+  \end{example}
+
+  \alinea 
+  A module \tcode{M1} \term{has an interface dependency} on a module
+  \tcode{M2} if the module interface of \tcode{M1} contains a
+  \grammarterm{module-import-declaration} nominating \tcode{M2},
+  or if there exists a module \tcode{M3} such that \tcode{M1} has an
+  interface dependency on \tcode{M3} and \tcode{M3} has an interface dependency
+  on \tcode{M2}.  A module
+  shall not have an interface dependency on itself.
+  \begin{example}
+  \begin{Program}
+     // Interface unit of M1
+     export module M1;
+     import M2;
+
+     // Interface unit of M2
+     export module M2;
+     import M3;
+
+     // Interface unit of M3
+     export module M3;
+     import M1;         // error: cyclic interface dependency M3 -> M1 -> M2 -> M3
+  \end{Program}
+  \end{example}
+
+  \alinea
+  A translation unit has an interface dependency on a module \tcode{M} if it is
+  a module implementation unit of \tcode{M}, or if it contains a
+  \grammarterm{module-import-declaration} nominating \tcode{M}, or if it has
+  an interface dependency on a module that has an interface dependency on \tcode{M}.
+\end{std.txt}
+
+
+\rSec2[dcl.module.export]{Module exportation}%
+
+\begin{std.txt}\color{addclr}
+  \resetalinea[0]
+  \alinea
+  An exported
+   \grammarterm{module-import-declaration} nominating a module \tcode{M2}
+  in the purview of a module interface unit of a module \tcode{M} 
+  makes all exported names
+  of \tcode{M2} visible to any translation unit importing \tcode{M}, as if
+  that translation unit also contains a \grammarterm{module-import-declaration}
+  nominating \tcode{M2}.
+  \enternote
+  A module interface unit (for a module \tcode{M}) containing a non-exported
+    \grammarterm{module-import-declaration} does not make the imported
+    names transitively visible to translation units importing the module
+    \tcode{M}.
+  \exitnote
+  % Wording requested by Hubert Tong on December 17, 2017.
+  In addition to its usual semantics, a 
+  \grammarterm{module-import-declaration} nominating a module $M$ with 
+  a module interface unit containing one or more exported
+  \grammarterm{module-import-declaration}{s} also behaves as if
+  it nominates each module nominated by an exported
+  \grammarterm{module-import-declaration} in $M$; this may in turn
+  lead it to be considered to nominate yet additional modules.
+\end{std.txt}
+
+
+\rSec2[dcl.module.proclaim]{Proclaimed ownership declaration}%
+
+\begin{std.txt}\color{addclr}
+  \begin{bnf}\color{addclr}
+    \nonterminal{proclaimed-ownership-declaration}:\br
+      \terminal{extern} \terminal{module} module-name \terminal{:} declaration
+ \end{bnf}
+
+ \resetalinea[0]
+  \alinea
+  A \grammarterm{proclaimed-ownership-declaration} shall only appear
+  at namespace scope. 
+  It shall not appear directly or indirectly within an unnamed namespace.
+  A \grammarterm{proclaimed-ownership-declaration} has the declarative effects
+  of its \grammarterm{declaration}.
+  The \grammarterm{declaration} shall declare at 
+  least one name, and the \grammarterm{decl-specifier-seq} (if any)
+  of the \grammarterm{declaration} shall not contain \tcode{static}.
+  The \grammarterm{declaration} shall not be a \grammarterm{namespace-definition},
+  an \grammarterm{export-declaration},
+   or a \grammarterm{proclaimed-ownership-declaration}.
+  The \grammarterm{declaration} shall not be a defining declaration
+  (\ref{basic.def}).
+  A \grammarterm{proclaimed-ownership-declaration} nominating a module $M$
+  shall not appear in the purview of $M$.
+
+  \alinea
+  A \grammarterm{proclaimed-ownership-declaration} asserts that the entities
+  introduced by the declaration are exported by the nominated module. 
+  \enternote
+  A \grammarterm{proclaimed-ownership-declaration} may be used to break
+  circular dependencies between two modules (in possibly too finely
+  designed components.)
+  \begin{example}
+    \begin{codeblock}
+    // TU 1
+    export module Ty;
+    extern module Sym: struct Symbol;
+    export struct Type {
+      Symbol* decl;
+      // ...
+    };
+
+    // TU 2
+    export module Sym;
+    extern module Ty: struct Type;
+    export struct Symbol {
+      const char* name;
+      const Type* type;
+      // ...
+    };
+    \end{codeblock}
+  \end{example}
+  \exitnote
+  
+  \alinea 
+  The program is ill-formed, no diagnostic required, if the
+  nominated module in the  
+  \grammarterm{proclaimed-ownership-declaration} does not export the entities
+  introduced by the declaration. 
+\end{std.txt}
+
+\rSec2[dcl.module.reach]{Reachability}
+
+\begin{std.txt}\color{addclr}
+  \resetalinea[0]
+  \alinea
+  When declarations from the abstract semantics graph of a module $M$
+   are made available 
+  to name lookup in another translation unit $TU$, it is necessary to
+  determine the interpretation of the names they introduce and their
+  semantic properties. Except as noted below, the 
+  \term{reachable semantic properties} of declset $D$
+  (or of the entity, if any, denoted by that declset)
+  of the abstract semantic graph of $M$ from $TU$ are 
+  \begin{itemize}
+    \item if $D$ contains at least one exported declaration, 
+    the semantic properties cumulatively obtained in the context
+    of the exported declaration (\ref{dcl.module.interface}) 
+    members of $D$ in the module interface
+    unit of $M$. Furthermore, if $D$ denotes an inline function,
+    the property that the inline function has a definition
+    (\ref{dcl.fct.spec}) is a reachable semantic property, even 
+    if that definition is not exported. Otherwise,
+    \item the semantic properties cumulatively obtained in the context of all
+    declaration members of $D$ in the module interface unit of $M$.
+  \end{itemize}
+%  Given a declset $D$ for an exported name from a module $M$,
+%  the \term{reachable semantic property} of any declaration in that declset
+%  (or of the entity, if any, designated by that declset) from a translation unit
+%%   For a given declaration $D$ of a name $X$ exported from a module $M$, the
+%%  \term{reachable semantic properties} of $D$ from a translation unit
+%  containing a \grammarterm{module-import-declaration} nominating $M$ are
+%  restricted to 
+%  the semantic properties cumulatively obtained in 
+%  the context of the exported declaration members of $D$ in $M$.
+  \enternote
+  These reachable semantic properties include type completeness, 
+  type definitions, initializers,
+  default arguments of functions or template declarations, attributes,
+  visibility to normal lookup, entities that are direct targets of edges 
+  emanating from $D$ in the abstract semantics graph of $M$, etc.
+  Since default arguments are evaluated in the context of the call expression,
+  reachable semantic properties of the corresponding parameter types apply in 
+  that context. 
+  \begin{example}
+    \begin{codeblock}
+      // TU 1
+      struct F { int f { 42 }; };
+      export module M;
+      export using T = F;
+      export struct A { int i; };
+      export int f(int, A = { 3 });
+
+      export struct B;      // exported as incomplete type
+      struct B {            // definition not exported
+        operator int();
+      };
+      export int g(B = B{});
+      export int h(int = B{}); // \#1
+
+      export struct S {
+        static constexpr int v(int);
+      };
+
+      export S j();       // S attendant entity of j()
+      constexpr int S::v(int x) { return 2 * x; }
+
+
+      // TU 2
+      import M;
+      int main() {
+        T t { };             // OK: reachable semantic properties of T include completeness. 
+        auto x = f(42);      // OK: default argument A\{3\} evaluated here.
+        auto y = h();        // OK: completeness of B only checked at \#1.
+        auto z = g();        // error: parameter type incomplete here.
+        constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
+                            // in the abstract semantics graph of M (\ref{dcl.fct.spec})
+      }
+    \end{codeblock}
+  \end{example}
+  \exitnote
+
+  \alinea
+  Within a module interface unit, it is necessary to determine that the
+  declarations being exported collectively present a coherent view of 
+  the semantic properties of the entities they reference.  This determination
+  is based on the semantic properties of attendant entities.
+  \enternote
+  The reachable semantics properties of an entity, the declarations of which
+  are made available via a \grammarterm{module-import-declaration}, are
+  determined by its owning module and are unaffected by the importing module.
+  \begin{example}
+    \begin{codeblock}
+      // module interface of M1
+      export module M1;
+      export struct S { };
+
+      // module interface of M2
+      import M1;
+      export module M2;
+      export S f();       // \#1
+      export S* g();      // \#2
+
+      // elsewhere
+      import M2;
+      auto x = f();       // OK: completeness of S obtained at \#1
+      auto y = *g();      // OK: completeness of S obtained at \#2
+    \end{codeblock}
+  \end{example}
+  \exitnote
+  
+  For each declaration $D$ exported from the module interface unit of a module $M$,
+   there is a set of zero or more
+  \term{attendant entities} defined as follows:
+  \begin{itemize}
+    \item If $D$ is a type alias declaration, then the attendant entities
+    of $D$ are those determined by the aliased type at the point of the 
+    declaration $D$.
+
+    \item If $D$ is a \grammarterm{using-declaration}, the set of attendant entities
+    is the union of the sets of attendant entities of the declarations introduced by
+    $D$ at the point of the declaration.
+
+    \item If $D$ is a template declaration, the set of attendant entities is 
+    the union of the set of attendant entities 
+    of the declaration being parameterized, the set of attendant entities
+    determined by the default type template arguments (if any), 
+    and the set consisting of 
+    the entities (if any) designated by the default template template argument,
+    the default non-type template arguments (if any).
+
+    \item if $D$ has a type $T$, the set of attendant entities is the set of 
+    attendant entities determined by $T$ at the point of declaration.
+
+    \item Otherwise, the set of attendant entities is empty.
+  \end{itemize}
+
+  The \term{set of attendant entities determined by} a type $T$ is defined as follows
+  (exactly one of these cases matches):
+  \begin{itemize}
+    \item If $T$ is a fundamental type, then
+    the set of attendant entities is empty.
+
+  %  \item If $T$ is a dependent type denoted by a \grammarterm{typename-specifier}
+  %  where the \grammarterm{nested-name-specifier} itself denotes a dependent type,
+  %  then the set of attendant entities is the set of attendant entities determined by
+  %  that type.
+    \item If $T$ is a member of an unknown specialization, the set of
+    attendant entities is the set of attendant entities determined by that
+    unknown specialization.
+
+    \item If $T$ is a class type owned by $M$, the set of attendant entities includes
+    $T$ itself, the union of the sets of the attendant entities determined
+    by its direct base classes owned by $M$, the sets of the
+    attendant entities of its data members, static data member templates,
+    member functions, member function templates, 
+    the function parameters of its constructors and constructor templates.  
+    Furthermore, if $T$ is a 
+    class template specialization, the set of attendant entities also 
+    includes: the class template if it is owned by $M$,
+    the union of the sets of attendant entities determined by the type
+    template-arguments, the sets of the attendant entities of the templates
+    used as template template-arguments, the sets of the attendant entities
+    determined by the types of the non-type template-arguments.
+
+    \item If $T$ is an enumeration type owned by $M$, 
+    the set of attendant entities is the singleton $\{T\}$.
+
+    \item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, 
+    the set of attendant entities is the set of attendant entities determined by $U$.
+
+    \item If $T$ is a function type, the set of attendant entities is the
+    union of the set of attendant entities determined by the function
+    parameter types and the return type.
+
+    \item if $T$ is a pointer to data member of class $X$, the set of attendant
+    entities is the union of the set of attendant entities of the member type
+    and the set of attendant entities determined by $X$.
+    
+    \item If $T$ is a pointer to member function type of a class $X$, the
+    set of attendant entities is the union of the set of attendant entities
+     determined by $X$ and the set of attendant entities determined by
+    the function type.
+    
+    \item Otherwise, the set of attendant entities is empty.
+  \end{itemize}
+
+  If a class template $X$ is an attendant entity, then its reachable semantic
+  properties include all the declarations of the primary class template,
+  its partial specializations, and its explicit specializations in the
+  containing module interface unit.
+  If a complete class type $X$ is an attendant entity, then its reachable
+  semantic properties include the declarations of its nested types but
+  not the definitions of the types denoted by those members
+   unless those definitions are exported.
+  Furthermore, if $X$ is an attendant entity of an 
+  exported declaration $D$, then its reachable semantic properties are 
+  restricted to those defined by the exported declarations of $X$ 
+  (if $X$ is introduced by an exported declaration), or by 
+  the semantic properties of $X$ available at the point of the declaration $D$.
+  \enternote
+  If $X$ is a complete class type that is an attendant entity, its nested types
+  (including nested enumerations and associated enumerators) 
+  and member class templates
+  are not considered attendant entities unless they are determined attendant
+  entities by one of the rules above.  Attendant entities allow type checking 
+  of direct member selection of an object even if that object's type isn't exported.
+  Declarations, such as \grammarterm{asm-declaration} or
+  \grammarterm{alias-declaration} or 
+  \grammarterm{static\_assert-declaration},
+   that do not declare entities do not contribute to the set of attendant entities.
+  \exitnote
+  \begin{example}
+    \begin{codeblock}
+      export module M;
+      export struct Foo;          // Foo exported as incomplete type
+      struct Foo { };
+      export using ::Foo;         // OK: exports complete type Foo
+
+      struct C { };
+      struct S {
+        struct B { };
+        using C = ::C;
+        int i : 8;
+        double d { };
+      };
+
+      export S f();       // S attendant entity of f().
+
+      // translation unit 2
+      import M;
+      int main() {
+        int x = sizeof(decltype(f())::B);   // error: incomplete B
+        int y = sizeof(decltype(f())::C);   // error: incomplete C
+        decltype(f()) s { };
+        s.d = 3.14;                         // OK
+        return &s.i != nullptr;             // error: cannot take address of bitfield
+      }
+    \end{codeblock}
+  \end{example}
+
+  \alinea
+  If $X$ is an attendant entity of two exported declarations
+  designating two distinct entities, its reachable semantic properties shall
+  be the same at the points where the declarations occur.
+  \begin{example}
+    \begin{codeblock}
+      export module M;
+      struct S;
+      export S f();     // \#1
+      struct S { };
+      export S g();     // error: class type S has different properties from \#1
+    \end{codeblock}
+  \end{example}
+  
+\end{std.txt}
+

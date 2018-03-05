@@ -1,0 +1,512 @@
+%!TEX root = std.tex
+\rSec0[basic]{Basic concepts}
+
+%gram: \rSec1[gram.basic]{Basic concepts}
+%gram:
+
+\noindent
+Modify paragraph 6/3 as follows:
+
+%\pnum
+\resetalinea[2]
+\begin{std.txt}
+\alinea
+  An \emph{entity} is a value, object, reference, function,
+  enumerator, type, class member, bit-field, template, template
+  specialization, namespace, \added{module}, or parameter pack.
+\end{std.txt}
+
+\noindent
+Modify paragraph 6/4 as follows:
+
+\resetalinea[3]
+\begin{std.txt}
+\alinea
+  A \emph{name} is a use of an \grammarterm{identifier} (5.10), 
+  \grammarterm{operator-function-id} (16.5), \grammarterm{literal-operator-id}
+  (16.5.8),
+  \grammarterm{conversion-function-id} (15.3.2), \removed{or }
+  \grammarterm{template-id} (17.2), \added{or \grammarterm{module-name} (10.7)} that 
+  denotes an entity or  \grammarterm{label} (9.6.4, 9.1).
+\end{std.txt}
+
+\noindent
+Add a sixth bullet to paragraph 6/8 as follows:
+
+\resetalinea[7]
+\begin{std.txt}\color{addclr}
+  \begin{itemize}
+    \item[--] \added{they are \grammarterm{module-name}{s} composed of the same
+      dotted sequence of \grammarterm{identifier}{s}.}
+  \end{itemize}
+\end{std.txt}
+
+\rSec1[basic.def]{Declarations and definitions}
+
+Modify paragraph 6.1/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  A declaration (Clause \ref{dcl.dcl}) may introduce one or more names into a
+  translation unit or redeclare names introduced by previous declarations.
+  If so, the declaration specifies the interpretation and
+  \removed{attributes}\added{semantic properties} of these names. [...]
+  \end{std.txt}
+
+\noindent
+Append the following two bullets to paragraph 6.1/2:
+\begin{std.txt}
+  \resetalinea[1]
+  \alinea
+  A declaration is a \term{definition} unless
+  \begin{itemize}
+    \item ...
+    \item it is an explicit specialization (17.7.3) whose \grammarterm{declaration}
+    is not definition\removed{.}\added{,}
+    \color{addclr}
+    \item \added{it is a \grammarterm{module-import-declaration},}
+    \item \added{it is a \grammarterm{proclaimed-ownership-declaration}.} 
+  \end{itemize}
+  \color{addclr}
+%  \begin{example}
+\enterexample
+\begin{codeblock}
+    import std.io;                  // make names from std.io available
+    export module M;                // toplevel declaration for M
+    export struct Point {           // define and export Point
+      int x;
+      int y;
+    };
+\end{codeblock}
+\exitexample
+\end{std.txt}
+
+
+\rSec1[basic.def.odr]{One-definition rule}
+
+Replace paragraph 6.2/1 with:
+\begin{std.txt}\color{addclr}
+  \resetalinea[0]
+  \alinea
+  \added{A variable, function, class type, enumeration type, or template shall not
+  be defined where a prior definition is reachable (\ref{basic.lookup}).}
+\end{std.txt}
+
+Modify opening of paragraph 6.2/6 as follows
+\begin{std.txt}
+  \resetalinea[5]
+  \alinea
+  There can be more than one definition of a class type (Clause 12), 
+  enumeration type (10.2), inline function with external \added{or module} 
+  linkage (10.1.6), 
+  inline variable with external \added{or module} linkage (10.1.6), 
+  class template (Clause 17), 
+  non-static function template (17.5.6), static data member of a class 
+  template (17.5.1.3), member function of a class template (17.5.1.1), or 
+  template specialization for which some template parameters are not 
+  specified (17.7, 17.5.5) in a program provided that \removed{each definition appears 
+  in a different translation unit}
+  \added{no prior definition is reachable (\ref{basic.lookup}) at the point where a definition appears}, 
+  and provided the definitions satisfy the 
+  following requirements. 
+  \added{For an entity with an exported declaration, there shall be only one
+   definition of that entity; a diagnostic is required only if the abstract 
+   semantics graph of the module contains a definition of the entity.}
+   \added{\enternote
+   If the definition is not in the interface unit, then at most one module unit can
+   have and make use of the definition.
+   \exitnote}
+  Given such an entity named \tcode{D} defined in more than one 
+  translation unit, then
+\end{std.txt}
+
+
+
+\rSec1[basic.scope]{Scope}%
+
+\setcounter{subsection}{1}
+\rSec2[basic.scope.pdecl]{Point of declaration}
+
+\noindent
+Add a new paragraph 6.3.2/13 as follows:
+\resetalinea[12]
+\begin{std.txt}\color{addclr}
+\alinea
+  \added{The point of declaration of a module is immediately after the
+  \term{module-name} in a \grammarterm{module-declaration}.}
+\end{std.txt}
+
+\setcounter{subsection}{5}
+\rSec2[basic.scope.namespace]{Namespace scope}
+
+From end-user perspective, there are really no new lookup rules to
+learn.  The ``old'' rules are the ``new'' rules, with appropriate
+adjustment in the definition of ``associated entities.''
+
+\noindent
+Modify paragraph 6.3.6/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  The declarative region of a \grammarterm{namespace-definition} is its
+  \grammarterm{namespace-body}. 
+  Entities declared in a \grammarterm{namespace-body}
+  are said to be members of the namespace, and names introduced by
+  these declarations 
+  into the declarative region of the namespace are said to be
+  \term{member names} of the namespace. A namespace member name
+  has namespace
+  scope. Its potential scope includes its namespace from the name's
+  point of declaration (6.3.2) onwards;
+   and for each \grammarterm{using-directive}
+  (10.3.4) that nominates the member's namespace, the member's
+  potential scope includes that portion of the potential scope of the
+  \grammarterm{using-directive} that follows the member's point of
+  declaration. \added{If a name $X$ (not having internal linkage) is declared
+    in a namespace $N$ in the purview of the module
+    interface unit of a module $M$, the potential scope of $X$ 
+    includes the portion of the namespace $N$ in the purview of
+     every module implementation unit of $M$
+    and, if the name $X$ is exported, in every translation unit that imports $M$
+    after a \grammarterm{module-import-declaration} nominating $M$.
+    }
+  \color{addclr}
+%  ; and for each \term{module-import-declaration} that nominates M,
+%  the potential scope of X includes the 
+%  portion of the potential scope of the \term{using-directive} that
+%  follows that \term{module-import-declaration}. 
+   \enterexample
+   \begin{codeblock}
+    // Translation unit \#1
+    export module M;
+    export int sq(int i) { return i*i; }
+
+    // Translation unit \#2
+    import M;
+    int main() { return sq(9); }       // OK: 'sq' from module M
+    \end{codeblock}
+    \exitexample
+\end{std.txt}
+
+
+\setcounter{section}{3}
+\rSec1[basic.lookup]{Name lookup}
+
+Modify paragraph 6.4/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  The name lookup rules apply uniformly to all names
+  (including \grammarterm{typedef-name}{s} (10.1.3),
+  \grammarterm{namespace-name}{s} (10.3), and 
+  \grammarterm{class-name}{s} (12.1))
+  wherever the grammar allows such names in the context discussed by a 
+  particular rule.
+  Name lookup associates the use of a name with a set of declarations (6.1)
+  \added{or citations (\ref{dcl.module.import})} of that name.
+  \added{For all intent and purposes of further semantic processing
+  requiring declarations, 
+  a citation is replaced with the declarations contained in its declset.}
+  [...] Only after name lookup, function overload resolution (if applicable)
+  and access checking have succeeded are the
+  \removed{attributes}\added{semantic properties} introduced by the name's
+  declaration used further in the expression processing (Clause 8).
+
+\end{std.txt}
+
+Add new paragraph 6.4/5 as follows:
+\begin{std.txt}\color{addclr}
+  \resetalinea[4]
+  \alinea
+  \added{A declaration is \term{reachable} from a program point if it can be found
+  by unqualified name lookup in its scope.}
+\end{std.txt}
+
+\setcounter{subsection}{1}
+\rSec2[basic.lookup.argdep]{Argument-dependent name lookup}
+
+\noindent
+Modify paragraph 6.4.2/2 as follows:
+\begin{std.txt}
+  \resetalinea[1]
+  \alinea
+  For each argument type \tcode{T} in the function call, there is a
+  set of zero or more \term{associated namespaces} (10.3) and a set of
+  zero or more \term{associated \removed{classes} \added{entities}}
+  \added{(other than namespaces)} to be considered.  The sets of
+  namespaces and \removed{classes} \added{entities} are determined
+  entirely by the types of the function arguments (and the namespace
+  of any template template argument).  Typedef names and
+  \grammarterm{using-declaration}{s} used to specify the types do not
+  contribute to this set.  The sets of namespaces
+  and \removed{classes} \added{entities} are determined in the
+  following way:
+  \begin{itemize}
+  \item[---] If \tcode{T} is a fundamental type, its associated sets
+  of namespaces and \removed{classes} \added{entities} are both empty.
+
+  \item[---] If \tcode{T} is a class type (including unions), its
+  associated \removed{classes} \added{entities} are the class itself;
+  the class of which it is a member, if any; and its direct and
+  indirect base classes.  Its associated namespaces are the innermost
+  enclosing namespaces of its associated \removed{classes} \added{entities}.
+  Furthermore, if \tcode{T} is a class template specialization, its
+  associated namespaces and \removed{classes} \added{entities} also
+  include: the namespace and \removed{classes} \added{entities}
+  associated with the types of the template arguments provided for
+  template type parameters (excluding template template arguments);
+  \added{the templates used as template template arguments;} the
+  namespaces of which any template template arguments are members;
+  and the classes of which any member template used as template
+  template arguments are members. \enternote Non-type template
+  arguments do not contribute to the set of associated namespaces. \exitnote
+
+  \item[---] If \tcode{T} is an enumeration type, its associated
+  namespace is the innermost enclosing namespace of its
+  declaration\added{, and its associated entities are \tcode{T}, and,
+  if}\removed{. If} it is a class member, \removed{its associated
+  class is} the member's class\removed{; else it has no associated class}.
+
+  \item[---] If \tcode{T} is a pointer to \tcode{U} or an array
+  of \tcode{U}, its associated namespaces
+  and \removed{classes} \added{entities} are those associated
+  with \tcode{U}. 
+
+  \item[---] If \tcode{T} is a function type, its associated
+  namespaces and \removed{classes} \added{entities} are those
+  associated with the function parameter types and those associated
+  with the return type.
+
+  \item[---] If \tcode{T} is a pointer to a data member of
+  class \tcode{X}, its associated namespaces
+  and \removed{classes} \added{entities} are those associated with the
+  member type together with those associated with \tcode{X}.
+  \end{itemize}
+
+  If an associated namespace is an inline namespace (10.3.1), its
+  enclosing namespace is also included in the set.  If an associated
+  namespace directly contains inline namespaces, those inline
+  namespaces are also included in the set.  In addition, if the
+  argument is the name or address of a set of overloaded functions
+  and/or function templates, its
+  associated \removed{classes} \added{entities} and namespaces are the
+  union of those associated with each of the members of the set, i.e.,
+  the \removed{classes} \added{entities} and namespaces associated
+  with its parameter types and return type.  Additionally, if the
+  aforementioned set of overloaded functions is named with
+  a \grammarterm{template-id}, its
+  associated \removed{classes} \added{entities} and namespaces also
+  include those of its type \grammarterm{template-argument}{s} and its
+  template \grammarterm{template-argument}{s}.
+\end{std.txt}
+
+\noindent
+Modify paragraph 6.4.2/4 as follows:
+\begin{std.txt}
+  \resetalinea[3]
+  \alinea
+  When considering an associated namespace, the lookup is the same as
+  the lookup performed when the associated namespace is used as a
+  qualifier (6.4.3.2) except that:
+  \begin{itemize}
+    \item[---] Any \grammarterm{using-directive}{s} in the associated
+  namespace are ignored.
+
+     \item Any namespace-scope friend declaration functions or friend
+  function templates declared in \removed{associated}
+  classes \added{in the set of associated entities} are visible within
+  their respective namespaces even if they are not visible during an
+  ordinary lookup (14.3).
+
+     \item All names except those of (possibly overloaded) functions
+  and function templates are ignored.
+
+     \color{addclr}
+     \item[---] \added{In resolving dependent names (17.6.4),
+      any function or function template that is owned by a
+     named module \tcode{M} (10.7), that is
+     declared in the module interface unit of \tcode{M}, and that has
+     the same innermost enclosing non-inline namespace as some entity
+     owned by \tcode{M} in the set of associated entities, is visible
+     within its namespace even if it is not exported.}
+  \end{itemize}
+\end{std.txt}
+
+\setcounter{section}{4}
+\rSec1[basic.link]{Program and linkage}%
+
+\resetalinea[0]
+
+Change the definition of \term{translation-unit} in paragraph 6.5/1
+to:
+
+
+\begin{bnf}\color{addclr}
+  \added{\nonterminal{translation-unit}\br
+     toplevel-declaration-seq\opt}
+\end{bnf}
+
+\begin{bnf}\color{addclr}
+      \added{\nonterminal{toplevel-declaration-seq}\br
+          toplevel-declaration\br
+          toplevel-declaration-seq toplevel-declaration}
+\end{bnf}
+
+\begin{bnf}\color{addclr}
+      \added{\nonterminal{toplevel-declaration}\br
+         module-declaration\br
+         declaration}
+\end{bnf}
+
+
+
+\noindent
+Insert a new bullet between first and second bullet of paragraph 6.5/2:
+
+\begin{std.txt}\color{addclr}
+  \begin{itemize}
+    \item[---] \added{When a name has \term{module linkage}, the entity it denotes
+      can be referred to by names
+      from other scopes of the same module unit (\ref{dcl.module.unit}) 
+      or from scopes of
+      other module units of that same module.}
+  \end{itemize}
+\end{std.txt}
+
+\noindent
+Modify bullet (3.2) of paragraph 6.5/3 as follows:
+\begin{std.txt}
+  \begin{itemize}
+    \item[---] a non-inline \added{non-exported} variable of non-volatile const-qualified type 
+    that is neither explicitly declared \tcode{extern} nor
+    previously declared to have external \added{or module} linkage; or
+  \end{itemize}
+\end{std.txt}
+
+\noindent
+Modify paragraph 6.5/4 as follows:
+%\begin{std.txt}
+%  \resetalinea[3]
+%  \alinea
+%  An unnamed namespace or a namespace declared directly or 
+%  indirectly within an unnamed namespace has internal linkage. All other 
+%  namespaces have external linkage. 
+%  \added{A name declared at namespace scope in the purview of a named module
+%  that does not have internal linkage by the previous rules and that
+%  is not exported has module
+%  linkage. The name of any class member where the enclosing class has
+%  a name with module linkage also has module linkage.}
+%  A name having namespace scope that has 
+%  not been given internal \added{or module} linkage above has the same linkage as the enclosing 
+%  namespace if it is the name of
+%\end{std.txt}
+%% New wording suggested by Hubert Tong, on December 17, 2017.
+\begin{std.txt}
+  \resetalinea[3]
+  \alinea
+  An unnamed namespace or a namespace declared directly or 
+  indirectly within an unnamed namespace has internal linkage. All other 
+  namespaces have external linkage. 
+  A name having namespace scope that has 
+  not been given internal linkage above \removed{has the same linkage as the enclosing 
+  namespace if it}\added{and that} is the name of
+  \begin{itemize}
+    \item a variable; or
+    \item a function; or
+    \item a named class (Clause 12), or an unnamed class defined in a 
+    typedef declaration in which the class has the typedef name for 
+    linkage purposes (10.1.3); or
+    \item a named enumeration (10.2), or an unnamed enumeration defined in
+    a typedef declaration in which the enumeration has the typedef name for
+    linkage purposes (10.1.3); or
+    \item a template\removed{.}
+  \end{itemize}
+  \color{addclr}
+  \added{has the same linkage as the enclosing namespace if}
+    \begin{itemize}
+      \item \added{said namespace has internal linkage, or}
+      \item \added{the name is exported (\ref{dcl.module.interface}),
+      or is declared in a \grammarterm{proclaimed-ownership-declaration},
+      or is not being declared in the purview of
+      a named module (\ref{dcl.module.unit});}
+    \end{itemize}
+    \added{otherwise, the name has module linkage.}
+\end{std.txt}
+
+
+\noindent
+Modify 6.5/6 as follows:
+\begin{std.txt}
+\resetalinea[5]
+\alinea
+The name of a function declared in block scope and the name of a
+variable declared by a block scope extern declaration have linkage. If
+there is a visible declaration of an entity with linkage having the
+same name and type, ignoring entities declared outside the innermost
+enclosing namespace scope, the block scope declaration declares that
+same entity and receives the linkage of the previous declaration. 
+\added{If that entity was exported by an imported module or if the containing block scope is in the purview of a named module, the program is
+ill-formed.} If
+there is more than one such matching entity, the program is
+ill-formed. Otherwise, if no matching entity is found, the block scope
+entity receives external linkage.
+\end{std.txt}
+
+\noindent
+Modify paragrapgh 6.5/9 as follows:
+\begin{std.txt}
+  \resetalinea[8]
+  \alinea
+  Two names that are the same (Clause 9) and that are declared in different scopes
+  shall denote the same variable, function, type, template or namespace if
+  \begin{itemize}
+    \item[---] both names have external \added{or module} linkage
+    \added{and are declared in declarations attached to the
+     same module}{\color{addclr}\footnote{This provision supports implementations where
+     exported entities in different modules have different implementation
+     symbols.  Conversely, for other implementations, exported entities
+     have the same implementation symbols regardless of in which
+     module they are declared.  Such implementations are supported
+     for the time being by disallowing all situations where the same names
+     with external linkage might appear from different modules.}}\added{,} 
+     or else both names have internal linkage and are declared in
+      the same translation unit; and
+
+      \item both names refer to members of the same namespace or to members,
+      not by inheritance, of the same class; and
+
+      \item when both names denote functions, the parameter-typelists of the
+      functions (11.3.5) are identical; and
+
+      \item when both names denote function templates, the signatures (17.5.6.1)
+      ar the same.
+  \end{itemize}
+  \added{If two declarations 
+  declaring entities (other than namespaces) and attached to 
+   different modules introduce two names that are the same
+  and that both have external linkage, the program is ill-formed; no
+  diagnostic required.
+  \enternote
+  \grammarterm{using-declaration}{s}, typedef declarations, and 
+  \grammarterm{alias-declaration}{s} do not declare entities, but 
+  merely introduce synonyms.  Similarly, \grammarterm{using-directive}{s}
+  do not declare entities, either.
+  \exitnote
+  }
+\end{std.txt}
+
+
+\setcounter{section}{5}
+\rSec1[basic.start]{Start and termination}
+
+\setcounter{subsection}{0}
+\rSec2[basic.start.main]{\tcode{main} function}
+
+Modify paragraph 6.6.1/1 as follows:
+\begin{std.txt}
+  \resetalinea[0]
+  \alinea
+  A program shall contain a global function called \tcode{main}
+  \added{declared in the purview of the global module}.
+\end{std.txt}
+

@@ -1,0 +1,28 @@
+%!TEX root = ts.tex
+
+\setcounter{chapter}{15}
+\rSec0[over]{Overloading}
+
+\setcounter{section}{4}
+\rSec1[over.oper]{Overloaded operators}
+
+\setcounter{subsection}{7}
+\rSec2[over.literal]{User-defined literals}
+
+\noindent
+Modify paragraph 16.5.8/7 as follows:
+\begin{std.txt}
+    \resetalinea[6]
+    \alinea
+    \enternote
+    Literal operators and literal operator templates are usually invoked 
+    implicitly through user-defined literals (5.13.8). However, except for 
+    the constraints described above, they are ordinary namespace-scope 
+    functions and function templates. In particular, they are looked up 
+    like ordinary functions and function templates and they follow the same 
+    overload resolution rules. Also, they can be declared \tcode{inline}
+     or \tcode{constexpr}, 
+    they may have internal\added{, module,} or external linkage, they can be called explicitly, 
+    their addresses can be taken, etc.
+    \exitnote
+\end{std.txt}
