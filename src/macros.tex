@@ -187,6 +187,7 @@
 %% Cross reference
 \newcommand{\xref}{\textsc{See also:}\xspace}
 \newcommand{\xsee}{\textsc{See:}\xspace}
+\newcommand{\stdref}[2]{#2}
 
 %% NTBS, etc.
 \newcommand{\NTS}[1]{\textsc{#1}\xspace}
@@ -351,7 +352,7 @@
  \newcommand{\bnfindentfirst}{\BnfIndent}
  \newcommand{\bnfindentinc}{\BnfInc}
  \newcommand{\bnfindentrest}{\BnfRest}
- \begin{minipage}{.9\hsize}
+ \begin{minipage}{.95\hsize}
  \newcommand{\br}{\hfill\\}
  \frenchspacing
  }
@@ -509,3 +510,18 @@
 \subsubsection[#1]{\hfill[#2]}\vspace{-.3\onelineskip}\label{#2}\textbf{#1}\\%
 }
 \newcommand{\defncontext}[1]{\textlangle#1\textrangle}
+
+\newenvironment{before}{
+\begin{tcolorbox}[breakable,colback=red!5!white,colframe=red!75!black,title=Before]
+}{
+\end{tcolorbox}
+}
+
+\newenvironment{after}{
+\begin{tcolorbox}[breakable,colback=green!5!white,colframe=green!75!black,title=After]
+}{
+\end{tcolorbox}
+}
+
+% Wording on which the authors disagree.
+\newenvironment{undecided}{}{}

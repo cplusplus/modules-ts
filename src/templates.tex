@@ -51,6 +51,9 @@ Add new example to paragraph 17.6.4/1:
     }
 
     // Interface unit of M1
+    @\begin{after}\color{addclr}
+    module;
+    \end{after}@
     #include "X.h"       // global module
     namespace Q {
        void g_impl(X, X);
@@ -62,6 +65,9 @@ Add new example to paragraph 17.6.4/1:
     }
 
     // Interface unit of M2
+    @\begin{after}\color{addclr}
+    module;
+    \end{after}@
     #include "X.h"
     import M1;
     export module M2;
@@ -91,6 +97,9 @@ Add new paragraphs to 17.6.4:
      }
 
      // Interface unit of M
+     @\begin{after}\color{addclr}
+     module;
+     \end{after}@
      import Std;
      export module M;
 
@@ -119,6 +128,9 @@ Add new paragraphs to 17.6.4:
       }
 
       // Module interface unit of M
+      @\begin{after}\color{addclr}
+      module;
+      \end{after}@
       #include "X.h"
       import F;
       export module M;
@@ -149,6 +161,9 @@ Add new paragraphs to 17.6.4:
       }
 
       // Module interface unit of C
+      @\begin{after}\color{addclr}
+      module;
+      \end{after}@
       #include <string>        // not in the purview of C
       import B;
       export module C;
@@ -180,6 +195,9 @@ Add new paragraphs to 17.6.4:
    \enterexample
    \begin{codeblock}
     // Module interface unit of M1
+    @\begin{after}\color{addclr}
+    module;
+    \end{after}@
     #include <algorithm>
 
     export module M1;
@@ -189,6 +207,9 @@ Add new paragraphs to 17.6.4:
     }
 
     // Module interface unit of M2
+    @\begin{after}\color{addclr}
+    module;
+    \end{after}@
     #include <locale>
     struct Aux : std::ctype_base {
       operator int() const;

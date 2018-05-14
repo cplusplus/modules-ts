@@ -9,9 +9,9 @@
           \textbf{Document Number:} & {\larger\docno}             \\
           \textbf{Date:}            & \reldate                    \\
           \textbf{Revises:}         & \prevdocno                  \\
-          \textbf{Reply to:}        & Gabriel Dos~Reis           \\
-                                    & Microsoft                   \\
-                                    & gdr@microsoft.com
+          \textbf{Reply to:}        & Richard Smith               \\
+                                    & Google                      \\
+                                    & richard@metafoo.co.uk
           \end{tabular}
 }
 \newlength{\hdwidth}
@@ -22,10 +22,31 @@
 \vspace{2.5cm}
 \begin{center}
 \textbf{\Huge
-Working Draft, Extensions to \Cpp for Modules}
+Merging Modules}
 \end{center}
-\vfill
-\textbf{Note: this is an early draft. It's known to be incomplet and
-  incorrekt, and it has lots of
-  b\kern-1.2pta\kern1ptd\hspace{1.5em}for\kern-3ptmat\kern0.6ptti\raise0.15ex\hbox{n}g.}
+
+This document presents the changes to be applied to the Modules TS in order
+to merge the features of the Atom proposal, as directed by Evolution at the
+Jacksonville 2018 committee meeting.
+
+A note aboute stylistic conventions: as this document describes a ``diff of
+a diff,'' the usual convention of using text style for \added{added} and
+\removed{removed} text does not work well. In its place, we use block-style
+diffs showing the text of the Modules TS before and after this document is
+applied:
+
+\begin{before}
+Here is some text from the \Cpp standard
+\added{with some additions from the Modules TS}.
+\end{before}
+
+\begin{after}
+Here is some text from the \Cpp standard
+\added{with some additions from the Modules TS}
+\added{and some more from the Atom proposal}.
+\end{after}
+
+Unchanged text from the Modules TS is retained in this document so that a
+complete picture of the ``after'' wording may be obtained by simply ignoring
+the ``before'' regions.
 \newpage

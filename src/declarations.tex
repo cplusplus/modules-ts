@@ -7,7 +7,7 @@
 %gram:
 
 \noindent
-Add a new alternative to \term{declaration} in paragraph 10/1 as follows
+Add new alternatives to \term{declaration} in paragraph 10/1 as follows
 \begin{std.txt}
   \begin{bnf}
     \nonterminal{declaration}:\br
@@ -109,6 +109,9 @@ Modify paragraph 10.3/1 as follows:
   that is, the members of the namespace. Unlike other declarative
   regions, the definition of a namespace can be split over several
   parts of one or more translation units.
+  %%% TODO: Decide if we want this rule or the "namespace names are
+  %%% exported only if their name or some name within them is exported" rule.
+  \begin{undecided}
   \added{A namespace with external linkage is always 
     exported regardless of whether any of its \term{namespace-definition}{s} is
     introduced by \tcode{export}.
@@ -123,8 +126,30 @@ Modify paragraph 10.3/1 as follows:
     }
   \end{codeblock}
   \end{example}
+  \end{undecided}
+%%%  \begin{after}
+%%%  \added{A namespace with external linkage is exported
+%%%  if any of its \term{namespace-definition}{s} is
+%%%  introduced by \tcode{export}, or if it contains any
+%%%  \grammarterm{export-declaration}{s}.}
+%%%  \enternote
+%%%  Excluding anonymous namespaces and namespaces nested within
+%%%  them, a namespace always has external linkage even if it is
+%%%  not exported.
+%%%  \exitnote
+%%%  \color{addclr}
+%%%  \begin{example}
+%%%  \begin{codeblock}
+%%%    export module M;
+%%%    namespace N1 {}                     // \tcode{N1} is not exported
+%%%    export namespace N2 {}              // \tcode{N2} is exported
+%%%    namespace N3 { export int n; }      // \tcode{N3} is exported
+%%%  \end{codeblock}
+%%%  \end{example}
+%%%  \end{after}
 \end{std.txt}
 
+\begin{undecided}
 \setcounter{subsection}{2}
 \rSec2[namespace.udecl]{The \tcode{using} declaration}
 
@@ -147,7 +172,7 @@ Modify paragraph 10.3.3/1 as follows:
   declaration \added{or citation} 
   introduced by the \grammarterm{using-declarator}. [...]
 \end{std.txt}
-
+\end{undecided}
 
 \noindent
 Add a new subclause 10.7 titled ``\textbf{Modules}'' as follows:
@@ -158,15 +183,29 @@ Add a new subclause 10.7 titled ``\textbf{Modules}'' as follows:
 \rSec2[dcl.module.unit]{Module units and purviews}
 
 \begin{std.txt}\color{addclr}
-  \begin{bnf}\color{addclr}
-    \nonterminal{module-declaration}:\br
-       \terminal{export}\opt {} \terminal{module} module-name attribute-specifier-seq\opt \terminal{;}
-  \end{bnf}
+\begin{before}\color{addclr}
+\begin{bnf}
+\nonterminal{module-declaration}:\br
+   \terminal{export}\opt{} \terminal{module} module-name attribute-specifier-seq\opt{} \terminal{;}
+\end{bnf}
+\end{before}\begin{after}\color{addclr}
+\begin{bnf}
+\nonterminal{module-declaration}:\br
+   \terminal{export}\opt{} \terminal{module} module-name module-partition\opt{} attribute-specifier-seq\opt{} \terminal{;}
+\end{bnf}
+\end{after}
   
   \begin{bnf}\color{addclr}
     \nonterminal{module-name}:\br
       module-name-qualifier-seq\opt identifier
   \end{bnf}
+  
+  \begin{after}
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-partition}:\br
+      \terminal{:} module-name-qualifier-seq\opt identifier
+  \end{bnf}
+  \end{after}
   
   \begin{bnf}\color{addclr}
     \nonterminal{module-name-qualifier-seq}:\br
@@ -183,15 +222,41 @@ Add a new subclause 10.7 titled ``\textbf{Modules}'' as follows:
 \alinea A \term{module unit} is a translation unit that contains
 a \grammarterm{module-declaration}. A \term{named module} is the
 collection of module units with the same \grammarterm{module-name}.
+\begin{before}\color{addclr}
+% This follows from the grammar now.
 A translation unit shall not contain more than
-one \grammarterm{module-declaration}. A \grammarterm{module-name}
+one \grammarterm{module-declaration}.
+\end{before}
+A \grammarterm{module-name}
 has external linkage but cannot be found by name lookup.
 
 \alinea
 A \term{module interface unit} is a module unit whose
 \grammarterm{module-declaration} contains the \texttt{export} keyword;
-any other module unit is a \term{module implementation unit}.  A named
-module shall contain exactly one module interface unit.
+any other module unit is a \term{module implementation unit}.
+\begin{before}\color{addclr}
+A named module shall contain exactly one module interface unit.
+\end{before}
+\begin{after}\color{addclr}
+A named module shall contain exactly one module interface unit
+with no \grammarterm{module-partition}, known as the
+\term{primary module interface unit} of the module.
+\end{after}
+
+\begin{after}\color{addclr}
+\alinea
+A \term{module partition} is
+a module unit whose \grammarterm{module-declaration} contains
+a \grammarterm{module-partition}.
+A named module shall not contain multiple module partitions with
+the same sequence of \grammarterm{identifier}{s} in their
+\grammarterm{module-partition}.
+All module partitions of a module
+that are module interface units
+shall be directly or indirectly exported
+by the primary module interface unit (\ref{dcl.module.export}).
+No diagnostic is required for a violation of these rules.
+\end{after}
 
 \alinea
 A \term{module unit purview} starts at the \grammarterm{module-declaration}
@@ -206,29 +271,67 @@ extension, such declarations  are said to be in the purview of the
 global module. 
 \enternote
 The global module has no name, no module interface unit, and is not
-  introduced by any 
-  \grammarterm{module-declaration}.
+introduced by any \grammarterm{module-declaration}.
 \exitnote
 
 \alinea
   A \term{module} is either a named module or the global module.
+  \begin{before}\color{addclr}
   A \grammarterm{proclaimed-ownership-declaration} is
   \term{attached} to the module it nominates; any other declaration
   is attached to the module in whose purview it appears.
+  \end{before}
+  \begin{after}\color{addclr}
+  A declaration is \term{attached} to a module determined as follows:
+  \begin{itemize}\color{addclr}
+  \item If the declaration is of a replaceable global allocation or deallocation
+  function (\stdref{new.delete.single}{21.6.2.1}, \stdref{new.delete.array}{21.6.2.2}),
+  it is attached to the global module.
+
+  \item Otherwise, if the declaration is a
+  \grammarterm{namespace-declaration} with external linkage, it
+  is attached to the global module.
+  
+  \item Otherwise, if the declaration is
+  within a \grammarterm{proclaimed-ownership-declaration}, it
+  is attached to the module nominated by the
+  \grammarterm{proclaimed-ownership-declaration}.
+
+  \item Otherwise, if the declaration is
+  within a \grammarterm{linkage-specification}, it
+  is attached to the global module.
+
+  \item Otherwise, the declaration is
+  attached to the module in whose purview it appears.
+  \end{itemize}
+  \end{after}
 
   \alinea
+  \begin{before}\color{addclr}
 For a namespace-scope declaration $D$ of an entity (other than a
 namespace), if $D$ is within a \grammarterm{proclaimed-ownership-declaration}
 for a module $X$, the entity is said to be \term{owned} by $X$.
 Otherwise, if $D$ is the first declaration of that entity, then that entity is said
 to be \term{owned} by the module in whose purview $D$ appears. 
+\end{before}
+\begin{after}\color{addclr}
+An entity introduced at namespace scope is \term{owned} by the
+module to which its first declaration is attached.
+\end{after}
 
   \alinea
   If a declaration attached to some module
   matches (according to the redeclaration rules) a reachable declaration
-  from a different module, 
+  \begin{before}\color{addclr}
+  from
+  \end{before}
+  \begin{after}\color{addclr}
+  attached to
+  \end{after}
+  a different module, 
   the program is ill-formed.
   \begin{example}
+    \begin{before}\color{addclr}
     \begin{codeblock}
       // module interface of M
       int f();            // \#1
@@ -244,17 +347,50 @@ to be \term{owned} by the module in whose purview $D$ appears.
       static int h();     // error: matches \#3
       int k();            // error: matches \#4
     \end{codeblock}
+    \end{before}\begin{after}\color{addclr}
+    \begin{codeblock}
+      // module interface of M
+      module;
+      int f();            // \#1
+      int g();            // \#2, owned by the global module
+      export module M;
+      export using ::f;   // OK: does not declare an entity
+      int g();            // error: matches \#2, but appears in the purview of M
+      export int h();     // \#3
+      export int k();     // \#4
+
+      // other translation unit
+      import M;
+      static int h();     // error: matches \#3
+      int k();            // error: matches \#4
+    \end{codeblock}
+    \end{after}
   \end{example}
 
   \alinea
+\begin{before}\color{addclr}
   The subgraph of the abstract semantics graph $G$ of a module $M$
   generated by the nodes of $G$, excluding those introducing names
   with internal linkage, is available to name lookup in the purview of every
   module implementation unit of $M$.
   The declsets made available by the \grammarterm{module-import-declaration}{s}
-   in the purview of the module
-  interface unit of $M$ are also available to name lookup in the purview of all 
+   in the purview of
+   %\begin{before}
+   the module interface unit of $M$
+   %\end{before}
+   %\begin{after}
+   %the module interface units of $M$
+   %\end{after}
+   are also available to name lookup in the purview of all 
   module implementation units of $M$.
+\end{before}
+\begin{after}\color{addclr}
+A \grammarterm{module-declaration}
+that contains neither \tcode{export}
+nor a \grammarterm{module-partition}
+implicitly imports the primary module interface unit of the module
+as if by a \grammarterm{module-import-declaration}.
+\end{after}
 \end{std.txt}
 
 \rSec2[dcl.module.interface]{Export declaration}%
@@ -273,7 +409,7 @@ to be \term{owned} by the module in whose purview $D$ appears.
   An \grammarterm{export-declaration} shall not appear directly
   or indirectly within an unnamed namespace. 
   An \grammarterm{exported-declaration}
-   has the declarative effects of its \grammarterm{declaration}
+  has the declarative effects of its \grammarterm{declaration}
   or its \grammarterm{declaration-seq} (if any).
   An \grammarterm{export-declaration} does not
   establish a scope and shall not contain more than one
@@ -286,8 +422,11 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \begin{grammar}
         @\tcode{export}@ @\term{declaration}@
   \end{grammar}
-  the \grammarterm{declaration} shall be a \grammarterm{module-import-declaration},
-  or it shall declare at least one name,
+  the \grammarterm{declaration}
+  \begin{before}\color{addclr}
+  shall be a \grammarterm{module-import-declaration}, or it
+  \end{before}
+  shall declare at least one name,
   and if that declaration declares an entity, the 
   \grammarterm{decl-specifier-seq} (if any) of the 
   \grammarterm{declaration} shall not contain \tcode{static}.
@@ -295,6 +434,7 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \grammarterm{unnamed-namespace-definition}
   or a \grammarterm{proclaimed-ownership-declaration}.
   \begin{example}
+  \begin{before}\color{addclr}
     \begin{codeblock}
       export int x;             // error: not in the purview of a module interface unit
       export module M;
@@ -306,6 +446,20 @@ to be \term{owned} by the module in whose purview $D$ appears.
       export namespace N { }    // OK
       export using namespace N; // error: does not declare a name
     \end{codeblock}
+  \end{before}\begin{after}\color{addclr}
+    \begin{codeblock}
+      module;
+      export int x;             // error: not in the purview of a module interface unit
+      export module M;
+      namespace {
+        export int a;           // error: export within unnamed namespace
+      }
+      export static int b;      // error: b explicitly declared static.
+      export int f();           // OK
+      export namespace N { }    // OK
+      export using namespace N; // error: does not declare a name
+    \end{codeblock}
+  \end{after}
   \end{example}
 
   If the \grammarterm{declaration} is a \grammarterm{using-declaration}
@@ -340,7 +494,6 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \exitnote
 
   \alinea
-
   An \grammarterm{export-declaration} of the form
   \begin{grammar}
     @\tcode{export}@ @\tcode{\{} \term{declaration-seq${}_{opt}$} \tcode{\}}@ 
@@ -350,13 +503,25 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \tcode{export}.
 
   \alinea
-  A namespace-scope or a class-scope declaration lexically
+  A namespace-scope
+  \begin{before}\color{addclr}
+  or a class-scope
+  \end{before}
+  declaration lexically
   contained in an \grammarterm{export-declaration}, as well as the
   entities and the names it introduces are said to be \term{exported}.
+  \begin{before}\color{addclr}
   The exported declarations in the interface of a module are reachable from
   any translation unit importing that module.  
+  \end{before}
   \enternote
   Exported names have either external linkage or no linkage; see \ref{basic.link}
+  \begin{after}\color{addclr}
+  Namespace-scope names exported by a module are visible to name lookup
+  in any translation unit importing that module; see \ref{basic.scope.namespace}.
+  Class and enumeration member names are visible to name lookup in any
+  context in which a definition of the type is reachable.
+  \end{after}
   \exitnote
 %  The declarations introducing names with linkage
 %  other than internal linkage introduced or made reachable
@@ -465,33 +630,125 @@ to be \term{owned} by the module in whose purview $D$ appears.
 \rSec2[dcl.module.import]{Import declaration}%
 
 \begin{std.txt}\color{addclr}
+\begin{before}
   \begin{bnf}\color{addclr}
     \nonterminal{module-import-declaration}:\br
       \terminal{import} module-name attribute-specifier-seq\opt {} \terminal{;}
   \end{bnf}
+\end{before}\begin{after}
+  \begin{bnf}\color{addclr}
+    \nonterminal{module-import-declaration}:\br
+      \terminal{export}\opt{} \terminal{import} module-name attribute-specifier-seq\opt {} \terminal{;}\br
+      \terminal{export}\opt{} \terminal{import} module-partition attribute-specifier-seq\opt {} \terminal{;}\br
+      \terminal{export}\opt{} \terminal{import} header-name attribute-specifier-seq\opt {} \terminal{;}
+  \end{bnf}
+\end{after}
 
   \resetalinea[0]
   \alinea
   A \grammarterm{module-import-declaration} shall appear only at
   global scope, and not in a \grammarterm{linkage-specification}
   or \grammarterm{proclaimed-ownership-declaration}.
+  \begin{after}\color{addclr}
+  In a module unit, a \grammarterm{module-import-declaration} shall
+  appear only within the \grammarterm{preamble}.
+
+  \alinea
+  \end{after}
   A \grammarterm{module-import-declaration} nominating a module $M$
-  makes every citation and every exported declaration from the 
+  \begin{after}\color{addclr}
+  imports all module interface units of $M$.
+  \end{after}
+
+  \begin{after}\color{addclr}
+  \alinea
+  A \grammarterm{module-import-declaration} nominating
+  a \grammarterm{module-partition} shall only appear after
+  the \grammarterm{module-declaration} in a module unit in
+  some module $M$.
+  Such a declaration imports the so-named
+  \grammarterm{module-partition} of $M$.
+
+  \color{addclr}
+  \alinea
+  A \grammarterm{module-import-declaration} nominating
+  a \grammarterm{header-name} $H$ behaves as if it imports
+  a synthesized \term{legacy header unit} defined as follows:
+
+  \begin{codeblock}\color{addclr}
+  export module @\textit{unique}@ ;
+  export extern "C++" {
+  #include @$H$@
+  }
+  \end{codeblock}
+
+  where \textit{unique} is a \grammarterm{module-name}
+  different from every \tcode{module-name}
+  used in the program, and where two
+  \grammarterm{module-import-declaration}{s}
+  import the same legacy header unit if and only if
+  their \grammarterm{header-name}{s} identify the same
+  header or source file.
+  \enternote
+  A \grammarterm{module-import-declaration} nominating
+  a \grammarterm{header-name} is also recognized by the
+  preprocessor and may result in one or more macros being
+  made available (\ref{cpp.module}).
+  \exitnote
+  \end{after}
+
+  \alinea
+  \begin{after}
+  Importing a translation unit $M$
+  \end{after}
+  makes every citation and every
+  \begin{before}\color{addclr}
+  exported declaration
+  \end{before}
+  \begin{after}\color{addclr}
+  exported name
+  \end{after}
+  from the 
   abstract semantics graph of $M$ available, as a citation,
   %makes exported declarations from the interface of the nominated module visible
   to name lookup in
   the current translation unit, in the same namespaces and contexts
   as in $M$.
   % the nominated module.
+  \begin{after}
+  If $M$ is part of the same module as the importing translation unit,
+  importing $M$ also makes every name declared in the purview of $M$
+  that does not have internal linkage visible to name lookup
+  in the current translation unit, in the same namespaces and contexts
+  as in $M$.
+  \end{after}
+  \begin{before}\color{addclr}
   A \term{citation} for a declaration attached to a module $M$ is a pair of
   $M$ and the corresponding declset from the abstract semantics graph 
   of $M$. 
+  \end{before}
+  \begin{after}\color{addclr}
+  A \term{citation} for a declaration in a translation unit $M$ is a pair of
+  $M$ and the corresponding declset from the abstract semantics graph 
+  of $M$. 
+  \end{after}
 %  The \grammarterm{attribute-specifier-seq} appartain to the nominated module.
   \enternote
   The declarations in the declsets and the entities denoted by the declsets
   are not redeclared in the translation unit
-    containing the \grammarterm{module-import-declaration}.
+  containing the \grammarterm{module-import-declaration}.
   \exitnote
+
+  \begin{after}\color{addclr}
+  \alinea
+  \enternote
+  A \grammarterm{module-import-declaration} also makes all
+  declarations in the purview of the module interface units of $M$
+  reachable in the current translation unit, and may make declarations
+  from the preamble of $M$ reachable in the current translation
+  unit, as described in \ref{dcl.module.reach}.
+  \exitnote
+  \end{after}
   \begin{example}
   \begin{Program}
      // Interface unit of M
@@ -518,10 +775,18 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \end{example}
 
   \alinea
+\begin{before}\color{addclr}
   A module \tcode{M1} \term{has a dependency} on a module \tcode{M2}
   if any module unit of \tcode{M1} contains a \grammarterm{module-import-declaration}
   nominating \tcode{M2}. A module shall not have a dependency on
   itself.
+\end{before}
+\begin{after}\color{addclr}
+  A module implementation unit of a module \tcode{M}
+  that is not a module partition
+  shall not contain a \grammarterm{module-import-declaration}
+  nominating \tcode{M}.
+\end{after}
   \begin{example}
   \begin{codeblock}
      module M;
@@ -530,12 +795,21 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \end{example}
 
   \alinea 
+\begin{before}\color{addclr}
   A module \tcode{M1} \term{has an interface dependency} on a module
   \tcode{M2} if the module interface of \tcode{M1} contains a
   \grammarterm{module-import-declaration} nominating \tcode{M2},
   or if there exists a module \tcode{M3} such that \tcode{M1} has an
   interface dependency on \tcode{M3} and \tcode{M3} has an interface dependency
   on \tcode{M2}.  A module
+\end{before}
+\begin{after}\color{addclr}
+  A translation unit \term{has an interface dependency} on a module unit \tcode{U} in module \tcode{M}
+  if it is a module implementation unit of \tcode{M} and \tcode{U} is a module interface unit,
+  or if it contains a \grammarterm{module-import-declaration} nominating \tcode{U}, or if it has
+  an interface dependency on a module unit that has an interface dependency on \tcode{U}.
+  A translation unit
+\end{after}
   shall not have an interface dependency on itself.
   \begin{example}
   \begin{Program}
@@ -553,21 +827,28 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \end{Program}
   \end{example}
 
-  \alinea
+\begin{before}\color{addclr}
+\alinea
   A translation unit has an interface dependency on a module \tcode{M} if it is
   a module implementation unit of \tcode{M}, or if it contains a
   \grammarterm{module-import-declaration} nominating \tcode{M}, or if it has
   an interface dependency on a module that has an interface dependency on \tcode{M}.
+\end{before}
 \end{std.txt}
-
 
 \rSec2[dcl.module.export]{Module exportation}%
 
 \begin{std.txt}\color{addclr}
   \resetalinea[0]
   \alinea
+  \begin{after}\color{addclr}
+  A \grammarterm{module-import-declaration} declared with \tcode{export} 
+  is \term{exported}, and shall only appear after the
+  \grammarterm{module-declaration} in the \grammarterm{preamble}
+  of a module interface unit.
+  \end{after}
   An exported
-   \grammarterm{module-import-declaration} nominating a module \tcode{M2}
+  \grammarterm{module-import-declaration} nominating a module \tcode{M2}
   in the purview of a module interface unit of a module \tcode{M} 
   makes all exported names
   of \tcode{M2} visible to any translation unit importing \tcode{M}, as if
@@ -661,7 +942,42 @@ to be \term{owned} by the module in whose purview $D$ appears.
    are made available 
   to name lookup in another translation unit $TU$, it is necessary to
   determine the interpretation of the names they introduce and their
-  semantic properties. Except as noted below, the 
+  semantic properties.
+\begin{after}\color{addclr}
+  \alinea
+  A semantic property is \term{reachable} from a program point if
+  \begin{itemize}\color{addclr}
+  \item it is declared prior to that program point in the same translation unit, or
+  \item it is declared in the purview of a module interface unit of a module
+  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import}), or
+  \item it is declared in the preamble of a module interface unit of a module
+  that is directly
+  or indirectly imported prior to that program point
+  and is a reachable semantic property of an exported declaration
+  in that translation unit as described below.
+  \end{itemize}
+  When the semantic properties of an entity are examined,
+  all properties that are reachable from
+  the point of inquiry are found,
+  even if the declaration introducing the property
+  is not visible to unqualified lookup.
+\begin{example}
+\begin{codeblock}
+module;
+struct X {};
+export module A;
+export using Y = X;
+
+module B;
+import A;
+Y y;            // OK, definition of \tcode{X} is reachable
+X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
+\end{codeblock}
+\end{example}
+\end{after}
+
+  \alinea
+  Except as noted below, the 
   \term{reachable semantic properties} of declset $D$
   (or of the entity, if any, denoted by that declset)
   of the abstract semantic graph of $M$ from $TU$ are 
@@ -698,6 +1014,9 @@ to be \term{owned} by the module in whose purview $D$ appears.
   \begin{example}
     \begin{codeblock}
       // TU 1
+      @\begin{after}\color{addclr}
+      module;
+      \end{after}@
       struct F { int f { 42 }; };
       export module M;
       export using T = F;
@@ -894,8 +1213,13 @@ to be \term{owned} by the module in whose purview $D$ appears.
 
   \alinea
   If $X$ is an attendant entity of two exported declarations
-  designating two distinct entities, its reachable semantic properties shall
+  designating two distinct entities,
+  \begin{after}\color{addclr}
+  and $X$ is declared in the purview of the global module,
+  \end{after}
+  its reachable semantic properties shall
   be the same at the points where the declarations occur.
+  \begin{before}\color{addclr}
   \begin{example}
     \begin{codeblock}
       export module M;
@@ -905,6 +1229,18 @@ to be \term{owned} by the module in whose purview $D$ appears.
       export S g();     // error: class type S has different properties from \#1
     \end{codeblock}
   \end{example}
+  \end{before}
   
+  \begin{after}\color{addclr}
+  \begin{example}
+    \begin{codeblock}
+      module;
+      struct S;
+      export module M;
+      export S f();     // \#1
+      extern "C++" struct S { };
+      export S g();     // error: class type S has different properties from \#1
+    \end{codeblock}
+  \end{example}
+  \end{after}
 \end{std.txt}
-

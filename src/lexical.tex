@@ -39,8 +39,10 @@ Modify bullet 7 of paragraph 5.2/1 as follows:
     The process of analyzing and translating the tokens may occasionally 
     result in one token being replaced by a sequence of other tokens (17.2). 
     \exitnote
-    \added{It is implementation-defined whether the source for module interface 
-    units for modules on which the current translation unit has an interface
+    \added{It is implementation-defined whether the source for}
+    \begin{before}\added{module interface units for modules}\end{before}
+    \begin{after}\added{module units}\end{after}
+    \added{on which the current translation unit has an interface
     dependency (\ref{dcl.module.import}) is required to be available.}
     \enternote
     Source files, translation units and translated translation units need not
@@ -52,7 +54,7 @@ Modify bullet 7 of paragraph 5.2/1 as follows:
 \end{itemize}
 \end{std.txt}
 
-
+\begin{undecided}
 Add new paragraphs as follows:
 \begin{std.txt}\color{addclr}
     \resetalinea[1]
@@ -70,10 +72,19 @@ Add new paragraphs as follows:
         declarations contained in $D_2$ declare an entity mentioned 
         in a declaration contained in $D_1$.
     \end{itemize}
-    The \term{abstract semantics graph of a module} is the subgraph of
+    The \term{abstract semantics graph of a module} is
+    \begin{before}\color{addclr}
+    the subgraph of
     the abstract semantics graph of its module interface unit generated
     by the declsets the declarations of which are
-     in the purview of that module interface unit.
+    in the purview of that module interface unit.
+    \end{before}
+    \begin{after}\color{addclr}
+    the subgraph of
+    the abstract semantics graph of its module interface units generated
+    by the declsets the declarations of which are
+    in the purview of those module interface units.
+    \end{after}
     \enternote
     The abstract semantics graphs of modules,
     as appropriately restricted (\ref{dcl.module.reach}), are used in
@@ -421,7 +432,7 @@ entities used in those expressions.
 \exitnote
 
 \end{std.txt}
-
+\end{undecided}
 
 \setcounter{section}{10}
 \Sec1[lex.key]{Keywords}

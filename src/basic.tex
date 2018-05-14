@@ -4,6 +4,8 @@
 %gram: \rSec1[gram.basic]{Basic concepts}
 %gram:
 
+\begin{undecided}
+
 \noindent
 Modify paragraph 6/3 as follows:
 
@@ -41,16 +43,20 @@ Add a sixth bullet to paragraph 6/8 as follows:
   \end{itemize}
 \end{std.txt}
 
+\end{undecided}
+
 \rSec1[basic.def]{Declarations and definitions}
 
 Modify paragraph 6.1/1 as follows:
+
 \begin{std.txt}
   \resetalinea[0]
   \alinea
   A declaration (Clause \ref{dcl.dcl}) may introduce one or more names into a
   translation unit or redeclare names introduced by previous declarations.
   If so, the declaration specifies the interpretation and
-  \removed{attributes}\added{semantic properties} of these names. [...]
+  \removed{attributes}\added{semantic properties} of these names.
+  [...]
   \end{std.txt}
 
 \noindent
@@ -70,6 +76,7 @@ Append the following two bullets to paragraph 6.1/2:
   \color{addclr}
 %  \begin{example}
 \enterexample
+\begin{before}\color{addclr}
 \begin{codeblock}
     import std.io;                  // make names from std.io available
     export module M;                // toplevel declaration for M
@@ -78,6 +85,16 @@ Append the following two bullets to paragraph 6.1/2:
       int y;
     };
 \end{codeblock}
+\end{before}\begin{after}\color{addclr}
+\begin{codeblock}
+    export module M;                // toplevel declaration for M
+    import std.io;                  // make names from std.io available
+    export struct Point {           // define and export Point
+      int x;
+      int y;
+    };
+\end{codeblock}
+\end{after}
 \exitexample
 \end{std.txt}
 
@@ -89,10 +106,17 @@ Replace paragraph 6.2/1 with:
   \resetalinea[0]
   \alinea
   \added{A variable, function, class type, enumeration type, or template shall not
-  be defined where a prior definition is reachable (\ref{basic.lookup}).}
+  be defined where a prior definition is reachable}
+  \begin{before}
+  \added{(\ref{basic.lookup}).}
+  \end{before}
+  \begin{after}
+  \added{(\ref{dcl.module.reach}).}
+  \end{after}
 \end{std.txt}
 
 Modify opening of paragraph 6.2/6 as follows
+
 \begin{std.txt}
   \resetalinea[5]
   \alinea
@@ -106,9 +130,17 @@ Modify opening of paragraph 6.2/6 as follows
   template specialization for which some template parameters are not 
   specified (17.7, 17.5.5) in a program provided that \removed{each definition appears 
   in a different translation unit}
-  \added{no prior definition is reachable (\ref{basic.lookup}) at the point where a definition appears}, 
+  \added{no prior definition is reachable}
+  \begin{before}
+  \added{(\ref{basic.lookup})}
+  \end{before}
+  \begin{after}
+  \added{(\ref{dcl.module.reach})}
+  \end{after}
+  \added{at the point where a definition appears}, 
   and provided the definitions satisfy the 
   following requirements. 
+\begin{before}
   \added{For an entity with an exported declaration, there shall be only one
    definition of that entity; a diagnostic is required only if the abstract 
    semantics graph of the module contains a definition of the entity.}
@@ -116,13 +148,23 @@ Modify opening of paragraph 6.2/6 as follows
    If the definition is not in the interface unit, then at most one module unit can
    have and make use of the definition.
    \exitnote}
+\end{before}
+\begin{after}
+  \added{For an entity with an exported declaration, there shall be only one
+   definition of that entity; no diagnostic is required unless a prior definition
+   is reachable at a point where a later definition appears.}
+   \added{\enternote
+   If the definition is in a module implementation unit, then the definition
+   will only be reachable in that translation unit.
+   \exitnote}
+\end{after}
   Given such an entity named \tcode{D} defined in more than one 
   translation unit, then
 \end{std.txt}
 
-
-
 \rSec1[basic.scope]{Scope}%
+
+\begin{undecided}
 
 \setcounter{subsection}{1}
 \rSec2[basic.scope.pdecl]{Point of declaration}
@@ -135,6 +177,8 @@ Add a new paragraph 6.3.2/13 as follows:
   \added{The point of declaration of a module is immediately after the
   \term{module-name} in a \grammarterm{module-declaration}.}
 \end{std.txt}
+
+\end{undecided}
 
 \setcounter{subsection}{5}
 \rSec2[basic.scope.namespace]{Namespace scope}
@@ -162,7 +206,9 @@ Modify paragraph 6.3.6/1 as follows:
   (10.3.4) that nominates the member's namespace, the member's
   potential scope includes that portion of the potential scope of the
   \grammarterm{using-directive} that follows the member's point of
-  declaration. \added{If a name $X$ (not having internal linkage) is declared
+  declaration.
+\begin{before}
+\added{If a name $X$ (not having internal linkage) is declared
     in a namespace $N$ in the purview of the module
     interface unit of a module $M$, the potential scope of $X$ 
     includes the portion of the namespace $N$ in the purview of
@@ -170,6 +216,21 @@ Modify paragraph 6.3.6/1 as follows:
     and, if the name $X$ is exported, in every translation unit that imports $M$
     after a \grammarterm{module-import-declaration} nominating $M$.
     }
+\end{before}
+\begin{after}
+\added{%
+If a translation unit $M$ is imported into a translation unit $N$,
+the potential scope of a name $X$ declared with namespace scope in $M$
+is extended to include the portion of the corresponding namespace
+scope in $N$ following the first \grammarterm{module-import-declaration}
+in $N$ that directly or indirectly nominates $M$ if
+} \color{addclr}
+\begin{itemize}
+\item \added{$X$ does not have internal linkage, and}
+\item \added{$X$ is declared after the \grammarterm{module-declaration} in $M$, and}
+\item \added{either $M$ and $N$ are part of the same module or $X$ is exported.}
+\end{itemize}
+\end{after}
   \color{addclr}
 %  ; and for each \term{module-import-declaration} that nominates M,
 %  the potential scope of X includes the 
@@ -203,17 +264,24 @@ Modify paragraph 6.4/1 as follows:
   wherever the grammar allows such names in the context discussed by a 
   particular rule.
   Name lookup associates the use of a name with a set of declarations (6.1)
-  \added{or citations (\ref{dcl.module.import})} of that name.
+\begin{undecided}
+  \added{or citations (\ref{dcl.module.import})}
+\end{undecided}
+  of that name.
+\begin{undecided}
+%%% FIXME: If we keep this, fix the typo "intent" -> "intents"
   \added{For all intent and purposes of further semantic processing
   requiring declarations, 
   a citation is replaced with the declarations contained in its declset.}
+\end{undecided}
   [...] Only after name lookup, function overload resolution (if applicable)
   and access checking have succeeded are the
   \removed{attributes}\added{semantic properties} introduced by the name's
   declaration used further in the expression processing (Clause 8).
-
 \end{std.txt}
 
+% Moved to dcl.module.reach with some changes.
+\begin{before}
 Add new paragraph 6.4/5 as follows:
 \begin{std.txt}\color{addclr}
   \resetalinea[4]
@@ -221,10 +289,12 @@ Add new paragraph 6.4/5 as follows:
   \added{A declaration is \term{reachable} from a program point if it can be found
   by unqualified name lookup in its scope.}
 \end{std.txt}
+\end{before}
 
 \setcounter{subsection}{1}
 \rSec2[basic.lookup.argdep]{Argument-dependent name lookup}
 
+%%% TODO: restrict module ADL to only declarations in the module? 
 \noindent
 Modify paragraph 6.4.2/2 as follows:
 \begin{std.txt}
@@ -322,10 +392,21 @@ Modify paragraph 6.4.2/4 as follows:
   and function templates are ignored.
 
      \color{addclr}
-     \item[---] \added{In resolving dependent names (17.6.4),
-      any function or function template that is owned by a
+     \item[---]
+     \begin{before}
+     \added{In resolving dependent names (17.6.4), any}
+     \end{before}
+     \begin{after}\added{Any}\end{after}
+     \added{function or function template that is owned by a
      named module \tcode{M} (10.7), that is
-     declared in the module interface unit of \tcode{M}, and that has
+     declared in}
+     \begin{before}
+     \added{the}
+     \end{before}
+     \begin{after}
+     \added{a}
+     \end{after}
+     \added{module interface unit of \tcode{M}, and that has
      the same innermost enclosing non-inline namespace as some entity
      owned by \tcode{M} in the set of associated entities, is visible
      within its namespace even if it is not exported.}
@@ -340,7 +421,7 @@ Modify paragraph 6.4.2/4 as follows:
 Change the definition of \term{translation-unit} in paragraph 6.5/1
 to:
 
-
+\begin{before}
 \begin{bnf}\color{addclr}
   \added{\nonterminal{translation-unit}\br
      toplevel-declaration-seq\opt}
@@ -357,8 +438,21 @@ to:
          module-declaration\br
          declaration}
 \end{bnf}
+\end{before}
 
+\begin{after}
+\begin{bnf}
+\nonterminal{translation-unit}:\br
+    \added{preamble\opt} declaration-seq\opt
+\end{bnf}
 
+\begin{bnf}
+\added{\nonterminal{preamble}:\br
+    \terminal{module} \terminal{;} declaration-seq module-declaration\br
+    module-declaration\br
+    preamble\opt module-import-declaration}
+\end{bnf}
+\end{after}
 
 \noindent
 Insert a new bullet between first and second bullet of paragraph 6.5/2:
@@ -421,16 +515,32 @@ Modify paragraph 6.5/4 as follows:
     linkage purposes (10.1.3); or
     \item a template\removed{.}
   \end{itemize}
-  \color{addclr}
+  \begin{before}\color{addclr}
   \added{has the same linkage as the enclosing namespace if}
     \begin{itemize}
       \item \added{said namespace has internal linkage, or}
-      \item \added{the name is exported (\ref{dcl.module.interface}),
-      or is declared in a \grammarterm{proclaimed-ownership-declaration},
+      \item \added{the name is exported (\ref{dcl.module.interface}), or}
+      \added{is declared in a \grammarterm{proclaimed-ownership-declaration},
       or is not being declared in the purview of
       a named module (\ref{dcl.module.unit});}
     \end{itemize}
     \added{otherwise, the name has module linkage.}
+  \end{before}
+  \begin{after}\color{addclr}
+  \added{has its linkage determined as follows:}
+    \begin{itemize}\color{addclr}
+      \item \added{if the enclosing namespace has internal linkage,
+      the name has internal linkage;}
+      \item \added{otherwise, if
+      the declaration of the name is attached to a named module,
+      is not exported (\ref{dcl.module.interface}),
+      and is not declared in a
+      \grammarterm{proclaimed-ownership-declaration} or a
+      \grammarterm{linkage-specification},
+      the name has module linkage;}
+      \item \added{otherwise, the name has external linkage}.
+    \end{itemize}
+  \end{after}
 \end{std.txt}
 
 
@@ -445,45 +555,55 @@ there is a visible declaration of an entity with linkage having the
 same name and type, ignoring entities declared outside the innermost
 enclosing namespace scope, the block scope declaration declares that
 same entity and receives the linkage of the previous declaration. 
-\added{If that entity was exported by an imported module or if the containing block scope is in the purview of a named module, the program is
-ill-formed.} If
+\begin{before}
+\added{If that entity was exported by an imported module
+or if the containing block scope is in the purview of a named module, the program is
+ill-formed.}
+\end{before}
+If
 there is more than one such matching entity, the program is
 ill-formed. Otherwise, if no matching entity is found, the block scope
 entity receives external linkage.
+\begin{after}
+\added{In either case, if the declared entity would be owned by a named module,
+the program is ill-formed.}
+\end{after}
 \end{std.txt}
 
 \noindent
-Modify paragrapgh 6.5/9 as follows:
+Modify paragraph 6.5/9 as follows:
 \begin{std.txt}
   \resetalinea[8]
   \alinea
+  \addtocounter{footnote}{1}
   Two names that are the same (Clause 9) and that are declared in different scopes
   shall denote the same variable, function, type, template or namespace if
   \begin{itemize}
     \item[---] both names have external \added{or module} linkage
     \added{and are declared in declarations attached to the
-     same module}{\color{addclr}\footnote{This provision supports implementations where
-     exported entities in different modules have different implementation
-     symbols.  Conversely, for other implementations, exported entities
-     have the same implementation symbols regardless of in which
-     module they are declared.  Such implementations are supported
-     for the time being by disallowing all situations where the same names
-     with external linkage might appear from different modules.}}\added{,} 
+     same module}%
+     {\color{addclr}\footnote{\added{This provision supports implementations where
+  exported entities in different modules have different implementation
+  symbols.  Conversely, for other implementations, exported entities
+  have the same implementation symbols regardless of in which
+  module they are declared.  Such implementations are supported
+  for the time being by disallowing all situations where the same names
+  with external linkage might appear from different modules.}}}\added{,}
      or else both names have internal linkage and are declared in
       the same translation unit; and
 
       \item both names refer to members of the same namespace or to members,
       not by inheritance, of the same class; and
 
-      \item when both names denote functions, the parameter-typelists of the
+      \item when both names denote functions, the parameter-type-lists of the
       functions (11.3.5) are identical; and
 
       \item when both names denote function templates, the signatures (17.5.6.1)
       ar the same.
   \end{itemize}
   \added{If two declarations 
-  declaring entities (other than namespaces) and attached to 
-   different modules introduce two names that are the same
+  declaring entities (other than namespaces) and attached to
+  different modules introduce two names that are the same
   and that both have external linkage, the program is ill-formed; no
   diagnostic required.
   \enternote
@@ -491,8 +611,7 @@ Modify paragrapgh 6.5/9 as follows:
   \grammarterm{alias-declaration}{s} do not declare entities, but 
   merely introduce synonyms.  Similarly, \grammarterm{using-directive}{s}
   do not declare entities, either.
-  \exitnote
-  }
+  \exitnote}
 \end{std.txt}
 
 
@@ -507,6 +626,12 @@ Modify paragraph 6.6.1/1 as follows:
   \resetalinea[0]
   \alinea
   A program shall contain a global function called \tcode{main}
+  % This is a semantic requirement not a syntactic one, so should use ownership not purview.
+  \begin{before}
   \added{declared in the purview of the global module}.
+  \end{before}
+  \begin{after}
+  \added{owned by the global module}.
+  \end{after}
 \end{std.txt}
 
