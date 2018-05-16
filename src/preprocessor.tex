@@ -18,7 +18,31 @@ These capabilities are called
 because conceptually they occur
 before translation of the resulting translation unit.
 \end{std.txt}
+\end{after}
 
+\setcounter{section}{1}
+\rSec1[cpp.include]{Source file inclusion}%
+
+\begin{after}
+Add a new paragraph after 19.2/6 as follows:
+
+\begin{std.txt}
+\resetalinea[6]
+\color{addclr}
+\alinea
+If the header identified by the \grammarterm{header-name}
+denotes a legacy header unit, the preprocessing directive
+is instead replaced by the \grammarterm{preprocessing-token}{s}
+\begin{bnf}
+\terminal{import} header-name \terminal{;}
+\end{bnf}
+\color{addclr}
+How the set of headers denoting legacy header units is specified
+is implementation-defined.
+\end{std.txt}
+\end{after}
+
+\begin{after}
 \noindent
 Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
 
@@ -64,6 +88,7 @@ Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
   \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{;}}
 \end{bnf}
 
+\color{addclr}
 \alinea
 A sequence of \grammarterm{preprocessing-token}{s} matching the form
 of a \grammarterm{pp-import}
@@ -77,6 +102,8 @@ immediately after the \tcode{;} terminating the preprocessing preamble
 immediately after the \tcode{;} terminating the \grammarterm{pp-import}
 otherwise.
 
+\noindent % force para to begin so color applies to para number
+\color{addclr}
 \alinea
 A \term{macro directive} for a macro name is a \tcode{\#define} or
 \tcode{\#undef} directive naming that macro name.
@@ -90,7 +117,6 @@ or a legacy header unit that transitively imports it,
 is imported into the current translation unit by a \grammarterm{pp-import}
 whose point of macro import precedes that source location.
 
-\color{addclr}
 \alinea
 Multiple macro directives for a macro name may be visible at the same
 source location.
