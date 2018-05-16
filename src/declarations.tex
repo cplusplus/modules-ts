@@ -695,10 +695,26 @@ as if by a \grammarterm{module-import-declaration}.
   preprocessor and may result in one or more macros being
   made available (\ref{cpp.module}).
   \exitnote
+  Within a legacy header unit, certain semantic restrictions
+  are relaxed:
+  \begin{itemize}
+  \item A \grammarterm{module-import-declaration} may appear
+  in the purview of the module, and is considered to be exported.
+  \item A declaration of a name with internal linkage is
+  permitted within the synthesized
+  \grammarterm{export-declaration}. If such a name is
+  odr-used by a translation unit outside the legacy
+  header unit, or by an instantiation unit for a template
+  instantiation whose point of instantiation is outside
+  the legacy header unit, the program is ill-formed.
+  \end{itemize}
+  The \grammarterm{linkage-specification} shall not be
+  terminated by an included \tcode{\}} token preceding
+  the synthesized \tcode{\}} token.
   \end{after}
 
   \alinea
-  \begin{after}
+  \begin{after}\color{addclr}
   Importing a translation unit $M$
   \end{after}
   makes every citation and every
@@ -715,7 +731,7 @@ as if by a \grammarterm{module-import-declaration}.
   the current translation unit, in the same namespaces and contexts
   as in $M$.
   % the nominated module.
-  \begin{after}
+  \begin{after}\color{addclr}
   If $M$ is part of the same module as the importing translation unit,
   importing $M$ also makes every name declared in the purview of $M$
   that does not have internal linkage visible to name lookup

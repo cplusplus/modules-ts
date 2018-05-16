@@ -5,12 +5,8 @@ added 'module;' introducer (p0713r1, approved at jax)
 header import semantics
 module import declaration shall only appear within preamble if there is a module-declaration
 availability rule (effects may be available despite the declaration not being visible)
-
-TODO:
 header import preprocessor effects
 preamble identification
-
-module partition import and export: do we need 'export import :partition' to match 'export module foo:partition', or just infer it?
 
 WORDING QUESTIONS:
 do we need ASG etc? can we simplify it?

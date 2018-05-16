@@ -1,0 +1,169 @@
+%!TEX root = std.tex
+\setcounter{chapter}{18}
+\rSec0[cpp]{Preprocessing directives}%
+
+\begin{after}
+Modify paragraph 19/5 as follows:
+
+\begin{std.txt}
+\resetalinea[4]
+\alinea
+The implementation can
+process and skip sections of source files conditionally,
+include other source files,
+\added{import macros from legacy header units,}
+and replace macros.
+These capabilities are called
+\term{preprocessing},
+because conceptually they occur
+before translation of the resulting translation unit.
+\end{std.txt}
+
+\noindent
+Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
+
+\setcounter{section}{2}
+\rSec1[cpp.module]{Legacy header units}%
+\resetalinea[0]
+
+\begin{std.txt}
+\color{addclr}
+\begin{bnf}
+\nonterminal{pp-import}:\br
+  \terminal{export}\opt{} \terminal{import}\opt{} header-name pp-attrs\opt{} \terminal{;}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-attrs}:\br
+  pp-attrs\opt{} \terminal{[} \terminal{[} pp-attr-tokens \terminal{]} \terminal{]}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-attr-tokens}:\br
+  pp-attr-tokens\opt{} pp-attr-token
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-attr-token}:\br
+  \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{]}}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-preamble}:\br
+  \terminal{module}\opt{} pp-module-name pp-attrs\opt{} \terminal{;}
+  pp-preamble pp-import
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-module-name}:\br
+  pp-module-name\opt{} pp-module-name-token
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-module-name-token}:\br
+  \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{;}}
+\end{bnf}
+
+\alinea
+A sequence of \grammarterm{preprocessing-token}{s} matching the form
+of a \grammarterm{pp-import}
+instructs the preprocessor to import macros from the legacy header unit
+(\ref{dcl.module.import}) denoted by the \grammarterm{header-name}.
+The \tcode{;} \grammarterm{preprocessing-token} shall not be produced by
+macro replacement (\stdref{cpp.replace}{19.3}).
+The \term{point of macro import} for a \grammarterm{pp-import} is
+immediately after the \tcode{;} terminating the preprocessing preamble
+(see below) if the import occurs within the preprocessing preamble, and
+immediately after the \tcode{;} terminating the \grammarterm{pp-import}
+otherwise.
+
+\alinea
+A \term{macro directive} for a macro name is a \tcode{\#define} or
+\tcode{\#undef} directive naming that macro name.
+An \term{exported macro directive} is
+a macro directive occuring in a legacy header unit
+whose macro name is not lexically identical to a keyword.
+A macro directive is \term{visible} at a source location
+if it precedes that source location in the same translation unit, or
+if it is an exported macro directive whose legacy header unit,
+or a legacy header unit that transitively imports it,
+is imported into the current translation unit by a \grammarterm{pp-import}
+whose point of macro import precedes that source location.
+
+\color{addclr}
+\alinea
+Multiple macro directives for a macro name may be visible at the same
+source location.
+The interpretation of a macro name is determined as follows:
+\begin{itemize}
+\item
+\color{addclr}
+A macro directive \term{overrides} all macro directives for the same name
+that are visible at the point of the directive.
+\item
+\color{addclr}
+A macro directive is \term{active} if it is visible and
+no visible macro directive overrides it.
+\item
+\color{addclr}
+A set of macro directives is \term{consistent} if it consists of only
+\tcode{\#undef} directives or if all \tcode{\#define} directives in the set
+are valid as redefinitions of the same macro.
+\end{itemize}
+\color{addclr}
+When a \grammarterm{preprocessing-token} matching the macro name of a visible
+macro directive is encountered, the set of active macro directives for that
+macro name shall be consistent, and semantics of the active macro directives
+determine whether the macro name is defined and the behavior of macro
+replacement.
+\enternote
+The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
+particular macro definition is active.
+\exitnote
+
+\color{addclr}
+\alinea
+The \term{preprocessing preamble} of a translation unit is
+the longest sequence of \grammarterm{preprocessing-token}{s} matching
+the syntax of \grammarterm{pp-preamble}
+beginning with the first \tcode{module} token that is
+neither preceded by \tcode{extern} (\ref{dcl.module.proclaim})
+nor followed by \tcode{;}.
+If there is no such sequence of tokens,
+the translation unit has no preprocessing preamble.
+Within the preprocessing preamble, the tokens \tcode{export} and \tcode{import}
+shall not be produced by macro replacement.
+If an \tcode{import} \grammarterm{preprocessing-token}
+appears after the end of the preprocessing preamble,
+the program is ill-formed.
+\enternote
+The preamble always terminates with a semicolon token.
+A \tcode{\#if} directive immediately following the end of the preamble
+can expand macros imported by a \grammarterm{pp-import} within the
+preamble; if that results in encountering additional
+\grammarterm{preprocessing-token}{s} matching the syntax of a
+\grammarterm{pp-import}, the preamble is not extended to include
+those tokens because doing so would not form a valid preprocessing preamble.
+\begin{example}
+\begin{codeblock}
+// macros.h
+#define GOT_MACRO 1
+
+// TU M
+module M;
+import "macros.h";
+#if GOT_MACRO
+import "other.h";
+#endif
+\end{codeblock}
+The preprocessing preamble ends at the \tcode{;} of the first \tcode{import}.
+As a consequence, the program is ill-formed because \tcode{import "other.h";}
+appears after the preprocessing preamble.
+The preprocessing preamble cannot extend to include the second \tcode{import},
+because if it did, the macro \tcode{GOT_MACRO} would not be defined in the
+context of the \tcode{\#if}.
+\end{example}
+\exitnote
+\end{std.txt}
+
+\end{after}
