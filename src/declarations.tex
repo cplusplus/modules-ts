@@ -965,7 +965,9 @@ as if by a \grammarterm{module-import-declaration}.
   \begin{itemize}\color{addclr}
   \item it is declared prior to that program point in the same translation unit, or
   \item it is declared in the purview of a module interface unit of a module
-  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import}), or
+  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import}),
+  for which all indirect \grammarterm{import-declaration}{s} appear within the
+  purview of the enclosing module unit, or
   \item it is declared in the preamble of a module interface unit of a module
   that is directly
   or indirectly imported prior to that program point
