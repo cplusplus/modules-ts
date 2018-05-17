@@ -54,38 +54,29 @@ Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
 \color{addclr}
 \begin{bnf}
 \nonterminal{pp-import}:\br
-  \terminal{export}\opt{} \terminal{import}\opt{} header-name pp-attrs\opt{} \terminal{;}
+  \terminal{export}\opt{} \terminal{import}\opt{} header-name pp-decl-suffix\opt{} \terminal{;}
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-attrs}:\br
-  pp-attrs\opt{} \terminal{[} \terminal{[} pp-attr-tokens \terminal{]} \terminal{]}
+\nonterminal{pp-decl-suffix}:\br
+  pp-decl-suffix\opt{} pp-decl-suffix-token\br
+  pp-decl-suffix\opt{} \terminal{[} pp-bracketed-tokens \terminal{]}
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-attr-tokens}:\br
-  pp-attr-tokens\opt{} pp-attr-token
+\nonterminal{pp-decl-suffix-token}:\br
+  \descr{any \grammarterm{preprocessing-token} other than \terminal{[}, \terminal{]}, or \terminal{;}}
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-attr-token}:\br
+\nonterminal{pp-bracketed-tokens}:\br
+  pp-bracketed-tokens\opt{} pp-bracketed-token\br
+  pp-bracketed-tokens\opt{} \terminal{[} pp-bracketed-tokens \terminal{]}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-bracketed-token}:\br
   \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{]}}
-\end{bnf}
-
-\begin{bnf}
-\nonterminal{pp-preamble}:\br
-  \terminal{module}\opt{} pp-module-name pp-attrs\opt{} \terminal{;}
-  pp-preamble pp-import
-\end{bnf}
-
-\begin{bnf}
-\nonterminal{pp-module-name}:\br
-  pp-module-name\opt{} pp-module-name-token
-\end{bnf}
-
-\begin{bnf}
-\nonterminal{pp-module-name-token}:\br
-  \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{;}}
 \end{bnf}
 
 \color{addclr}
@@ -102,18 +93,20 @@ immediately after the \tcode{;} terminating the preprocessing preamble
 immediately after the \tcode{;} terminating the \grammarterm{pp-import}
 otherwise.
 
-\noindent % force para to begin so color applies to para number
 \color{addclr}
 \alinea
 A \term{macro directive} for a macro name is a \tcode{\#define} or
 \tcode{\#undef} directive naming that macro name.
 An \term{exported macro directive} is
 a macro directive occuring in a legacy header unit
+\color{addclr}
 whose macro name is not lexically identical to a keyword.
 A macro directive is \term{visible} at a source location
 if it precedes that source location in the same translation unit, or
 if it is an exported macro directive whose legacy header unit,
-or a legacy header unit that transitively imports it,
+or a legacy header unit that
+\color{addclr}
+transitively imports it,
 is imported into the current translation unit by a \grammarterm{pp-import}
 whose point of macro import precedes that source location.
 
@@ -147,21 +140,39 @@ The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
 particular macro definition is active.
 \exitnote
 
+\begin{bnf}
+\nonterminal{pp-preamble}:\br
+  \terminal{module} pp-decl-suffix \terminal{;}\br
+  pp-preamble \terminal{export}\opt{} \terminal{import} pp-decl-suffix \terminal{;}
+\end{bnf}
+
+%%% FIXME: Non-modular sources have no preamble. This matches
+%%% the Modules TS rule, not the Atom rule. However, this is
+%%% necessary to support imports within the global module,
+%%% which the Modules TS relies on.
+%%%
+%%% We should look into a better compromise here. Is there some
+%%% way we can distinguish between the Modules TS case and the
+%%% Atom case? Maybe we should simply not allow them to be mixed
+%%% in the same TU?
 \color{addclr}
 \alinea
 The \term{preprocessing preamble} of a translation unit is
-the longest sequence of \grammarterm{preprocessing-token}{s} matching
-the syntax of \grammarterm{pp-preamble}
+a sequence of \grammarterm{preprocessing-token}{s}
 beginning with the first \tcode{module} token that is
 neither preceded by \tcode{extern} (\ref{dcl.module.proclaim})
-nor followed by \tcode{;}.
-If there is no such sequence of tokens,
+nor followed by \tcode{;},
+and ending at the last \tcode{;} token such that
+the preprocessing preamble forms a \grammarterm{pp-preamble}.
+If there is no such \tcode{module} token,
 the translation unit has no preprocessing preamble.
-Within the preprocessing preamble, the tokens \tcode{export} and \tcode{import}
-shall not be produced by macro replacement.
-If an \tcode{import} \grammarterm{preprocessing-token}
+Otherwise, if there is no such \grammarterm{pp-preamble}
+or if an \tcode{import} \grammarterm{preprocessing-token}
 appears after the end of the preprocessing preamble,
 the program is ill-formed.
+Within the preprocessing preamble, the tokens
+\tcode{export} and \tcode{import}
+shall not be produced by macro replacement.
 \enternote
 The preamble always terminates with a semicolon token.
 A \tcode{\#if} directive immediately following the end of the preamble
