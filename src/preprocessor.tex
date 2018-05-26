@@ -139,7 +139,11 @@ replacement.
 The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
 particular macro definition is active.
 \exitnote
+\end{std.txt}
+\end{after}
 
+\begin{after}\color{addclr}
+\begin{std.txt}
 \begin{bnf}
 \nonterminal{pp-preamble}:\br
   \terminal{module} pp-decl-suffix \terminal{;}\br
@@ -155,7 +159,6 @@ particular macro definition is active.
 %%% way we can distinguish between the Modules TS case and the
 %%% Atom case? Maybe we should simply not allow them to be mixed
 %%% in the same TU?
-\color{addclr}
 \alinea
 The \term{preprocessing preamble} of a translation unit is
 a sequence of \grammarterm{preprocessing-token}{s}

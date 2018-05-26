@@ -256,6 +256,58 @@ that are module interface units
 shall be directly or indirectly exported
 by the primary module interface unit (\ref{dcl.module.export}).
 No diagnostic is required for a violation of these rules.
+\enternote
+Module partitions can only be imported by
+other module units in the same module.
+The division of a module into module units
+is not visible outside the module.
+\exitnote
+\end{after}
+
+\begin{after}\color{addclr}
+\alinea
+\begin{example}
+\begin{codeblock}
+// TU 1
+export module A;
+export import :Foo;
+export int baz();
+\end{codeblock}
+
+\begin{codeblock}
+// TU 2
+export module A:Foo;
+import :Internals;
+export int foo() { return 2 * (bar() + 1); }
+\end{codeblock}
+
+\begin{codeblock}
+// TU 3
+module A:Internals;
+int bar();
+\end{codeblock}
+
+\begin{codeblock}
+// TU 4
+module A;
+import :Internals;
+int bar() { return baz() - 10; }
+int baz() { return 30; }
+\end{codeblock}
+
+Module \tcode{A} contains four translation units:
+\begin{itemize}
+\item a primary module interface unit,
+\item a module partition \tcode{A:Foo}, which is a module interface unit
+forming part of the interface of module \tcode{A},
+\item a module partition \tcode{A:Internals}, which does not contribute
+to the external interface of module \tcode{A}, and
+\item an implementation module unit providing
+a definition of \tcode{bar} and \tcode{baz},
+which cannot be imported because
+it does not have a partition name.
+\end{itemize}
+\end{example}
 \end{after}
 
 \alinea
@@ -390,6 +442,34 @@ that contains neither \tcode{export}
 nor a \grammarterm{module-partition}
 implicitly imports the primary module interface unit of the module
 as if by a \grammarterm{module-import-declaration}.
+\begin{example}
+\begin{codeblock}
+// TU 1
+export module B;
+import :Y;                      // OK, does not create interface dependency cycle
+int n = y();
+\end{codeblock}
+
+\begin{codeblock}
+// TU 2
+module B:X;                     // does not implicitly import \tcode{B}
+int &a = n;                     // error: \tcode{n} not visible here
+import B;
+int &b = n;                     // OK
+\end{codeblock}
+
+\begin{codeblock}
+// TU 3
+module B:Y;                     // does not implicitly import \tcode{B}
+int y();
+\end{codeblock}
+
+\begin{codeblock}
+// TU 4
+module B;                       // implicitly imports \tcode{B}
+int &c = n;                     // OK
+\end{codeblock}
+\end{example}
 \end{after}
 \end{std.txt}
 
@@ -673,18 +753,27 @@ as if by a \grammarterm{module-import-declaration}.
   \alinea
   A \grammarterm{module-import-declaration} nominating
   a \grammarterm{header-name} $H$ behaves as if it imports
-  a synthesized \term{legacy header unit} defined as follows:
-
+  a synthesized \term{legacy header unit},
+  which is a module whose abstract semantics graph
+  comprises the result of applying
+  phases 1 to 7 of translation (\stdref{lex.phases}{5.2})
+  to the source file nominated by $H$, and
+  treating all declarations therein as being
+  exported and attached to the global module.
+  \enternote
+  The legacy header unit for $H$ is equivalent to
   \begin{codeblock}\color{addclr}
   export module @\textit{unique}@ ;
   export extern "C++" {
   #include @$H$@
-  }
-  \end{codeblock}
-
+  }\end{codeblock}
   where \textit{unique} is a \grammarterm{module-name}
-  different from every \tcode{module-name}
-  used in the program, and where two
+  different from every \grammarterm{module-name}
+  used in the program,
+  except that the \grammarterm{linkage-specification} cannot be
+  terminated by an included \tcode{\}} token.
+  \exitnote
+  Two
   \grammarterm{module-import-declaration}{s}
   import the same legacy header unit if and only if
   their \grammarterm{header-name}{s} identify the same
@@ -692,25 +781,23 @@ as if by a \grammarterm{module-import-declaration}.
   \enternote
   A \grammarterm{module-import-declaration} nominating
   a \grammarterm{header-name} is also recognized by the
-  preprocessor and may result in one or more macros being
-  made available (\ref{cpp.module}).
+  preprocessor, and results in macros defined at the
+  end of phase 4 of translation of the legacy header unit
+  being made visible as described in \ref{cpp.module}.
   \exitnote
   Within a legacy header unit, certain semantic restrictions
   are relaxed:
   \begin{itemize}
-  \item A \grammarterm{module-import-declaration} may appear
-  in the purview of the module, and is considered to be exported.
+  \item A \grammarterm{module-import-declaration} may appear,
+  and is considered to be exported.
   \item A declaration of a name with internal linkage is
-  permitted within the synthesized
-  \grammarterm{export-declaration}. If such a name is
+  permitted despite all declarations being implicitly exported.
+  If such a name is
   odr-used by a translation unit outside the legacy
   header unit, or by an instantiation unit for a template
   instantiation whose point of instantiation is outside
   the legacy header unit, the program is ill-formed.
   \end{itemize}
-  The \grammarterm{linkage-specification} shall not be
-  terminated by an included \tcode{\}} token preceding
-  the synthesized \tcode{\}} token.
   \end{after}
 
   \alinea
@@ -718,12 +805,12 @@ as if by a \grammarterm{module-import-declaration}.
   Importing a translation unit $M$
   \end{after}
   makes every citation and every
-  \begin{before}\color{addclr}
+  %\begin{before}\color{addclr}
   exported declaration
-  \end{before}
-  \begin{after}\color{addclr}
-  exported name
-  \end{after}
+  %\end{before}
+  %\begin{after}\color{addclr}
+  %exported name
+  %\end{after}
   from the 
   abstract semantics graph of $M$ available, as a citation,
   %makes exported declarations from the interface of the nominated module visible
@@ -961,44 +1048,32 @@ as if by a \grammarterm{module-import-declaration}.
   semantic properties.
 \begin{after}\color{addclr}
   \alinea
-  A semantic property is \term{reachable} from a program point if
+  A declaration is \term{reachable} from a program point if
   \begin{itemize}\color{addclr}
-  \item it is declared prior to that program point in the same translation unit, or
-  \item it is declared in the purview of a module interface unit of a module
+  \item it appears prior to that program point in the same translation unit, or
+  \item it appears in the purview of a module interface unit of a module
   that is directly or indirectly imported prior to that program point (\ref{dcl.module.import}),
   for which all indirect \grammarterm{import-declaration}{s} appear within the
   purview of the enclosing module unit, or
-  \item it is declared in the preamble of a module interface unit of a module
+  \item it appears in the preamble of a module interface unit of a module
   that is directly
-  or indirectly imported prior to that program point
-  and is a reachable semantic property of an exported declaration
-  in that translation unit as described below.
+  or indirectly imported prior to that program point,
+  and there is a path from an exported declaration to it
+  in the abstract semantics graph of that module interface unit.
   \end{itemize}
-  When the semantic properties of an entity are examined,
-  all properties that are reachable from
-  the point of inquiry are found,
-  even if the declaration introducing the property
-  is not visible to unqualified lookup.
-\begin{example}
-\begin{codeblock}
-module;
-struct X {};
-export module A;
-export using Y = X;
-
-module B;
-import A;
-Y y;            // OK, definition of \tcode{X} is reachable
-X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
-\end{codeblock}
-\end{example}
 \end{after}
 
   \alinea
+\begin{before}\color{addclr}
   Except as noted below, the 
+\end{before}
+\begin{after}\color{addclr}
+The
+\end{after}
   \term{reachable semantic properties} of declset $D$
   (or of the entity, if any, denoted by that declset)
   of the abstract semantic graph of $M$ from $TU$ are 
+\begin{before}\color{addclr}
   \begin{itemize}
     \item if $D$ contains at least one exported declaration, 
     the semantic properties cumulatively obtained in the context
@@ -1020,56 +1095,124 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
 %  restricted to 
 %  the semantic properties cumulatively obtained in 
 %  the context of the exported declaration members of $D$ in $M$.
+\end{before}
+\begin{after}\color{addclr}
+  the semantic properties of all reachable declarations in $D$.
+  When the semantic properties of an entity are examined,
+  all properties that are reachable from
+  the point of inquiry are found,
+  even if the declaration introducing the property
+  is not visible to unqualified lookup.
+\begin{example}
+\begin{codeblock}
+module;
+struct X {};
+export module A;
+export using Y = X;
+
+module B;
+import A;
+Y y;            // OK, definition of \tcode{X} is reachable
+X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
+\end{codeblock}
+\end{example}
+
+\alinea
+\end{after}
   \enternote
   These reachable semantic properties include type completeness, 
   type definitions, initializers,
   default arguments of functions or template declarations, attributes,
-  visibility to normal lookup, entities that are direct targets of edges 
-  emanating from $D$ in the abstract semantics graph of $M$, etc.
+  visibility to normal lookup,
+\begin{before}\color{addclr}
+  entities that are direct targets of edges 
+  emanating from $D$ in the abstract semantics graph of $M$,
+\end{before}
+  etc.
   Since default arguments are evaluated in the context of the call expression,
   reachable semantic properties of the corresponding parameter types apply in 
   that context. 
   \begin{example}
-    \begin{codeblock}
-      // TU 1
-      @\begin{after}\color{addclr}
-      module;
-      \end{after}@
-      struct F { int f { 42 }; };
-      export module M;
-      export using T = F;
-      export struct A { int i; };
-      export int f(int, A = { 3 });
+\begin{before}\color{addclr}
+\begin{codeblock}
+// TU 1
+struct F { int f { 42 }; };
+export module M;
+export using T = F;
+export struct A { int i; };
+export int f(int, A = { 3 });
 
-      export struct B;      // exported as incomplete type
-      struct B {            // definition not exported
-        operator int();
-      };
-      export int g(B = B{});
-      export int h(int = B{}); // \#1
+export struct B;      // exported as incomplete type
+struct B {            // definition not exported
+  operator int();
+};
+export int g(B = B{});
+export int h(int = B{}); // \#1
 
-      export struct S {
-        static constexpr int v(int);
-      };
+export struct S {
+  static constexpr int v(int);
+};
 
-      export S j();       // S attendant entity of j()
-      constexpr int S::v(int x) { return 2 * x; }
+export S j();       // S attendant entity of j()
+constexpr int S::v(int x) { return 2 * x; }
 
 
-      // TU 2
-      import M;
-      int main() {
-        T t { };             // OK: reachable semantic properties of T include completeness. 
-        auto x = f(42);      // OK: default argument A\{3\} evaluated here.
-        auto y = h();        // OK: completeness of B only checked at \#1.
-        auto z = g();        // error: parameter type incomplete here.
-        constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
-                            // in the abstract semantics graph of M (\ref{dcl.fct.spec})
-      }
-    \end{codeblock}
+// TU 2
+import M;
+int main() {
+  T t { };             // OK: reachable semantic properties of T include completeness. 
+  auto x = f(42);      // OK: default argument A\{3\} evaluated here.
+  auto y = h();        // OK: completeness of B only checked at \#1.
+  auto z = g();        // error: parameter type incomplete here.
+  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
+                      // in the abstract semantics graph of M (\ref{dcl.fct.spec})
+}
+\end{codeblock}
+\end{before}
+\begin{after}\color{addclr}
+\begin{codeblock}
+// TU 1
+module M:B;
+struct B {                // definition not exported
+  operator int();
+};
+
+// TU 2
+module;
+struct F { int f { 42 }; };
+export module M;
+import :B;
+export using T = F;       // earlier definition of F now reachable
+export struct A { int i; };
+export int f(int, A = { 3 });
+
+export struct B;          // exported as incomplete type
+export int g(B = B{});
+export int h(int = B{});  // \#1
+
+export struct S {
+  static constexpr int v(int);
+};
+
+export S j();
+constexpr int S::v(int x) { return 2 * x; }
+
+// TU 2
+import M;
+int main() {
+  T t { };                // OK: reachable semantic properties of T include completeness
+  auto x = f(42);         // OK: default argument A\{3\} evaluated here
+  auto y = h();           // OK: completeness of B only checked at \#1
+  auto z = g();           // error: parameter type incomplete here
+  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
+                          // in the abstract semantics graph of M (\ref{dcl.fct.spec})
+}
+\end{codeblock}
+\end{after}
   \end{example}
   \exitnote
 
+\begin{before}\color{addclr}
   \alinea
   Within a module interface unit, it is necessary to determine that the
   declarations being exported collectively present a coherent view of 
@@ -1079,6 +1222,7 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
   The reachable semantics properties of an entity, the declarations of which
   are made available via a \grammarterm{module-import-declaration}, are
   determined by its owning module and are unaffected by the importing module.
+\end{before}\begin{before}\color{addclr}
   \begin{example}
     \begin{codeblock}
       // module interface of M1
@@ -1098,7 +1242,7 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
     \end{codeblock}
   \end{example}
   \exitnote
-  
+\end{before}\begin{before}\color{addclr}
   For each declaration $D$ exported from the module interface unit of a module $M$,
    there is a set of zero or more
   \term{attendant entities} defined as follows:
@@ -1124,22 +1268,22 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
 
     \item Otherwise, the set of attendant entities is empty.
   \end{itemize}
-
+\end{before}\begin{before}\color{addclr}
   The \term{set of attendant entities determined by} a type $T$ is defined as follows
   (exactly one of these cases matches):
   \begin{itemize}
-    \item If $T$ is a fundamental type, then
+    \item\color{addclr} If $T$ is a fundamental type, then
     the set of attendant entities is empty.
 
-  %  \item If $T$ is a dependent type denoted by a \grammarterm{typename-specifier}
+  %  \item\color{addclr} If $T$ is a dependent type denoted by a \grammarterm{typename-specifier}
   %  where the \grammarterm{nested-name-specifier} itself denotes a dependent type,
   %  then the set of attendant entities is the set of attendant entities determined by
   %  that type.
-    \item If $T$ is a member of an unknown specialization, the set of
+    \item\color{addclr} If $T$ is a member of an unknown specialization, the set of
     attendant entities is the set of attendant entities determined by that
     unknown specialization.
 
-    \item If $T$ is a class type owned by $M$, the set of attendant entities includes
+    \item\color{addclr} If $T$ is a class type owned by $M$, the set of attendant entities includes
     $T$ itself, the union of the sets of the attendant entities determined
     by its direct base classes owned by $M$, the sets of the
     attendant entities of its data members, static data member templates,
@@ -1153,28 +1297,28 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
     used as template template-arguments, the sets of the attendant entities
     determined by the types of the non-type template-arguments.
 
-    \item If $T$ is an enumeration type owned by $M$, 
+    \item\color{addclr} If $T$ is an enumeration type owned by $M$, 
     the set of attendant entities is the singleton $\{T\}$.
 
-    \item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, 
+    \item\color{addclr} If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, 
     the set of attendant entities is the set of attendant entities determined by $U$.
 
-    \item If $T$ is a function type, the set of attendant entities is the
+    \item\color{addclr} If $T$ is a function type, the set of attendant entities is the
     union of the set of attendant entities determined by the function
     parameter types and the return type.
 
-    \item if $T$ is a pointer to data member of class $X$, the set of attendant
+    \item\color{addclr} if $T$ is a pointer to data member of class $X$, the set of attendant
     entities is the union of the set of attendant entities of the member type
     and the set of attendant entities determined by $X$.
     
-    \item If $T$ is a pointer to member function type of a class $X$, the
+    \item\color{addclr} If $T$ is a pointer to member function type of a class $X$, the
     set of attendant entities is the union of the set of attendant entities
      determined by $X$ and the set of attendant entities determined by
     the function type.
     
-    \item Otherwise, the set of attendant entities is empty.
+    \item\color{addclr} Otherwise, the set of attendant entities is empty.
   \end{itemize}
-
+\end{before}\begin{before}\color{addclr}
   If a class template $X$ is an attendant entity, then its reachable semantic
   properties include all the declarations of the primary class template,
   its partial specializations, and its explicit specializations in the
@@ -1228,16 +1372,16 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
       }
     \end{codeblock}
   \end{example}
-
+\end{before}\begin{before}\color{addclr}
   \alinea
   If $X$ is an attendant entity of two exported declarations
   designating two distinct entities,
-  \begin{after}\color{addclr}
+  %\begin{after}\color{addclr}
   and $X$ is declared in the purview of the global module,
-  \end{after}
+  %\end{after}
   its reachable semantic properties shall
   be the same at the points where the declarations occur.
-  \begin{before}\color{addclr}
+  %\begin{before}\color{addclr}
   \begin{example}
     \begin{codeblock}
       export module M;
@@ -1247,18 +1391,19 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
       export S g();     // error: class type S has different properties from \#1
     \end{codeblock}
   \end{example}
-  \end{before}
+  %\end{before}
   
-  \begin{after}\color{addclr}
-  \begin{example}
-    \begin{codeblock}
-      module;
-      struct S;
-      export module M;
-      export S f();     // \#1
-      extern "C++" struct S { };
-      export S g();     // error: class type S has different properties from \#1
-    \end{codeblock}
-  \end{example}
-  \end{after}
+%  \begin{after}\color{addclr}
+%  \begin{example}
+%    \begin{codeblock}
+%      module;
+%      struct S;
+%      export module M;
+%      export S f();     // \#1
+%      extern "C++" struct S { };
+%      export S g();     // error: class type S has different properties from \#1
+%    \end{codeblock}
+%  \end{example}
+%  \end{after}
+\end{before}
 \end{std.txt}
