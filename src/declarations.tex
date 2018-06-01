@@ -573,6 +573,22 @@ int &c = n;                     // OK
   \end{example}
   \exitnote
 
+  \begin{after}\color{addclr}
+  \alinea
+  The \grammarterm{declaration} in an \grammarterm{export-declaration}
+  shall not be a redeclaration of
+  a non-exported \grammarterm{declaration}.
+  \begin{example}
+  \begin{codeblock}
+  export module M;
+  export struct S;
+  struct S { int n; };
+  export typedef S S;   // OK, not a redeclaration of \tcode{struct S}
+  export struct S;      // error: exported declaration follows non-exported definition
+  \end{codeblock}
+  \end{example}
+  \end{after}
+
   \alinea
   An \grammarterm{export-declaration} of the form
   \begin{grammar}
@@ -1048,19 +1064,37 @@ int &c = n;                     // OK
   semantic properties.
 \begin{after}\color{addclr}
   \alinea
+  A module unit is \term{reachable} from a program point if
+  it appears in the purview of a module unit
+  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import})
+  by a path of
+  \grammarterm{module-declaration}{s}%
+  \footnote{\color{addclr}%
+  A \grammarterm{module-declaration} containing neither \tcode{export}
+  nor a \grammarterm{module-partition} is considered to import the named module.}
+  and
+  \grammarterm{import-declaration}{s},
+  for which all declarations other than the first
+  are either exported or
+  appear within the same module as the program point.
   A declaration is \term{reachable} from a program point if
   \begin{itemize}\color{addclr}
   \item it appears prior to that program point in the same translation unit, or
-  \item it appears in the purview of a module interface unit of a module
-  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import}),
-  for which all indirect \grammarterm{import-declaration}{s} appear within the
-  purview of the enclosing module unit, or
-  \item it appears in the preamble of a module interface unit of a module
-  that is directly
-  or indirectly imported prior to that program point,
-  and there is a path from an exported declaration to it
-  in the abstract semantics graph of that module interface unit.
+  \item it appears in the purview of a reachable module unit and either
+  \begin{itemize}
+  \item the declaration is exported, or 
+  \item the declaration is not exported and is not a redeclaration of
+  an exported entity, or
+  \item the declaration appears in the same module as the program point,
   \end{itemize}
+  or
+  \item it appears in the preamble of a reachable module unit,
+  and there is a path from an exported declaration to it
+  in the abstract semantics graph of that module unit.
+  \end{itemize}
+  A declaration is considered to appear in the same module as a program point
+  if the program point is in the purview of a module and
+  the declaration appears within a module unit of that module.
 \end{after}
 
   \alinea
