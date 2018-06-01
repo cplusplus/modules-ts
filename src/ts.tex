@@ -109,12 +109,24 @@
 %%--------------------------------------------------
 %% front matter
 \frontmatter
-\include{front}
+\input{cover-wd}
+\input{front}
 
-%%--------------------------------------------------
-%% main body of the document
 \mainmatter
 \setglobalstyles
+
+%%--------------------------------------------------
+%% part 1: design and commentary
+\begin{KeepFromToc}
+\part[Commentary]{Design and commentary}\label{commentary}
+
+\input{bg}
+
+\end{KeepFromToc}
+
+%%--------------------------------------------------
+%% part 2: wording
+\part[Wording]{Wording for merging Atom into the Modules TS}\label{wording}
 
 \include{scope}
 \include{references}
