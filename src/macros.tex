@@ -151,6 +151,7 @@
 \newcommand{\enterexample}{\EnterBlock{Example}}
 \newcommand{\exitexample}{\ExitBlock{example}}
 \newenvironment{example}[1][Example]{\EnterBlock{#1}}{\ExitBlock{example}}
+\newenvironment{note}[1][Note]{\enternote}{\exitnote}
 
 %% Library function descriptions
 \newcommand{\Fundescx}[1]{\textit{#1}\xspace}
@@ -168,7 +169,7 @@
 \newcommand{\complexity}{\Fundesc{Complexity}}
 \newcommand{\remark}{\Fundesc{Remark}}
 \newcommand{\remarks}{\Fundesc{Remarks}}
-\newcommand{\note}{\remark}
+%\newcommand{\note}{\remark}
 \newcommand{\notes}{\remarks}
 \newcommand{\realnote}{\Fundesc{Note}}
 \newcommand{\realnotes}{\Fundesc{Notes}}
