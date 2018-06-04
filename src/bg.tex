@@ -350,6 +350,44 @@ are always reachable outside the owning module.
 \end{note}
 
 \pnum
+\begin{example}
+\begin{codeblock}
+export module A;
+// instantiation of this template...
+export template<typename T> auto f(T t, T t) {
+  return t * t;
+}
+\end{codeblock}
+
+\begin{codeblock}
+export module B;
+import B;
+import "my_complex.h";
+// ... finds declarations that are reachable here ...
+export template<typename T> auto g(T t) {
+  my_complex<T> v(1, t);
+  return f(v, v);
+}
+\end{codeblock}
+
+\begin{codeblock}
+module C;
+import B;
+import "my_rational.h";
+// ... and those that are reachable here
+void use() {
+  g<my_rational>(1);
+}
+\end{codeblock}
+
+\tcode{my_complex} and \tcode{my_rational} are complete
+types within the template instantiation,
+even though
+\tcode{my_complex} is not a complete type
+in either module \tcode{A} or module \tcode{C}.
+\end{example}
+
+\pnum
 In addition to semantic properties of entities,
 we must determine which names are found by
 argument-dependent name lookup.
@@ -368,6 +406,14 @@ in the same namespace as the associated entity,
 and are visible at a point where
 an enclosing instantiation
 was triggered.
+\begin{example}
+In the previous example,
+\tcode{operator*} can be found by
+argument-dependent name lookup
+in the legacy header modules for
+\tcode{"my_complex.h"} and
+\tcode{"my_rational.h"}.
+\end{example}
 
 \rSec0[vs]{Comparison to prior proposals}
 
