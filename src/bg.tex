@@ -67,14 +67,6 @@ This is the \term{primary module interface unit}
 for \tcode{foo}~(\ref{merged.part}).
 
 \pnum
-Imports control which namespace-scope names are visible to name lookup,
-and which namespace-scope declarations are reachable semantically.
-The behavior of an entity is determined by
-the set of declarations of that entity.
-For example, class members and enumeration members are visible to name lookup
-if there is a reachable definition of the class or enumeration.
- 
-\pnum
 A declaration can be exported by use of the \tcode{export} keyword:
 \begin{codeblock}
 export int a;
@@ -82,18 +74,40 @@ export {
 void f();
 }
 \end{codeblock}
+Imports control which namespace-scope names are visible to name lookup.
 Names introduced by exported declarations
 are visible to name lookup outside the module,
 in contexts that import that module.
 Names introduced by non-exported declarations are not.
-Likewise, exported declarations are reachable outside the module,
-in contexts that import that module.
-If an entity with no exported declarations
-is used in the interface of an exported declaration, 
+
+\pnum
+The behavior of an entity is determined by
+the set of reachable declarations of that entity.
+Entities introduced after the preamble in a module unit
+are owned by that module;
+when such an entity is used outside that module,
+its reachable declarations are those
+that are part of the interface of the module.
+In particular, a class, function, template, etc.
+that is owned by a module
+always has the same semantics
+when viewed from outside the module.
+Within a module unit of the owning module,
+the semantic properties accumulate throughout the file.
+Class members and enumeration members are visible to name lookup
+if there is a reachable definition of the class or enumeration.
+
+\pnum
+Exported declarations are reachable outside the module.
+When an entity is exported,
+it must be exported on its first declaration,
+and all exported declarations of that entity
+are required to precede any non-exported declaration.
+If an entity has no exported declarations
 all declarations of that entity
 within the interface of the module
-are reachable.
-
+are considered reachable.
+ 
 \pnum
 Declarations in the module interface (excluding those with internal linkage)
 are visible and reachable in implementation units of the same module,
@@ -200,11 +214,18 @@ export module foo;
 \end{codeblock}
 
 \pnum
+Only \tcode{\#include}{s} are permitted to appear
+in the global module fragment,
+but there are no special restrictions
+on the contents of the \tcode{\#include}{d} file.
+
+\pnum
 Declarations from code in the global module fragment
 are not owned by the module,
-and are not re-exported by default.
-Instead, such declarations are exported if they are referred to
-by an exported declaration (transitively).
+and are not reachable from outside the module by default.
+Instead, such declarations become reachable if they are referred to
+by an exported declaration
+(or transitively if they are referred to by another reachable declaration).
 Two important special cases are that an \tcode{export using}
 declaration exports both the nominated name and
 all reachable declarations of that name,
@@ -291,6 +312,63 @@ and we wish to encourage exploration of this space.
 An implementation is also permitted to not provide any mapping mechanism,
 and process each legacy header unit independently.
 
+\rSec1[merged.temp]{Templates}
+
+\pnum
+Template instantiations are notionally performed in ``instantiation units'',
+not within translation units that might contain imports.
+We must therefore specify
+which names are visible and
+which declarations are reachable
+in these instantiation units.
+
+\pnum
+The rules follow from a simple principle:
+when code at some point $X$ triggers a template instantiation,
+that instantiation should be able to reach (at least)
+the declarations that were reachable at $X$.
+Therefore, within a template instantiation,
+a declaration is reachable if
+it was reachable at one of the points where
+an enclosing instantiation was triggered.
+If that point is in the translation unit
+containing the point of instantiation,
+this includes all declarations reachable
+at that point;
+if the point is in an intervening instantiation
+in a module interface,
+only declarations that would be reachable
+to an importer of that module
+or that are visible through an import of that module
+are reachable.
+\begin{note}
+This only matters for entities that are
+not owned by a named module:
+for entities owned by a named module,
+a superset of the above properties
+are always reachable outside the owning module.
+\end{note}
+
+\pnum
+In addition to semantic properties of entities,
+we must determine which names are found by
+argument-dependent name lookup.
+For that purpose,
+we follow the Modules TS rule
+(subject to ongoing work on P0923)
+for associated entities owned by a named module
+and make functions visible
+if they are declared in that module,
+in the same namespace as the associated entity.
+For associated entities not owned by a named module,
+functions are visible to
+argument-dependent name lookup
+if they are declared
+in the same namespace as the associated entity,
+and are visible at a point where
+an enclosing instantiation
+was triggered.
+
 \rSec0[vs]{Comparison to prior proposals}
 
 \rSec1[vs.ts]{Changes to the Modules TS}
@@ -359,6 +437,11 @@ within a module are no longer owned by that module.
 It is unclear whether this is a change from the intent of
 the Modules TS.
 
+\pnum
+The global module fragment can only
+directly contain \tcode{\#include} directives,
+not arbitrary code.
+
 \rSec1[vs.atom]{Changes relative to the Atom proposal}
 
 \pnum
@@ -396,8 +479,11 @@ Under the Atom proposal,
 we considered restricting the preprocessor constructs that may appear
 within the preamble.
 In this merged proposal,
-such restrictions are not in place
-as they would harm the ability
+the global module fragment is restricted
+to only containing \tcode{\#include} directives,
+but there are no restrictions on the contents
+of the included file
+as such restrictions would harm the ability
 to put arbitrary code in the global module fragment,
 as required by the Modules TS's legacy header support.
 
@@ -412,8 +498,10 @@ The Atom proposal's rule for export of namespace names has not been adopted,
 pending further discussion. See \ref{vs.open.namespace}.
 
 \pnum
-The Atom proposal's rule for reachability within templates has not been adopted,
-pending further discussion. See \ref{vs.open.templates}.
+The Atom rule for declaration reachability
+has been relaxed to allow declarations owned by modules
+to be considered reachable even if the owning module
+is not reachable through a path of imports.
 
 \rSec2[vs.atom.extra]{Atom features not merged}
 
@@ -429,46 +517,10 @@ they are not part of the merged wording. They are:
 These declarations provide a mechanism to re-export
 the semantic properties of a module
 without re-exporting its introduced names.
-\begin{example}
-\begin{codeblock}
-export module Foo;
-public import std.memory;
-struct S { int n; };
-export std::unique_ptr<S> get();
-\end{codeblock}
-
-Here, a user of \tcode{Foo}
-can call \tcode{get()} without needing to
-import \tcode{std.memory}:
-
-\begin{codeblock}
-import Foo;
-int main() { return get()->n; } // ok
-\end{codeblock}
-
-In particular,
-the return type of \tcode{get()} is a complete type
-in an importer of \tcode{Foo}.
-With a regular \tcode{import},
-a user would need to also import \tcode{std.memory} themselves.
-With a \tcode{export import},
-the user could accidentally rely on
-\tcode{Foo} providing the name
-\tcode{std::unique_ptr} (and other names from the same module).
-\end{example}
-
-We still believe there is value in this functionality,
-but think it would be preferable to provide
-a more general mechanism that permits
-per-name export control, perhaps
-
-\begin{codeblock}
-export import some.module{list, of, imported::names};
-\end{codeblock}
-
-with which \tcode{public import foo;}
-can be rewritten as
-\tcode{export import foo\{\};}.
+Such functionality is rendered mostly unnecessary
+by the more liberal reachability rule
+used for entities owned by modules
+in the merged proposal.
 
 \item
 \tcode{\#export} directives.
@@ -481,10 +533,8 @@ in the context of P0877R0 and P0955R0.
 \rSec1[vs.open]{Open questions}
 
 \pnum
-While performing the merge, we discovered a few issues
-in the common subset of the Modules TS and the Atom proposal
-for which the two proposals give different answers,
-where we did not reach agreement on the superior answer
+While performing the merge, we encountered a few issues
+for which we did not reach an agreement on the superior answer
 and would like to solicit EWG input.
 
 \rSec2[vs.open.namespace]{Namespace export}
@@ -523,104 +573,76 @@ namespace C {         // exported in TS and merged proposal, not in Atom
 \end{codeblock}
 \end{example}
 
-\rSec2[vs.open.templates]{Reachability in template instantiations}
+\rSec2[vs.open.import.lex]{Lexing after \tcode{import}}
 
 \pnum
-The Atom proposal provides a concrete rule for
-the reachability of declarations
-within a template instantiation:
+The Atom proposal introduces a change in the \Cpp{} lexing rules.
+After the \tcode{import} token,
+the preprocessor attempts to form a \term{header-name}
+token where possible.
+This permits usage of normal header names:
 
-\hfill\begin{minipage}{\dimexpr\textwidth-1cm}
-Within a template instantiation, the \term{path of instantiation}
-is a sequence of locations within the program,
-starting from the ultimate point of instantiation,
-via each intervening template instantiation,
-terminating at the instantiation in question.
-Names are visible and semantic properties are available
-within template instantiations
-if they would be visible or available
-at any point along the path of instantiation,
-or (for points outside the current translation unit)
-would be visible or available
-at the end of the translation unit
-containing the relevant point of instantiation.
-\begin{flushright}
---- P0947R1, 7.1 Templates and two-phase name lookup
-\end{flushright}
-\end{minipage}
-
-This rule permits a template to make use of all semantic effects
-that were available at each point along its path of instantiation,
-even if those semantic effects were not exported.
+\begin{codeblock}
+import <foo.h>;       // forms \tcode{<foo.h>} header-name token
+import "bar\baz.h";   // forms \tcode{"bar\\baz.h"} header-name token
+\end{codeblock}
 
 \pnum
-The Modules TS does not specify any rule for which semantic effects
-are reachable in a template instantiation.
-One might presume that the reachable semantic effects
-are either those that are reachable the point of instantiation
-or perhaps the union of those and the semantic effects
-reachable at the point of definition of the template.
-However, neither of these is sufficient to accept
-cases involving more than a couple of modules:
+It has been suggested that we instead require use of
+raw string literals for header names with escape sequences:
 
 \begin{codeblock}
-export module A;
-export template<typename T, typename U> void f(T t, U u) {
-  t.f();
-}
+import R<foo.h>;       // forms \tcode{R<foo.h>} token
+import R"bar\baz.h";   // forms \tcode{R"bar\\baz.h"} token
 \end{codeblock}
 
-\begin{codeblock}
-export module B;
-import A;
-export struct S { void f(); };
-export template<typename U> void g(U u) { S s; f(s, u); }
-\end{codeblock}
+This avoids the need for a context-sensitive lexing rule,
+but introduces a new form of raw angled string literal,
+and has a \term{header-name} syntax distinct from
+that used by a \tcode{\#include}.
 
-\begin{codeblock}
-export module C;
-import B;
-export template<typename U> void h(U u) { g(u); }
-\end{codeblock}
-
-\begin{codeblock}
-import C;
-int main() { h(0); }
-\end{codeblock}
-
-Under the Modules TS, this program is presumably ill-formed.
-The definition of \tcode{struct S} and
-the declaration of its member \tcode{f}
-are --- presumably --- not reachable from the instantiation
-of \tcode{f<S, int>}.
-\tcode{S} is not even a complete type in the instantiation.
-In order to accept this program, we must make available
-semantic effects that are reachable from neither
-the point of definition of the template nor
-the point of instantiation of the template.
+\rSec2[vs.open.nonexport]{Syntax for non-exported declarations}
 
 \pnum
-Merging the Atom rule into the Modules TS would, however,
-violate a goal of the Modules TS:
-that the set of needed declarations from the global module fragment
-be identifiable when processing the module interface unit,
-and be minimal compared to the total size of the included headers.
-However, a hybrid rule is possible:
-declarations are reachable within a template instantiation if
-they are reachable at the (ultimate) point of instantiation,
-or if they would be reachable in a module implementation unit
-of any module along the path of instantiation
-(that is, if they are an exported semantic effect from
-the global module fragment of the module interface, or
-a semantic effect of a declaration in the module interface, or
-a semantic effect imported into the module interface).
+Following the Modules TS,
+the syntax for making a subset
+of the semantic properties of an entity reachable
+is to omit the \tcode{export} keyword
+from some redeclarations:
+
+\begin{codeblock}
+export module M;
+export struct S;
+// ...
+struct S { ... };
+\end{codeblock}
 
 \pnum
-The Atom rule also applies to the set of names found by ADL.
-For associated types owned by modules,
-the Modules TS already extends the set of locations where lookup is performed
-to include the owning modules of those types.
-However, we still need the extended lookup proposed by Atom
-for associated entities that are not owned by modules,
-in order to properly find ADL results
-for types defined in legacy header units.
+This is not completely satisfying:
+\begin{itemize}
+\item the simplest syntax is reserved for a case that is
+relatively rare in many code bases, and definitions may
+fail to be exported by accident
+\item the fact that the definition of \tcode{S} is not exported
+is an important semantic property of the code,
+but the code lacks a way to express that semantic property
+\item unlike other specifiers affecting the linkage
+of an entity, \tcode{export} is not inherited by redeclarations
+\item this behavior does not extend to entities where
+no declaration is exported
+\end{itemize}
+
+As an alternative, an explicit syntax could be used
+to specify that a declaration is excluded from the module interface
+despite being in the module interface unit.
+As a possible syntax:
+
+\begin{codeblock}
+export module M;
+export struct S;
+export struct T;
+// ...
+struct S { ... };                    // definition exported
+export(false) struct T { ... };      // definition not exported,
+                                     // despite \tcode{T} being exported
+\end{codeblock}
