@@ -357,8 +357,8 @@ are always reachable outside the owning module.
 \begin{codeblock}
 export module A;
 // instantiation of this template...
-export template<typename T> auto f(T t, T t) {
-  return t * t;
+export template<typename T> auto f(T t, T u) {
+  return t * u;
 }
 \end{codeblock}
 
