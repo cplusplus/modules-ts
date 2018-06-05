@@ -102,7 +102,8 @@ Exported declarations are reachable outside the module.
 When an entity is exported,
 it must be exported on its first declaration,
 and all exported declarations of that entity
-are required to precede any non-exported declaration.
+are required to precede any non-exported declaration
+of that entity.
 If an entity has no exported declarations
 all declarations of that entity
 within the interface of the module
@@ -218,6 +219,9 @@ Only \tcode{\#include}{s} are permitted to appear
 in the global module fragment,
 but there are no special restrictions
 on the contents of the \tcode{\#include}{d} file.
+%% FIXME: We do want some restrictions here.
+%% No module-declaration in included file, for instance.
+%% No macro expansion in preamble after the #includes?
 
 \pnum
 Declarations from code in the global module fragment
@@ -280,8 +284,7 @@ macros are not exported.
 Only the legacy header import syntax can import macros.
 
 \pnum
-Just like declarations within a named module,
-declarations within a legacy header unit
+Declarations within a legacy header unit
 are reachable only if the legacy header unit is imported.
 (There is no special rule for declarations
 that are referred to by an exported declaration.)
@@ -361,7 +364,7 @@ export template<typename T> auto f(T t, T t) {
 
 \begin{codeblock}
 export module B;
-import B;
+import A;
 import "my_complex.h";
 // ... finds declarations that are reachable here ...
 export template<typename T> auto g(T t) {
@@ -480,8 +483,10 @@ because there are no longer any cases where it could apply.
 \pnum
 Entities declared within \tcode{extern "C"} and \tcode{extern "C++"}
 within a module are no longer owned by that module.
-It is unclear whether this is a change from the intent of
-the Modules TS.
+In the Modules TS, such declarations would be considered attached
+to the module in whose purview they appear,
+which means they can only be exported by one module
+(although they can still be redeclared in multiple modules).
 
 \pnum
 The global module fragment can only
@@ -534,7 +539,7 @@ to put arbitrary code in the global module fragment,
 as required by the Modules TS's legacy header support.
 
 \pnum
-The identifiers \tcode{export} and \tcode{module} are taken as keywords
+The identifiers \tcode{import} and \tcode{module} are taken as keywords
 by the merged proposal,
 rather than making them context-sensitive as proposed by the Atom proposal.
 This follows EWG's direction on this question from discussion of P0924R0.
@@ -630,7 +635,7 @@ This permits usage of normal header names:
 
 \begin{codeblock}
 import <foo.h>;       // forms \tcode{<foo.h>} header-name token
-import "bar\baz.h";   // forms \tcode{"bar\\baz.h"} header-name token
+import "bar\baz.h";   // forms \tcode{"bar\textbackslash{}baz.h"} header-name token
 \end{codeblock}
 
 \pnum
@@ -639,7 +644,7 @@ raw string literals for header names with escape sequences:
 
 \begin{codeblock}
 import R<foo.h>;       // forms \tcode{R<foo.h>} token
-import R"bar\baz.h";   // forms \tcode{R"bar\\baz.h"} token
+import R"bar\baz.h";   // forms \tcode{R"bar\textbackslash{}baz.h"} token
 \end{codeblock}
 
 This avoids the need for a context-sensitive lexing rule,
@@ -689,6 +694,6 @@ export struct S;
 export struct T;
 // ...
 struct S { ... };                    // definition exported
-export(false) struct T { ... };      // definition not exported,
+noexport struct T { ... };           // definition not exported,
                                      // despite \tcode{T} being exported
 \end{codeblock}
