@@ -692,8 +692,14 @@ As a possible syntax:
 export module M;
 export struct S;
 export struct T;
+struct U;
+struct V;
 // ...
 struct S { ... };                    // definition exported
 noexport struct T { ... };           // definition not exported,
                                      // despite \tcode{T} being exported
+struct U { ... };
+noexport struct V { ... };
+export U *u();                       // \tcode{*u()} has complete type in importers
+export V *v();                       // \tcode{*v()} has incomplete type in importers
 \end{codeblock}
