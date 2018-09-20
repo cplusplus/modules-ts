@@ -23,8 +23,8 @@ Add new alternatives to \term{declaration} in paragraph 10/1 as follows
       attribute-declaration\br
       \color{addclr}
       \added{export-declaration\br
-      module-import-declaration\br
-      proclaimed-ownership-declaration}
+      module-import-declaration}\br
+      \begin{before}\added{proclaimed-ownership-declaration}\end{before}
   \end{bnf}
   \end{std.txt}
 
@@ -344,10 +344,10 @@ introduced by any \grammarterm{module-declaration}.
   \grammarterm{namespace-declaration} with external linkage, it
   is attached to the global module.
   
-  \item Otherwise, if the declaration is
-  within a \grammarterm{proclaimed-ownership-declaration}, it
-  is attached to the module nominated by the
-  \grammarterm{proclaimed-ownership-declaration}.
+%  \item Otherwise, if the declaration is
+%  within a \grammarterm{proclaimed-ownership-declaration}, it
+%  is attached to the module nominated by the
+%  \grammarterm{proclaimed-ownership-declaration}.
 
   \item Otherwise, if the declaration is
   within a \grammarterm{linkage-specification}, it
@@ -512,7 +512,7 @@ int &c = n;                     // OK
   \grammarterm{declaration} shall not contain \tcode{static}.
   The \grammarterm{declaration} shall not be an
   \grammarterm{unnamed-namespace-definition}
-  or a \grammarterm{proclaimed-ownership-declaration}.
+  \begin{before}\color{addclr}or a \grammarterm{proclaimed-ownership-declaration}\end{before}.
   \begin{example}
   \begin{before}\color{addclr}
     \begin{codeblock}
@@ -744,7 +744,7 @@ int &c = n;                     // OK
   \alinea
   A \grammarterm{module-import-declaration} shall appear only at
   global scope, and not in a \grammarterm{linkage-specification}
-  or \grammarterm{proclaimed-ownership-declaration}.
+  \begin{before}\color{addclr}or \grammarterm{proclaimed-ownership-declaration}\end{before}.
   \begin{after}\color{addclr}
   In a module unit, a \grammarterm{module-import-declaration} shall
   appear only within the \grammarterm{preamble}.
@@ -989,7 +989,7 @@ int &c = n;                     // OK
   lead it to be considered to nominate yet additional modules.
 \end{std.txt}
 
-
+\begin{before}
 \rSec2[dcl.module.proclaim]{Proclaimed ownership declaration}%
 
 \begin{std.txt}\color{addclr}
@@ -1051,6 +1051,7 @@ int &c = n;                     // OK
   \grammarterm{proclaimed-ownership-declaration} does not export the entities
   introduced by the declaration. 
 \end{std.txt}
+\end{before}
 
 \rSec2[dcl.module.reach]{Reachability}
 

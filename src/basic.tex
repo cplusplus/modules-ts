@@ -71,7 +71,7 @@ Append the following two bullets to paragraph 6.1/2:
     is not definition\removed{.}\added{,}
     \color{addclr}
     \item \added{it is a \grammarterm{module-import-declaration},}
-    \item \added{it is a \grammarterm{proclaimed-ownership-declaration}.} 
+    \item \begin{before}\added{it is a \grammarterm{proclaimed-ownership-declaration}.}\end{before}
   \end{itemize}
   \color{addclr}
 %  \begin{example}
@@ -535,7 +535,7 @@ Modify paragraph 6.5/4 as follows:
       the declaration of the name is attached to a named module,
       is not exported (\ref{dcl.module.interface}),
       and is not declared in a
-      \grammarterm{proclaimed-ownership-declaration} or a
+      %\grammarterm{proclaimed-ownership-declaration} or a
       \grammarterm{linkage-specification},
       the name has module linkage;}
       \item \added{otherwise, the name has external linkage}.
