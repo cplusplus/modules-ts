@@ -31,9 +31,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[pdftex, final]{graphicx}
 \usepackage[pdftex,
-            pdftitle={C++ Technical Specification},
-            pdfsubject={C++ Technical Specification},
-            pdfcreator={Gabriel Dos~Reis},
+            pdftitle={Merging Modules},
+            pdfsubject={Merging Modules},
+            pdfcreator={Richard Smith},
             bookmarks=true,
             bookmarksnumbered=true,
             pdfpagelabels=true,
@@ -59,26 +59,10 @@
 \makeindex[libraryindex]
 \makeindex[impldefindex]
 
-%%--------------------------------------------------
-%% macros specific to the Networking TS
-\newcommand{\completionsig}{\Fundesc{Completion signature}}
-\newcommand{\DEDUCED}{\textit{\texttt{DEDUCED}}}
-\newcommand{\nativeref}{see~\ref{socket.reqmts.native}}
-\newcommand{\CppXref}[1]{\texorpdfstring{C\kern-0.05em\protect\raisebox{.35ex}{\textsmaller[2]{+\kern-0.05em+}}Std}{C++Std} [#1]}
-% Alternative formatting of cross-references, resolving stable name to number.
-% Needs include{cxx} and CppXIV from cplusplus/draft/source/macros.tex.
-% \input{cxx}
-% \newcommand{\CppXref}[1]{\CppXIV \S\cxxref{#1}}
-
 % Add two names to the library index as both #1!#2 and #2!#1
 \newcommand{\indexlibrarytwo}[2]{%
 \indexlibrary{\idxcode{#1}!\idxcode{#2}}%
 \indexlibrary{\idxcode{#2}!\idxcode{#1}}%
-}
-% Add an extensible implementation entry to the main and library name indices
-\newcommand{\indexextensible}[1]{%
-\indextext{extensible implementation!\idxcode{#1}}%
-\indexlibrary{\idxcode{#1}!extensible implementation}%
 }
 
 %%--------------------------------------------------
