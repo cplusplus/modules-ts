@@ -954,21 +954,428 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
 %\end{std.txt}
 %\end{before}
 
+\rSec2[dcl.module.global]{Global module fragment}
+
+\begin{std.txt}\color{addclr}
+\begin{bnf}
+\nonterminal{global-module-fragment}:\br
+    \terminal{module} \terminal{;} declaration-seq
+\end{bnf}
+
+\resetalinea[0]
+\alinea
+A \grammarterm{global-module-fragment} specifies the contents of the
+\term{global module fragment} for a module unit.
+The global module fragment can be used to provide declarations
+that are attached to the global module and usable within the module unit.
+\enternote
+Before preprocessing, only preprocessing directives can appear
+in the global module fragment (\ref{cpp.glob.frag}).
+\exitnote
+
+\alinea
+Declarations in the global module fragment are \term{discarded} if they
+are not referenced by the module unit. A discarded declaration is only
+available to name lookup and reachable within the module unit
+and template instantiations whose points of instantiation
+(\stdref{temp.point}{12.7.4.1}) are within the module,
+even when the instantiation context (\ref{dcl.module.context})
+includes the module unit.
+\begin{example}
+\begin{codeblock}
+// header "foo.h"
+namespace N {
+  struct X {};
+  int f(X);
+  int g(X);
+  int h(X);
+}
+
+// module M interface
+module;
+#include "foo.h"
+export module M;
+// \tcode{N::f} is reachable via argument-dependent name lookup result
+// in context of template definition
+template<typename T> int use_f() { N::X x; f(x); }
+// \tcode{N::g} is not reachable because \tcode{g} is a dependent name
+// in context of template definition
+template<typename T> int use_g() { N::X x; g((T(), x)); }
+// \tcode{N::h} is reachable because \tcode{use_h<int>} has a point of
+// instantiation in the module unit \tcode{M}
+template<typename T> int use_h() { N::X x; h((T(), x)); }
+int k = use_h<int>();
+
+// module M implementation
+module M;
+int a = use_f<int>(); // ok
+int b = use_g<int>(); // error: no viable function for call to \tcode{g}
+int c = use_h<int>(); // ok
+\end{codeblock}
+\end{example}
+
+%% Changes: entities now include their declaration context in their basis.
+%% We need to retain those contexts so we can mangle the entity.
+
+\alinea
+The \term{basis} of a declaration $D$ is a set of entites determined as follows:
+\begin{itemize}
+\item If $D$ declares a \grammarterm{typedef-name}, the basis is the
+type-basis of the aliased type.
+
+\item If $D$ declares a variable or function, the basis is the type-basis
+of the type of that variable or function and the innermost enclosing
+namespace, class, or function.
+
+\item If $D$ defines a class type, the basis is the union of the
+type-bases of its direct base classes (if any), and the bases of
+its \grammarterm{member-declaration}{s},
+and the innermost enclosing namespace, class, or function.
+
+\item If $D$ is a \grammarterm{template-declaration},
+the basis is the union
+of the basis of its \grammarterm{declaration}, the set
+consisting of the entities (if any) designated by the default
+template template arguments and the default non-type template arguments,
+the type-bases of the default type template arguments,
+and the innermost enclosing namespace, class, or function.
+Furthermore, if $D$ declares a partial specialization,
+the basis also includes the primary template.
+
+\item If $D$ is an \grammarterm{explicit-instantiation}
+or an \grammarterm{explicit-specialization}, the basis includes
+the primary template, and all the entities in the basis of the
+\grammarterm{declaration} of $D$.
+
+\item If $D$ is a \grammarterm{linkage-specification}, the basis is the union
+of all the bases of the \grammarterm{declaration}{s} contained in $D$.
+
+\item If $D$ is a \grammarterm{namespace-definition}, the basis comprises
+the innermost enclosing namespace, if any.
+
+\item If $D$ is a \grammarterm{namespace-alias-definition}, the basis is the 
+singleton consisting of the namespace denoted by the
+\grammarterm{qualified-namespace-specifier}.
+
+\item If $D$ is a \grammarterm{using-declaration}, the basis is the union
+of the bases of all the declarations introduced by
+the \grammarterm{using-declarator}.
+
+\item If $D$ is a \grammarterm{using-directive}, the basis is the
+singleton consisting of the norminated namespace.
+
+\item If $D$ is an \grammarterm{alias-declaration}, the basis is the type-basis of its \grammarterm{defining-type-id}.
+
+\item Otherwise, the basis is empty.
+\end{itemize}
+
+The \term{type-basis} of a type $T$ is
+\begin{itemize}
+\item If $T$ is a fundamental type, the type-basis is the empty set.
+\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
+the unqualified type.
+\item If $T$ is a member of an unknown specialization, the type-basis
+is the type-basis of that specialization.
+\item If $T$ is a class template specialization, the type-basis
+is the union of the set consisting of the primary template and the
+template template arguments (if any) and the non-dependent non-type
+template arguments (if any), and the type-bases of the type 
+template arguments (if any).
+\item If $T$ is a class type or an enumeration type, 
+the type-basis is the singleton $\{ T \}$.
+\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
+type-basis is the type-basis of $U$.
+\item If $T$ is a function type, the type-basis is the union of the
+type-basis of the return type and the type-bases of the parameter types.
+\item If $T$ is a pointer to data member of a class $X$, the type-basis is
+the union of the type-basis of $X$ and the type-basis of member type.
+\item If $T$ is a pointer to member function type of a class $X$, the
+type-basis is the union of the type-basis of $X$ and the type-basis of
+the function type.
+\item Otherwise, the type-basis is the empty set.
+\end{itemize}
+
+% \alinea
+%   The \term{expr-basis} of an expression $E$ is
+%   \begin{itemize}
+%     \item If $E$ is a pair of \grammarterm{expression} separated by a comma, 
+%     the expr-basis is the union of the expr-bases of the two operands.
+
+%     \item If $E$ is an assignment, the expr-basis is the union of the
+%     expr-bases of the left operand and the right operand, and the set consisting 
+%     of the function implementing the assignment operator (if the left operand
+%     if of class type) and all the functions involved in the implicit conversion
+%     sequences applied to the operands.
+    
+%     \item If $E$ is a \grammarterm{throw-expression}, the expr-basis is the
+%     expr-basis of its operand.
+
+%     \item If $E$ is a \grammarterm{conditional-expression}, the expr-basis is the
+%     union of the expr-bases of all the operands, and the set of functions involved
+%     in the implicit conversion sequences applied to the operands.
+
+%     \item If $E$ is a binary expression, the expr-basis is the union of the 
+%     expr-bases of the two operands, and the set of functions involved in the
+%     implicit conversion sequences applied to the operands, and the function
+%     selected by overload resolution (if any) for the operator.
+
+%     \item If $E$ is an explicit type conversion expression, the expr-basis is
+%     the union of the type-basis of the target type and the expr-basis of
+%     the operand expression, and the set consisting of the function or constructor
+%     involved in performing the conversion to the target type (if any).
+
+%     \item If $E$ is a \grammarterm{noexcept-expression}, 
+%     the expr-basis is the expr-basis of the operand.
+
+%     \item If $E$ is an alignof expression,
+%     the expr-basis is the type-basis of that operand.
+
+%     \item If $E$ is a \grammarterm{delete-expression}, the expr-basis is
+%     the union of the expr-basis of the operand and the set consisting of
+%     the functions inolved in the implicit conversion sequence
+%     applied to the operand, and the deallocation function selected.
+
+%     \item If $E$ is a \grammarterm{new-expression}, the expr-basis is 
+%     the union of
+%     \begin{itemize}
+%         \item the expr-bases of the expressions in its
+%          \grammarterm{new-placement} (if any), and the set of
+%          functions involved in the implicit conversion sequences applied
+%          to those expressions (if any), and the allocation function selected
+%          \item the type-basis of the \grammarterm{type-specifier-seq} contained
+%          in the \grammarterm{new-type-id}, the expr-bases of the expressions
+%          contained in the \grammarterm{new-declarator} (if any), and the set
+%          consisting of the functions involved in the implicit conversion sequences
+%          applied to those expressions
+%          \item the expr-bases of the expressions contained in the
+%          \grammarterm{new-initializer} (if any), and the set consisting of the
+%          functions involved in the implicit conversion sequences applied 
+%          to those expressions and the constructor selected (if any)
+%     \end{itemize}
+
+%     \item If $E$ is a sizeof expression, the expr-basis is the expr-basis
+%      of the operand if the operand is an expression, otherwise the type-basis
+%      of the operand.
+
+%      \item If $E$ is prefix expression or a postfix expression, the expr-basis
+%      is the expr-basis of the operand, and the set consisting of the 
+%      operator function selected by overload resolution (if any).
+
+%      \item If $E$ is a pointer to member expression, the expr-basis is the
+%      set consisting of the designated non-static member.
+
+%      \item If $E$ is any other unary expression, the expr-basis is the
+%      union of the expr-basis of the operand expression, and the set
+%      consisting of the operator function (if any) selected by overload
+%      resolution and any functions involved in the implicit conversion 
+%      sequence applied to the operand expression.
+
+%      \item if $E$ is a \grammarterm{postfix-expression}
+%      \begin{itemize}
+%      \item and is a typeid expression, the expr-basis is the
+%       type-basis of the type operand if the operand is a type, or the 
+%       expr-basis of the expression operand
+
+%       \item and is a cast expression, the expr-basis is the union of the
+%       the type-basis of the target type, the expr-basis of the expression operand,
+%       and the set consisting of function or constructor involved in the
+%       conversion of the expression operand to the target type
+
+%       \item and is a postifx increment or decrement expression, the expr-basis is
+%       the expr-basis of the operand expression, and the set consisting of the
+%       operator function (if any) selected by overload resolution
+
+%       \item and is a pseudo destructor call, the expr-basis is the expr-basis
+%       of the left-hand side of the dot or arrow operator
+
+%       \item and is a class member access expression, the expr-basis is the union
+%       of the left-hand expression operand  of the dot or the arrow operator,
+%       and (if that left-hand side is not type-dependent) the set consisting of 
+%       the class member designated by the \grammarterm{id-expression}, the 
+%       operator function selected by overload resolution for the member access
+%       operator
+
+%       \item and is a function call expression, the expr-basis is the union of
+%       the expr-basis of the \grammarterm{postfix-expression}, the expr-bases
+%       of the arguments (if any), and the set consisting of the operator function
+%       implementing the call selected by overload resolution, all the functions
+%       involved in the implicit conversion sequences applied to each argument
+%       in the call
+
+%       \item and is a subscripting expression, the expr-basis is the union of
+%       the expr-basis of the \grammarterm{postfix-expression}, and the expr-bases
+%       of each expression in the \grammarterm{expr-or-braced-init-list}
+
+%       \item otherwise, the expr-basis is the empty set.
+%      \end{itemize}
+
+%      \item If $E$ is a primay expression,
+%      \begin{itemize}
+%         \item and is a literal, the expr-basis is...
+%         \item and is an \grammarterm{id-expression}, the expr-basis is the set
+%         consisting of the designated entity (if it has namespace scope
+%          or class scope) or the non-static class member; otherwise the class is empty
+%          \item and is a parentesized expression, the expr-basis is the expr-basis
+%          of that expression
+%          \item and is a lambda expression, the expr-basis is the union of
+%          \begin{itemize}
+%             \item the type-bases in the parameter types (if any)
+%             \item the type-basis of the \grammarterm{trailing-return-type} (if any)
+%             \item the expr-basis of the \grammarterm{initializer}{s} (if any)
+%             in its \grammarterm{lambda-capture}.
+%          \end{itemize}
+%      \end{itemize}
+
+%      \item Otherwise, the expr-basis is the empty set.
+
+%   \end{itemize}
+
+%   The \term{expr-basis} of an expression $E$ is
+%   \begin{itemize}
+%    \item If $E$ is a \grammarterm{literal}
+%    \begin{itemize}
+%        \item the set consisting of the literal operator function called, if
+%        $E$ is a \grammarterm{user-defined-literal}; otherwise
+%        \item the empty set.
+%    \end{itemize}
+
+%    \item If $E$ is a parenthesized expression, the expr-basis is the expr-basis
+%    of that expression.
+
+%    \item If $E$ is a \grammarterm{id-expression}
+%    \begin{itemize}
+%        \item the set consisting of the designated destructor,
+%         if $E$ denotes a destructor; otherwise,
+%         \item the union of the set consisting of the template, the template
+%         template-arguments (if any), the type-bases of the type
+%         template-argumnts (if any), the expr-bases of the non-type 
+%         template-arguments (if any), if $E$ is a \grammarterm{template-id}; otherwise,
+%         \item the set consisting of the namespace scope or class scope entity
+%         designated by $E$ if $E$ denotes such an entity; otherwise,
+%         \item the empty set. 
+%    \end{itemize}
+
+%    \item If $E$ is a \grammarterm{lambda-expression}, the union of
+%        \begin{itemize}
+%            \item the type-bases in the parameter types (if any)
+%            \item the type-basis of the \grammarterm{trailing-return-type} (if any)
+%            \item the expr-basis of the expressions in the 
+%            \grammarterm{initializer}{s} (if any)
+%            in its \grammarterm{lambda-capture}.
+%        \end{itemize}
+    
+%    \item If $E$ is a \grammarterm{fold-expression}, the union
+%    of the expr-bases of the operands, and the set of operator functions
+%    found by name lookup for the \grammarterm{fold-operator}{s} in the 
+%    context of $E$. 
+
+%    \item The empty set, if $E$ is any other \grammarterm{primary-expression}.
+
+%    \item If $E$ is a subscripting expression, the union of the expr-basis
+%    of the \grammarterm{postfix-expression}, the expr-bases of the
+%    expressions contained in the \grammarterm{expr-or-braced-init-list}, and
+%    the set consisting of the selected overloaded operator function (if any)
+%    and all functions involved in the implicit conversion sequences (if any)
+%    applied to those expressions.
+
+%    \item If $E$ is a function call expression, the union of the expr-basis
+%    of the \grammarterm{postfix-expression}, the expr-bases of the expressions
+%    in the argument list, the set consisting of the selected overloaded function
+%    operator (if any) and the functions involved in the 
+%    implicit conversion sequences (if any) applied to the arguments,
+%    and the set of functions found by name lookup in the context of $E$ if
+%    the \grammarterm{postfix-expression} is a dependent name.
+
+%    \item If $E$ is an explicit type conversion using functional notation,
+%    the union of the type-basis of the target type, the expr-bases of the 
+%    expressions in the \grammarterm{expression-list} or 
+%    \grammarterm{brace-init-list}, the set consisting of the
+%    constructor selected (if any) and all functions involved in
+%    the implicit conversion sequences (if any) applied to the arguments.
+
+%    \item If $E$ is a member selection expression, the union of the expr-basis
+%    of the \grammarterm{postfix-expression} and the set consisting of
+%    the overloaded function operator (if any) and the entity member (if any)
+%    designated by the \grammarterm{id-expression}.
+
+%    \item If $E$ is a named cast expression, the union of the type-basis
+%    of the target type, the expr-basis of the operand expression, the 
+%    set consisting of the function or constructor selected to perform
+%    the conversion and the function involved in the implicit conversion
+%    sequence (if any) applied to the operand.
+
+%    \item If $E$ is a post-increment or post-decrement expression, the 
+%    union of the expr-basis of the \grammarterm{postfix-expression}, and the
+%    set consisting the selected function operator (if any).
+
+%    \item If $E$ is a pseudo destructor call, the expr-basis of
+%    the \grammartem{postfix-expression}.
+
+%    \item If $E$ is a typeid expression, the expr-basis of the operand if
+%     that operand is an expression, otherwise the type-basis of that operand.
+
+%     \item The empty set, if $E$ is any other 
+%     \grammarterm{postfix-expression}.
+
+%     \item Otherwise, the empty set.
+%\end{itemize}
+
+\alinea
+\enternote
+The basis of a declaration includes neither non-fully-evaluated expressions nor
+entities used in those expressions.
+\begin{example}
+\begin{codeblock}
+const int size = 2;
+int ary1[size];                         // \tcode{size} not in \tcode{ary1}'s basis
+constexpr int identity(int x) { return x; }
+int ary2[identity(2)];                  // \tcode{identity} not in \tcode{ary2}'s basis
+
+template<typename> struct S;
+template<typename, int> struct S2;
+constexpr int g(int);
+
+template<typename T, int N>
+S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \mathtt{S2}, \mathtt{::} \}$ 
+\end{codeblock}
+\end{example}
+\exitnote
+
+\alinea
+A declaration from a global module fragment is \term{referenced}
+by the enclosing module unit $M$ if it is
+\begin{itemize}
+\item
+the unique result of name lookup for an
+\grammarterm{unqualified-id} or \grammarterm{identifier} in $M$
+or in a template instantiation whose point of instantiation is in $M$, or
+\item
+a function named by an expression (\ref{basic.def.odr}) in $M$
+or in a template instantiation whose point of instantiation is in $M$, or
+\item
+a lookup result for a dependent name in $M$ (\stdref{temp.dep.res}{12.7.4})
+that is visible at the point of definition of the enclosing template, or
+\item
+a declaration of an entity that is in the basis of a declaration referenced
+by $M$, recursively.
+\end{itemize}
+\end{std.txt}
+
+\rSec2[dcl.module.context]{Instantiation context}
+
 \rSec2[dcl.module.reach]{Reachability}
 
 \begin{std.txt}\color{addclr}
   \resetalinea[0]
   \alinea
-  When declarations from the abstract semantics graph of a module $M$
-   are made available 
+  When declarations from a translation unit $M$ are made available
   to name lookup in another translation unit $TU$, it is necessary to
   determine the interpretation of the names they introduce and their
   semantic properties.
 \begin{after}\color{addclr}
   \alinea
-  A module unit is \term{reachable} from a program point if
-  it appears in the purview of a module unit
-  that is directly or indirectly imported prior to that program point (\ref{dcl.module.import})
+  A translation unit is \term{reachable} from a program point if
+  it is directly or indirectly imported prior to that program point (\ref{dcl.module.import})
   by a path of
   \grammarterm{module-declaration}{s}%
   \footnote{\color{addclr}%
