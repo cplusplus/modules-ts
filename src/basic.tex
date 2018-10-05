@@ -532,10 +532,10 @@ Modify paragraph 6.5/9 and add /10 as follows:
       // module interface of M
       module;
       int f();            // \#1
-      int g();            // \#2, owned by the global module
+      int g();            // \#2, attached to the global module
       export module M;
       export using ::f;   // OK: does not declare an entity
-      int g();            // error: matches \#2, but appears in the purview of M
+      int g();            // error: matches \#2, but attached to M
       export int h();     // \#3
       export int k();     // \#4
 
