@@ -1,9 +1,9 @@
 %!TEX root = std.tex
-\setcounter{chapter}{18}
+\setcounter{chapter}{13}
 \rSec0[cpp]{Preprocessing directives}%
 
 \begin{after}
-Modify paragraph 19/5 as follows:
+Modify paragraph 14/5 as follows:
 
 \begin{std.txt}
 \resetalinea[4]
@@ -24,7 +24,7 @@ before translation of the resulting translation unit.
 \rSec1[cpp.include]{Source file inclusion}%
 
 \begin{after}
-Add a new paragraph after 19.2/6 as follows:
+Add a new paragraph after 14.2/6 as follows:
 
 \begin{std.txt}
 \resetalinea[6]
@@ -33,9 +33,11 @@ Add a new paragraph after 19.2/6 as follows:
 If the header identified by the \grammarterm{header-name}
 denotes a legacy header unit, the preprocessing directive
 is instead replaced by the \grammarterm{preprocessing-token}{s}
+
 \begin{bnf}
 \terminal{import} header-name \terminal{;}
 \end{bnf}
+
 \color{addclr}
 How the set of headers denoting legacy header units is specified
 is implementation-defined.
@@ -44,9 +46,35 @@ is implementation-defined.
 
 \begin{after}
 \noindent
-Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
+Add a new subclause 14.3 titled ``\textbf{Global module fragment}'' as follows:
 
 \setcounter{section}{2}
+\rSec1[cpp.glob.frag]{Global module fragment}%
+\resetalinea[0]
+
+\begin{std.txt}
+\color{addclr}
+\begin{bnf}
+\nonterminal{pp-global-module-fragment}:\br
+  \terminal{module} \terminal{;} pp-bracketed-tokens \terminal{module}
+\end{bnf}
+
+\alinea
+If the first two preprocessing tokens at the start of phase 4 of translation
+are \tcode{module} \tcode{;}, the result of preprocessing shall begin with
+a \grammarterm{pp-global-module-fragment} for which all
+\grammarterm{preprocessing-token}{s} in the \grammarterm{pp-bracketed-tokens}
+were produced directly or indirectly by source file inclusion
+(\ref{cpp.include}), and for which the second \tcode{module}
+\grammarterm{preprocessing-token} was not produced by source file inclusion or
+macro replacement (\stdref{cpp.replace}{14.3}).
+Otherwise, the first two preprocessing tokens at the end of phase 4 of
+translation shall not be \tcode{module} \tcode{;}.
+\end{std.txt}
+
+Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
+
+\setcounter{section}{3}
 \rSec1[cpp.module]{Legacy header units}%
 \resetalinea[0]
 
@@ -54,7 +82,7 @@ Add a new subclause 19.3 titled ``\textbf{Legacy header units}'' as follows:
 \color{addclr}
 \begin{bnf}
 \nonterminal{pp-import}:\br
-  \terminal{export}\opt{} \terminal{import}\opt{} header-name pp-decl-suffix\opt{} \terminal{;}
+  \terminal{import}\opt{} header-name pp-decl-suffix\opt{} \terminal{;}
 \end{bnf}
 
 \begin{bnf}
@@ -86,12 +114,9 @@ of a \grammarterm{pp-import}
 instructs the preprocessor to import macros from the legacy header unit
 (\ref{dcl.module.import}) denoted by the \grammarterm{header-name}.
 The \tcode{;} \grammarterm{preprocessing-token} shall not be produced by
-macro replacement (\stdref{cpp.replace}{19.3}).
+macro replacement (\stdref{cpp.replace}{14.3}).
 The \term{point of macro import} for a \grammarterm{pp-import} is
-immediately after the \tcode{;} terminating the preprocessing preamble
-(see below) if the import occurs within the preprocessing preamble, and
-immediately after the \tcode{;} terminating the \grammarterm{pp-import}
-otherwise.
+immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
 
 \color{addclr}
 \alinea
@@ -150,60 +175,13 @@ particular macro definition is active.
   pp-preamble \terminal{export}\opt{} \terminal{import} pp-decl-suffix \terminal{;}
 \end{bnf}
 
-%%% FIXME: Non-modular sources have no preamble. This matches
-%%% the Modules TS rule, not the Atom rule. However, this is
-%%% necessary to support imports within the global module,
-%%% which the Modules TS relies on.
-%%%
-%%% We should look into a better compromise here. Is there some
-%%% way we can distinguish between the Modules TS case and the
-%%% Atom case? Maybe we should simply not allow them to be mixed
-%%% in the same TU?
 \alinea
-The \term{preprocessing preamble} of a translation unit is
-a sequence of \grammarterm{preprocessing-token}{s}
-beginning with the first \tcode{module} token that is
-neither preceded by \tcode{extern} (\ref{dcl.module.proclaim})
-nor followed by \tcode{;},
-and ending at the last \tcode{;} token such that
-the preprocessing preamble forms a \grammarterm{pp-preamble}.
-If there is no such \tcode{module} token,
-the translation unit has no preprocessing preamble.
-Otherwise, if there is no such \grammarterm{pp-preamble}
-or if an \tcode{import} \grammarterm{preprocessing-token}
-appears after the end of the preprocessing preamble,
-the program is ill-formed.
-Within the preprocessing preamble, the tokens
-\tcode{export} and \tcode{import}
-shall not be produced by macro replacement.
-\enternote
-The preamble always terminates with a semicolon token.
-A \tcode{\#if} directive immediately following the end of the preamble
-can expand macros imported by a \grammarterm{pp-import} within the
-preamble; if that results in encountering additional
-\grammarterm{preprocessing-token}{s} matching the syntax of a
-\grammarterm{pp-import}, the preamble is not extended to include
-those tokens because doing so would not form a valid preprocessing preamble.
-\begin{example}
-\begin{codeblock}
-// macros.h
-#define GOT_MACRO 1
+If an imported macro is replaced (\stdref{cpp.replace}{14.3})
+or is named by a \grammarterm{defined-macro-expression}
+outside of a \grammarterm{pp-global-module-fragment},
+there shall be no \grammarterm{pp-import}{s} with a
+later point of macro import.
 
-// TU M
-module M;
-import "macros.h";
-#if GOT_MACRO
-import "other.h";
-#endif
-\end{codeblock}
-The preprocessing preamble ends at the \tcode{;} of the first \tcode{import}.
-As a consequence, the program is ill-formed because \tcode{import "other.h";}
-appears after the preprocessing preamble.
-The preprocessing preamble cannot extend to include the second \tcode{import},
-because if it did, the macro \tcode{GOT_MACRO} would not be defined in the
-context of the \tcode{\#if}.
-\end{example}
-\exitnote
 \end{std.txt}
 
 \end{after}

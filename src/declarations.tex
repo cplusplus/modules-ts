@@ -227,7 +227,7 @@ the same dotted sequence of \grammarterm{identifier}{s} in their
 All module partitions of a module
 that are module interface units
 shall be directly or indirectly exported
-by the primary module interface unit (\ref{dcl.module.export}).
+by the primary module interface unit (\ref{dcl.module.import}).
 No diagnostic is required for a violation of these rules.
 \enternote
 Module partitions can only be imported by
@@ -468,7 +468,7 @@ int &c = n;                     // OK
 
   \alinea
   If the \grammarterm{declaration} is a \grammarterm{using-declaration}
-  (\ref{namespace.udecl}), any entity to which the
+  (9.8 [namespace.udecl]), any entity to which the
   \grammarterm{using-declarator} ultimately refers shall have been introduced
   with a name having external linkage.
   \begin{example}
@@ -730,15 +730,16 @@ int &c = n;                     // OK
 
   \alinea
   When a \grammarterm{module-import-declaration} imports
-  a translation unit, it also imports
+  a translation unit $T$, it also imports
   all translation units imported by
   exported \grammarterm{module-import-declaration}{s}
-  in that translation unit.
+  in $T$; such translation units are
+  said to be exported by $T$.
   When a \grammarterm{module-import-declaration} in a module unit imports
   another module unit of the same module, it also imports
   all translation units imported by
   all \grammarterm{module-import-declaration}{s}
-  in that translation unit.
+  in that module unit.
   These rules may in turn lead to the importation of yet more
   translation units.
 
@@ -889,69 +890,69 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
 \end{before}
 \end{std.txt}
 
-\begin{before}
-\rSec2[dcl.module.proclaim]{Proclaimed ownership declaration}%
-
-\begin{std.txt}\color{addclr}
-  \begin{bnf}\color{addclr}
-    \nonterminal{proclaimed-ownership-declaration}:\br
-      \terminal{extern} \terminal{module} module-name \terminal{:} declaration
- \end{bnf}
-
- \resetalinea[0]
-  \alinea
-  A \grammarterm{proclaimed-ownership-declaration} shall only appear
-  at namespace scope. 
-  It shall not appear directly or indirectly within an unnamed namespace.
-  A \grammarterm{proclaimed-ownership-declaration} has the declarative effects
-  of its \grammarterm{declaration}.
-  The \grammarterm{declaration} shall declare at 
-  least one name, and the \grammarterm{decl-specifier-seq} (if any)
-  of the \grammarterm{declaration} shall not contain \tcode{static}.
-  The \grammarterm{declaration} shall not be a \grammarterm{namespace-definition},
-  an \grammarterm{export-declaration},
-   or a \grammarterm{proclaimed-ownership-declaration}.
-  The \grammarterm{declaration} shall not be a defining declaration
-  (\ref{basic.def}).
-  A \grammarterm{proclaimed-ownership-declaration} nominating a module $M$
-  shall not appear in the purview of $M$.
-
-  \alinea
-  A \grammarterm{proclaimed-ownership-declaration} asserts that the entities
-  introduced by the declaration are exported by the nominated module. 
-  \enternote
-  A \grammarterm{proclaimed-ownership-declaration} may be used to break
-  circular dependencies between two modules (in possibly too finely
-  designed components.)
-  \begin{example}
-    \begin{codeblock}
-    // TU 1
-    export module Ty;
-    extern module Sym: struct Symbol;
-    export struct Type {
-      Symbol* decl;
-      // ...
-    };
-
-    // TU 2
-    export module Sym;
-    extern module Ty: struct Type;
-    export struct Symbol {
-      const char* name;
-      const Type* type;
-      // ...
-    };
-    \end{codeblock}
-  \end{example}
-  \exitnote
-  
-  \alinea 
-  The program is ill-formed, no diagnostic required, if the
-  nominated module in the  
-  \grammarterm{proclaimed-ownership-declaration} does not export the entities
-  introduced by the declaration. 
-\end{std.txt}
-\end{before}
+%\begin{before}
+%\rSec2[dcl.module.proclaim]{Proclaimed ownership declaration}%
+%
+%\begin{std.txt}\color{addclr}
+%  \begin{bnf}\color{addclr}
+%    \nonterminal{proclaimed-ownership-declaration}:\br
+%      \terminal{extern} \terminal{module} module-name \terminal{:} declaration
+% \end{bnf}
+%
+% \resetalinea[0]
+%  \alinea
+%  A \grammarterm{proclaimed-ownership-declaration} shall only appear
+%  at namespace scope. 
+%  It shall not appear directly or indirectly within an unnamed namespace.
+%  A \grammarterm{proclaimed-ownership-declaration} has the declarative effects
+%  of its \grammarterm{declaration}.
+%  The \grammarterm{declaration} shall declare at 
+%  least one name, and the \grammarterm{decl-specifier-seq} (if any)
+%  of the \grammarterm{declaration} shall not contain \tcode{static}.
+%  The \grammarterm{declaration} shall not be a \grammarterm{namespace-definition},
+%  an \grammarterm{export-declaration},
+%   or a \grammarterm{proclaimed-ownership-declaration}.
+%  The \grammarterm{declaration} shall not be a defining declaration
+%  (\ref{basic.def}).
+%  A \grammarterm{proclaimed-ownership-declaration} nominating a module $M$
+%  shall not appear in the purview of $M$.
+%
+%  \alinea
+%  A \grammarterm{proclaimed-ownership-declaration} asserts that the entities
+%  introduced by the declaration are exported by the nominated module. 
+%  \enternote
+%  A \grammarterm{proclaimed-ownership-declaration} may be used to break
+%  circular dependencies between two modules (in possibly too finely
+%  designed components.)
+%  \begin{example}
+%    \begin{codeblock}
+%    // TU 1
+%    export module Ty;
+%    extern module Sym: struct Symbol;
+%    export struct Type {
+%      Symbol* decl;
+%      // ...
+%    };
+%
+%    // TU 2
+%    export module Sym;
+%    extern module Ty: struct Type;
+%    export struct Symbol {
+%      const char* name;
+%      const Type* type;
+%      // ...
+%    };
+%    \end{codeblock}
+%  \end{example}
+%  \exitnote
+%  
+%  \alinea 
+%  The program is ill-formed, no diagnostic required, if the
+%  nominated module in the  
+%  \grammarterm{proclaimed-ownership-declaration} does not export the entities
+%  introduced by the declaration. 
+%\end{std.txt}
+%\end{before}
 
 \rSec2[dcl.module.reach]{Reachability}
 
@@ -1008,29 +1009,29 @@ The
   \term{reachable semantic properties} of declset $D$
   (or of the entity, if any, denoted by that declset)
   of the abstract semantic graph of $M$ from $TU$ are 
-\begin{before}\color{addclr}
-  \begin{itemize}
-    \item if $D$ contains at least one exported declaration, 
-    the semantic properties cumulatively obtained in the context
-    of the exported declaration (\ref{dcl.module.interface}) 
-    members of $D$ in the module interface
-    unit of $M$. Furthermore, if $D$ denotes an inline function,
-    the property that the inline function has a definition
-    (\ref{dcl.fct.spec}) is a reachable semantic property, even 
-    if that definition is not exported. Otherwise,
-    \item the semantic properties cumulatively obtained in the context of all
-    declaration members of $D$ in the module interface unit of $M$.
-  \end{itemize}
-%  Given a declset $D$ for an exported name from a module $M$,
-%  the \term{reachable semantic property} of any declaration in that declset
-%  (or of the entity, if any, designated by that declset) from a translation unit
-%%   For a given declaration $D$ of a name $X$ exported from a module $M$, the
-%%  \term{reachable semantic properties} of $D$ from a translation unit
-%  containing a \grammarterm{module-import-declaration} nominating $M$ are
-%  restricted to 
-%  the semantic properties cumulatively obtained in 
-%  the context of the exported declaration members of $D$ in $M$.
-\end{before}
+%%\begin{before}\color{addclr}
+%%  \begin{itemize}
+%%    \item if $D$ contains at least one exported declaration, 
+%%    the semantic properties cumulatively obtained in the context
+%%    of the exported declaration (\ref{dcl.module.interface}) 
+%%    members of $D$ in the module interface
+%%    unit of $M$. Furthermore, if $D$ denotes an inline function,
+%%    the property that the inline function has a definition
+%%    (\ref{dcl.fct.spec}) is a reachable semantic property, even 
+%%    if that definition is not exported. Otherwise,
+%%    \item the semantic properties cumulatively obtained in the context of all
+%%    declaration members of $D$ in the module interface unit of $M$.
+%%  \end{itemize}
+%%%  Given a declset $D$ for an exported name from a module $M$,
+%%%  the \term{reachable semantic property} of any declaration in that declset
+%%%  (or of the entity, if any, designated by that declset) from a translation unit
+%%%%   For a given declaration $D$ of a name $X$ exported from a module $M$, the
+%%%%  \term{reachable semantic properties} of $D$ from a translation unit
+%%%  containing a \grammarterm{module-import-declaration} nominating $M$ are
+%%%  restricted to 
+%%%  the semantic properties cumulatively obtained in 
+%%%  the context of the exported declaration members of $D$ in $M$.
+%%\end{before}
 \begin{after}\color{addclr}
   the semantic properties of all reachable declarations in $D$.
   When the semantic properties of an entity are examined,
@@ -1068,42 +1069,42 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
   reachable semantic properties of the corresponding parameter types apply in 
   that context. 
   \begin{example}
-\begin{before}\color{addclr}
-\begin{codeblock}
-// TU 1
-struct F { int f { 42 }; };
-export module M;
-export using T = F;
-export struct A { int i; };
-export int f(int, A = { 3 });
-
-export struct B;      // exported as incomplete type
-struct B {            // definition not exported
-  operator int();
-};
-export int g(B = B{});
-export int h(int = B{}); // \#1
-
-export struct S {
-  static constexpr int v(int);
-};
-
-export S j();       // S attendant entity of j()
-constexpr int S::v(int x) { return 2 * x; }
-
-
-// TU 2
-import M;
-int main() {
-  T t { };             // OK: reachable semantic properties of T include completeness. 
-  auto x = f(42);      // OK: default argument A\{3\} evaluated here.
-  auto y = h();        // OK: completeness of B only checked at \#1.
-  auto z = g();        // error: parameter type incomplete here.
-  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
-                      // in the abstract semantics graph of M (\ref{dcl.fct.spec})
-}
-\end{codeblock}
-\end{before}
+%\begin{before}\color{addclr}
+%\begin{codeblock}
+%// TU 1
+%struct F { int f { 42 }; };
+%export module M;
+%export using T = F;
+%export struct A { int i; };
+%export int f(int, A = { 3 });
+%
+%export struct B;      // exported as incomplete type
+%struct B {            // definition not exported
+%  operator int();
+%};
+%export int g(B = B{});
+%export int h(int = B{}); // \#1
+%
+%export struct S {
+%  static constexpr int v(int);
+%};
+%
+%export S j();       // S attendant entity of j()
+%constexpr int S::v(int x) { return 2 * x; }
+%
+%
+%// TU 2
+%import M;
+%int main() {
+%  T t { };             // OK: reachable semantic properties of T include completeness. 
+%  auto x = f(42);      // OK: default argument A\{3\} evaluated here.
+%  auto y = h();        // OK: completeness of B only checked at \#1.
+%  auto z = g();        // error: parameter type incomplete here.
+%  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
+%                      // in the abstract semantics graph of M (\ref{dcl.fct.spec})
+%}
+%\end{codeblock}
+%\end{before}
 \begin{after}\color{addclr}
 \begin{codeblock}
 // TU 1
