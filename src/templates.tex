@@ -1,19 +1,17 @@
 %!TEX root = std.tex
-\setcounter{chapter}{16}
+\setcounter{chapter}{11}
 \rSec0[temp]{Templates}%
 %\indextext{template|(}
 
 \noindent
-Modify paragraph 17/2 as follows:
+Modify paragraph 11/2 as follows:
 \begin{std.txt}
   \resetalinea[1]
   \alinea
   A \grammarterm{template-declaration} can appear only as a 
   namespace scope or class scope declaration.
   \added{Its \grammarterm{declaration} shall not be an
-  \grammarterm{export-declaration}}
-  \begin{before}\added{or a \grammarterm{proclaimed-ownership-declaration}}\end{before}
-  \added{.}
+  \grammarterm{export-declaration}.}
   In a function template declaration, the last component of the 
   \grammarterm{declarator-id} shall not be a \grammarterm{template-id}. 
 \end{std.txt}
@@ -41,244 +39,192 @@ Modify paragraph 17/2 as follows:
 \setcounter{subsection}{3}
 \rSec2[temp.dep.res]{Dependent name resolution}
 
-Add new example to paragraph 17.6.4/1:
+Change in 12.7.4/1:
+
 \begin{std.txt}
-  \begin{addedblock}
-  \enterexample
-  \begin{codeblock}
-    // Header file X.h
-    namespace Q { 
-       struct X { };
-    }
+\resetalinea[0]
+\alinea
+In resolving dependent names, names from the following sources are considered:
+\begin{itemize}
+\item
+Declarations that are visible at the point of definition of the template.
+\item
+Declarations from namespaces associated with the types of the function
+arguments both from the instantiation context
+\removed{(12.7.4.1)} \added{(\ref{dcl.module.context})}
+and from the definition context.
+\end{itemize}
+\enterexample\color{addclr}
+\begin{codeblock}
+// header file \tcode{"X.h"}
+namespace Q { 
+  struct X { };
+}
 
-    // Interface unit of M1
-    @\begin{after}\color{addclr}
-    module;
-    \end{after}@
-    #include "X.h"       // global module
-    namespace Q {
-       void g_impl(X, X);
-    }
-    export module M1;
-    export template<typename T>
-    void g(T t) {
-       g_impl(t, Q::X{ });  // \#1: ADL in definition context finds Q::g_impl
-    }
+// header file \tcode{"G.h"}
+namespace Q {
+  void g_impl(X, X);
+}
 
-    // Interface unit of M2
-    @\begin{after}\color{addclr}
-    module;
-    \end{after}@
-    #include "X.h"
-    import M1;
-    export module M2;
-    void h(Q::X x) {
-       g(x);               // OK
-    }
-  \end{codeblock}
-  \exitexample
-\end{addedblock}
+// interface unit of \tcode{M1}
+module;
+#include "X.h"
+#include "G.h"
+export module M1;
+export template<typename T>
+void g(T t) {
+  g_impl(t, Q::X{ });   // ADL in definition context finds \tcode{Q::g_impl}, \tcode{g_impl} not discarded
+}
+
+// interface unit of \tcode{M2}
+module;
+#include "X.h"
+export module M2;
+import M1;
+void h(Q::X x) {
+   g(x);                // OK
+}
+\end{codeblock}
+\exitexample
 \end{std.txt}
-
 
 \noindent
-Add new paragraphs to 17.6.4:
+Add new paragraphs to 12.7.4:
 \begin{std.txt}
-   \color{addclr}
-   \resetalinea[1]
-   \alinea
-   \enterexample
-   \begin{codeblock}
-     // Interface unit of Std
-     export module Std;
-     export template<typename Iter>
-     void indirect_swap(Iter lhs, Iter rhs)
-     {
-        swap(*lhs, *rhs);    // swap can be found only via ADL
-     }
+\color{addclr}
+\alinea
+\enterexample
+\begin{codeblock}
+// interface unit of \tcode{Std}
+export module Std;
+export template<typename Iter>
+void indirect_swap(Iter lhs, Iter rhs)
+{
+  swap(*lhs, *rhs);     // swap can be found only via ADL
+}
 
-     // Interface unit of M
-     @\begin{after}\color{addclr}
-     module;
-     \end{after}@
-     import Std;
-     export module M;
+// interface unit of \tcode{M}
+module;
+import Std;
+export module M;
 
-     struct S { /* ...*/ };
-     void swap(S&, S&);     // \#1;
+struct S { /* ...*/ };
+void swap(S&, S&);      // \#1;
 
-     void f(S* p, S* q)
-     {
-        indirect_swap(p, q);   // instantiation finds \#1 via ADL
-     }
-   \end{codeblock}
-   \exitexample
-     
-   \alinea
-   \enterexample
-   \begin{codeblock}
-      // Header file X.h
-      struct X { /* ... */ };
-      X operator+(X, X);
+void f(S* p, S* q)
+{
+  indirect_swap(p, q);  // finds \#1 via ADL in instantiation context
+}
+\end{codeblock}
+\exitexample
 
-      // Module interface unit of F
-      export module F;
-      export template<typename T>
-      void f(T t) {
-          t + t;
-      }
+\alinea
+\enterexample
+\begin{codeblock}
+// header file \tcode{"X.h"}
+struct X { /* ... */ };
+X operator+(X, X);
 
-      // Module interface unit of M
-      @\begin{after}\color{addclr}
-      module;
-      \end{after}@
-      #include "X.h"
-      import F;
-      export module M;
-      void g(X x) {
-         f(x);          // OK: instantiates f from F
-                        // point of instantiation: just before g(X)
-      }
-   \end{codeblock}
-   \exitexample
+// module interface unit of \tcode{F}
+export module F;
+export template<typename T>
+void f(T t) {
+  t + t;
+}
 
-   \alinea
-   \enternote
-   \enterexample
-   \begin{codeblock}
-      // Module interface unit of A
-      export module A;
-      export template<typename T>
-      void f(T t) {
-         t + t;         // \#1
-      }
+// module interface unit of \tcode{M}
+module;
+#include "X.h"
+import F;
+export module M;
+void g(X x) {
+  f(x);             // OK: instantiates \tcode{f} from \tcode{F},
+                    // \tcode{operator+} is visible in instantiation context
+}
+\end{codeblock}
+\exitexample
 
-      // Module interface unit of B
-      export module B;
-      import A;
-      export template<typename T, typename U>
-      void g(T t, U u) {
-         f(t);
-      }
+\alinea
+\enterexample
+\begin{codeblock}
+// module interface unit of \tcode{A}
+export module A;
+export template<typename T>
+void f(T t) {
+  t + t;           // \#1
+}
 
-      // Module interface unit of C
-      @\begin{after}\color{addclr}
-      module;
-      \end{after}@
-      #include <string>        // not in the purview of C
-      import B;
-      export module C;
-      export template<typename T>
-      void h(T t) {
-         g(std::string{ }, t);
-      }
+// module interface unit of \tcode{B}
+export module B;
+import A;
+export template<typename T, typename U>
+void g(T t, U u) {
+  f(t);
+}
 
-      // Translation unit of main()
-      import C;
-      void i() {
-         h(0);        // ill-formed: '+' not found at \#1
-                      // point of instantiation of h<int>: just before 'i()'
-                      // point of instantiation of g<std::string, int>: same as h<int>'s
-                      // point of instantiation of f<std::string>: same as g<std::string, int>'s
-      }
-   \end{codeblock}
-   \exitexample
+// module interface unit of \tcode{C1}
+module;
+#include <string>   // \tcode{operator+} not referenced, discarded
+export module C1;
+import B;
+export template<typename T>
+void h(T t) {
+  g(std::string{ }, t);
+}
 
-   This example is ill-formed by this document.
-   It is an open question as to how often the scenario occurs in
-   practice, and whether to make the example well-formed or whether
-   additional syntax will be introduced that does not involve
-   modifying the header.
-   \exitnote
+// translation unit
+import C1;
+void i() {
+   h(0);        // ill-formed: '+' not found at \#1
+}
 
-   \alinea
-   \enternote
-   \enterexample
-   \begin{codeblock}
-    // Module interface unit of M1
-    @\begin{after}\color{addclr}module;\end{after}@
-    #include <algorithm>
+// module interface unit of \tcode{C2}
+export module C1;
+import B;
+import <string>;
+export template<typename T>
+void h(T t) {
+  g(std::string{ }, t);
+}
 
-    export module M1;
-    export template<typename T, typename U>
-    void f(T& t, U& u) {
-      min(t, u);                          // \#1
-    }
-
-    // Module interface unit of M2
-    @\begin{after}\color{addclr}module;\end{after}@
-    #include <locale>
-    struct Aux : std::ctype_base {
-      operator int() const;
-    };
-    void min(Aux&, Aux&);   // \#2
-    
-    export module M2;
-    import M1;
-    export template<typename T>
-    void g(T t) {
-      Aux aux;
-      f(aux, aux);
-    }
-
-    // Elsewhere, translation unit of global module
-    import M2;
-    void h() {
-      g(0);
-    }
-   \end{codeblock}
-   In the body of the function \tcode{h}, the call to \tcode{g} triggers a request
-   for (implicit) instantiation of \tcode{g<int>}.  The point of instantiation of
-   that specialization is right before the definition of \tcode{h}.
-   That instantiation, in turn, requests the implicit instantiation of 
-   \tcode{f<Aux,Aux>}.  The point of instantiation of that specialization
-   immediately preceeds that of \tcode{g<int>}.  In that context, the invocation of
-   \tcode{min}: (a) selects \tcode{std::min}; and (b) invokes the 
-   implicit conversion.  In particular, the declaration at {\#2} is not used
-   because it is neither available in the context of definition, nor in the
-   context of instantiation of \tcode{f<Aux,Aux>}.
-   However, paragraph 17.6.4.2/1 of the C++ Standard formally renders the behavior
-   of the program undefined because the better match wasn't considered.  This is
-   a case where it is unclear if that paragraph is too broad and needs further restrictions,
-   or if there ought to be a mechanism to consider all such functions.
-   \exitexample
-   \exitnote
+// translation unit
+import C1;
+void i() {
+   h(0);        // OK, '+' found in instantiation context:
+                // visible at end of module interface unit of \tcode{C2}
+}
+\end{codeblock}
+\exitexample
 \end{std.txt}
-
 
 \rSec3[temp.point]{Point of instantiation}
 
 \noindent
-Replace paragraph 17.6.4.1/7 as follows:
+Delete paragraph 12.7.4.1/7:
 \begin{std.txt}
-   \resetalinea[6]
-   \alinea
-   \removed{The instantiation context of an expression that depends on
-   the template arguments is the set of declarations with external
-   linkage declared prior to the point of instantiation of the
-   template specialization in the same translation unit.}\added{The
-   instantiation context of an expression that depends on template
-   arguments is the context of a lookup at the point of instantiation
-   of the enclosing template.}
+\resetalinea[6]
+\alinea
+\removed{The instantiation context of an expression that depends on
+the template arguments is the set of declarations with external
+linkage declared prior to the point of instantiation of the
+template specialization in the same translation unit.}
 \end{std.txt}
-
 
 \rSec3[temp.dep.candidate]{Candidate functions}
 
 \noindent
-Modify paragraph 17.6.4.2/1 as follows
+Modify paragraph 12.7.4.2/1 as follows
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
-  \ldots
-
-  If the call would be ill-formed or would find a better match had the 
-  lookup within the associated namespaces considered all the function 
-  declarations with external   \added{or module}
-  linkage introduced in those namespaces in all 
-  translation units, not just considering those declarations found in the 
-  template definition and template instantiation contexts, then the program 
-  has undefined behavior.
+\resetalinea[0]
+\alinea
+\ldots
+If the call would be ill-formed or would find a better match had the 
+lookup within the associated namespaces considered all the function 
+declarations with external   \added{or module}
+linkage introduced in those namespaces in all
+translation units, not just considering those declarations found in the 
+template definition and template instantiation contexts, then the program 
+has undefined behavior.
 \end{std.txt}
 
 

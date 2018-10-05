@@ -1363,94 +1363,202 @@ by $M$, recursively.
 
 \rSec2[dcl.module.context]{Instantiation context}
 
+\begin{std.txt}\color{addclr}
+\resetalinea[0]
+\alinea
+The \term{instantiation context} is a set of locations within the program
+that determines which names are visible to argument-dependent name lookup
+(\ref{basic.lookup.argdep})
+and which declarations are reachable (\ref{dcl.module.reach})
+in the context of a particular declaration or template instantiation.
+The instantiation context depends on how the declaration was formed,
+or where the template instantiation was referenced.
+
+\alinea
+During the implicit definition of a defaulted special member function
+(\stdref{special}{10.2.3}),
+the instantiation context is the union of
+the instantiation context of the definition of the class and
+the instantiation context of the program construct that
+resulted in the implicit definition of the special member function.
+
+\alinea
+During the implicit instantiation of a template
+whose point of instantiation is specified as
+that of an enclosing specialization (\stdref{temp.point}{12.7.4.1}),
+the instantiation context is the union of
+the instantiation context of the enclosing specialization and,
+if the template is defined in a module interface unit of a module $M$
+and the point of instantiation is not in a module interface unit of $M$,
+the point at the end of the primary module interface unit of $M$.
+
+\alinea
+During the implicit instantiation of a template
+that is implicitly instantiated because it is referenced
+from within the implicit definition of a defaulted special member function,
+the instantiation context is the instantiation context of
+the defaulted special member function.
+
+\alinea
+During the instantiation of any other template specialization,
+the instantiation context comprises the point of instantiation
+of the template.
+
+\alinea
+In any other case, the instantiation context at a program point comprises
+that program point.
+
+\alinea
+\begin{example}
+\begin{codeblock}
+// translation unit \#1
+export module stuff;
+export template<typename T, typename U> void foo(T, U u) { auto v = u; }
+export template<typename T, typename U> void bar(T, U u) { auto v = *u; }
+
+// translation unit \#2
+export module M1;
+import "defn.h";        // provides \tcode{struct X \{\};}
+import stuff;
+export template<typename T> void f(T t) {
+ X x;
+ foo(t, x);
+}
+
+// translation unit \#3
+export module M2;
+import "decl.h";        // provides \tcode{struct X;} (not a definition)
+import stuff;
+export template<typename T> void g(T t) {
+ X *x;
+ bar(t, x);
+}
+
+// translation unit \#4
+import M1;
+import M2;
+void test() {
+  // OK: the instantiation context of \tcode{foo<int, X>} comprises
+  // the point at the end of translation unit \#1,
+  // the point at the end of translation unit \#2, and
+  // the point of the call to \tcode{f(0)} below, so
+  // the definition of \tcode{X} is reachable (\ref{dcl.module.reach})
+  f(0);
+
+  // the instantiation context of \tcode{foo<int, X>} comprises
+  // the point at the end of translation unit \#1,
+  // the point at the end of translation unit \#3, and
+  // the point of the call to \tcode{g(0)} below, so
+  // the definition of \tcode{X} is not necessarily reachable
+  g(0);
+}
+\end{codeblock}
+\end{example}
+\end{std.txt}
+
 \rSec2[dcl.module.reach]{Reachability}
 
 \begin{std.txt}\color{addclr}
-  \resetalinea[0]
-  \alinea
-  When declarations from a translation unit $M$ are made available
-  to name lookup in another translation unit $TU$, it is necessary to
-  determine the interpretation of the names they introduce and their
-  semantic properties.
-\begin{after}\color{addclr}
-  \alinea
-  A translation unit is \term{reachable} from a program point if
-  it is directly or indirectly imported prior to that program point (\ref{dcl.module.import})
-  by a path of
-  \grammarterm{module-declaration}{s}%
-  \footnote{\color{addclr}%
-  A \grammarterm{module-declaration} containing neither \tcode{export}
-  nor a \grammarterm{module-partition} is considered to import the named module.}
-  and
-  \grammarterm{import-declaration}{s},
-  for which all declarations other than the first
-  are either exported or
-  appear within the same module as the program point.
-  A declaration is \term{reachable} from a program point if
-  \begin{itemize}\color{addclr}
-  \item it appears prior to that program point in the same translation unit, or
-  \item it appears in the purview of a reachable module unit and either
-  \begin{itemize}
-  \item the declaration is exported, or 
-  \item the declaration is not exported and is not a redeclaration of
-  an exported entity, or
-  \item the declaration appears in the same module as the program point,
-  \end{itemize}
-  or
-  \item it appears in the preamble of a reachable module unit,
-  and there is a path from an exported declaration to it
-  in the abstract semantics graph of that module unit.
-  \end{itemize}
-  A declaration is considered to appear in the same module as a program point
-  if the program point is in the purview of a module and
-  the declaration appears within a module unit of that module.
-\end{after}
+\resetalinea[0]
+\alinea
+A translation unit is \term{reachable} from a program point if
+it is a module interface unit on which the translation unit containing the
+program point has an interface dependency, or
+it is a translation unit that the translation unit containing the
+program point directly or indirectly imports,
+prior to that program point (\ref{dcl.module.import}).
+\enternote
+While module interface units are reachable even when they are only
+transitively imported via a non-exported import declaration,
+namespace-scope names from such module interface units are not visible
+to name lookup (\ref{basic.scope.namespace}).
+\exitnote
 
-  \alinea
-\begin{before}\color{addclr}
-  Except as noted below, the 
-\end{before}
-\begin{after}\color{addclr}
-The
-\end{after}
-  \term{reachable semantic properties} of declset $D$
-  (or of the entity, if any, denoted by that declset)
-  of the abstract semantic graph of $M$ from $TU$ are 
-%%\begin{before}\color{addclr}
-%%  \begin{itemize}
-%%    \item if $D$ contains at least one exported declaration, 
-%%    the semantic properties cumulatively obtained in the context
-%%    of the exported declaration (\ref{dcl.module.interface}) 
-%%    members of $D$ in the module interface
-%%    unit of $M$. Furthermore, if $D$ denotes an inline function,
-%%    the property that the inline function has a definition
-%%    (\ref{dcl.fct.spec}) is a reachable semantic property, even 
-%%    if that definition is not exported. Otherwise,
-%%    \item the semantic properties cumulatively obtained in the context of all
-%%    declaration members of $D$ in the module interface unit of $M$.
-%%  \end{itemize}
-%%%  Given a declset $D$ for an exported name from a module $M$,
-%%%  the \term{reachable semantic property} of any declaration in that declset
-%%%  (or of the entity, if any, designated by that declset) from a translation unit
-%%%%   For a given declaration $D$ of a name $X$ exported from a module $M$, the
-%%%%  \term{reachable semantic properties} of $D$ from a translation unit
-%%%  containing a \grammarterm{module-import-declaration} nominating $M$ are
-%%%  restricted to 
-%%%  the semantic properties cumulatively obtained in 
-%%%  the context of the exported declaration members of $D$ in $M$.
-%%\end{before}
-\begin{after}\color{addclr}
-  the semantic properties of all reachable declarations in $D$.
-  When the semantic properties of an entity are examined,
-  all properties that are reachable from
-  the point of inquiry are found,
-  even if the declaration introducing the property
-  is not visible to unqualified lookup.
+\alinea
+It is unspecified whether additional translation units on which the
+program point has an interface dependency are considered reachable,
+and under what circumstances.%
+\footnote{Implementations are not required to prevent the semantic effects of
+additional translation units involved in the compilation from being
+observed.}
+Programs intended to be portable should avoid
+depending on the reachability of any additional translation units.
+
+\alinea
+A declaration is \term{reachable} if, for any program point in the
+instantiation context (\ref{dcl.module.context}),
+\begin{itemize}
+\item it appears prior to that program point in the same translation unit, or
+\item it is not discarded (\ref{dcl.module.global}) and
+appears in a translation unit that is reachable from that program point.
+\end{itemize}
+\enternote
+Whether a declaration is exported has no bearing on whether it is reachable.
+\exitnote
+
+\alinea
+The \term{reachable semantic properties} of an entity within a context
+are the accumulated properties of all reachable declarations of
+that entity, and determine the behavior of the entity within
+that context.
+\enternote
+These reachable semantic properties include type completeness,
+type definitions, initializers,
+default arguments of functions or template declarations, attributes,
+visibility of class or enumeration member names to ordinary lookup,
+etc.
+Since default arguments are evaluated in the context of the call expression,
+the reachable semantic properties of the corresponding parameter types apply in 
+that context.
 \begin{example}
 \begin{codeblock}
-module;
-struct X {};
+// translation unit \#1
+export module M:A;
+export struct B;
+
+// translation unit \#2
+module M:B;
+struct B {
+  operator int();
+};
+
+// translation unit \#3
+module M:C;
+import :A;
+B b1;                     // error: no reachable definition of \tcode{struct B}
+
+// translation unit \#4
+export module M;
+export import :A;
+import :B;
+B b2;
+
+// translation unit \#5
+module X;
+import M;
+B b3;                     // error: no reachable definition of \tcode{struct B}
+\end{codeblock}
+\end{example}
+\exitnote
+
+\alinea
+\enternote
+The reachable semantic properties for an entity attached to a module $M$
+are the same for all contexts outside that module in which the entity
+can be referenced, irrespective of whether $M$ is directly or indirectly
+imported.
+\exitnote
+
+\alinea
+\enternote
+An entity can have reachable declarations and therefore
+reachable semantic properties even if it is not visible
+to name lookup.
+\exitnote
+\begin{example}
+\begin{codeblock}
 export module A;
+struct X {};
 export using Y = X;
 
 module B;
@@ -1459,101 +1567,6 @@ Y y;            // OK, definition of \tcode{X} is reachable
 X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
 \end{codeblock}
 \end{example}
-
-\alinea
-\end{after}
-  \enternote
-  These reachable semantic properties include type completeness, 
-  type definitions, initializers,
-  default arguments of functions or template declarations, attributes,
-  visibility to normal lookup,
-\begin{before}\color{addclr}
-  entities that are direct targets of edges 
-  emanating from $D$ in the abstract semantics graph of $M$,
-\end{before}
-  etc.
-  Since default arguments are evaluated in the context of the call expression,
-  reachable semantic properties of the corresponding parameter types apply in 
-  that context. 
-  \begin{example}
-%\begin{before}\color{addclr}
-%\begin{codeblock}
-%// TU 1
-%struct F { int f { 42 }; };
-%export module M;
-%export using T = F;
-%export struct A { int i; };
-%export int f(int, A = { 3 });
-%
-%export struct B;      // exported as incomplete type
-%struct B {            // definition not exported
-%  operator int();
-%};
-%export int g(B = B{});
-%export int h(int = B{}); // \#1
-%
-%export struct S {
-%  static constexpr int v(int);
-%};
-%
-%export S j();       // S attendant entity of j()
-%constexpr int S::v(int x) { return 2 * x; }
-%
-%
-%// TU 2
-%import M;
-%int main() {
-%  T t { };             // OK: reachable semantic properties of T include completeness. 
-%  auto x = f(42);      // OK: default argument A\{3\} evaluated here.
-%  auto y = h();        // OK: completeness of B only checked at \#1.
-%  auto z = g();        // error: parameter type incomplete here.
-%  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
-%                      // in the abstract semantics graph of M (\ref{dcl.fct.spec})
-%}
-%\end{codeblock}
-%\end{before}
-\begin{after}\color{addclr}
-\begin{codeblock}
-// TU 1
-module M:B;
-struct B {                // definition not exported
-  operator int();
-};
-
-// TU 2
-module;
-struct F { int f { 42 }; };
-export module M;
-import :B;
-export using T = F;       // earlier definition of F now reachable
-export struct A { int i; };
-export int f(int, A = { 3 });
-
-export struct B;          // exported as incomplete type
-export int g(B = B{});
-export int h(int = B{});  // \#1
-
-export struct S {
-  static constexpr int v(int);
-};
-
-export S j();
-constexpr int S::v(int x) { return 2 * x; }
-
-// TU 2
-import M;
-int main() {
-  T t { };                // OK: reachable semantic properties of T include completeness
-  auto x = f(42);         // OK: default argument A\{3\} evaluated here
-  auto y = h();           // OK: completeness of B only checked at \#1
-  auto z = g();           // error: parameter type incomplete here
-  constexpr auto a = decltype(j())::v(3); // OK: S::v defined 
-                          // in the abstract semantics graph of M (\ref{dcl.fct.spec})
-}
-\end{codeblock}
-\end{after}
-  \end{example}
-  \exitnote
 
 \begin{before}\color{addclr}
   \alinea
