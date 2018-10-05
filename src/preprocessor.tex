@@ -44,7 +44,6 @@ is implementation-defined.
 \end{std.txt}
 \end{after}
 
-\begin{after}
 \noindent
 Add a new subclause 14.3 titled ``\textbf{Global module fragment}'' as follows:
 
@@ -164,16 +163,6 @@ replacement.
 The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
 particular macro definition is active.
 \exitnote
-\end{std.txt}
-\end{after}
-
-\begin{after}\color{addclr}
-\begin{std.txt}
-\begin{bnf}
-\nonterminal{pp-preamble}:\br
-  \terminal{module} pp-decl-suffix \terminal{;}\br
-  pp-preamble \terminal{export}\opt{} \terminal{import} pp-decl-suffix \terminal{;}
-\end{bnf}
 
 \alinea
 If an imported macro is replaced (\stdref{cpp.replace}{14.3})
@@ -181,7 +170,4 @@ or is named by a \grammarterm{defined-macro-expression}
 outside of a \grammarterm{pp-global-module-fragment},
 there shall be no \grammarterm{pp-import}{s} with a
 later point of macro import.
-
 \end{std.txt}
-
-\end{after}
