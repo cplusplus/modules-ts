@@ -165,25 +165,20 @@ Add a new subclause 9.11 titled ``\textbf{Modules}'' as follows:
   
   \begin{bnf}\color{addclr}
     \nonterminal{module-name}:\br
-      module-name-qualifier-seq\opt identifier
+      module-name-qualifier\opt identifier
   \end{bnf}
   
   \begin{after}
   \begin{bnf}\color{addclr}
     \nonterminal{module-partition}:\br
-      \terminal{:} module-name-qualifier-seq\opt identifier
+      \terminal{:} module-name-qualifier\opt identifier
   \end{bnf}
   \end{after}
   
   \begin{bnf}\color{addclr}
-    \nonterminal{module-name-qualifier-seq}:\br
-      module-name-qualifier  \terminal{.}\br
-      module-name-qualifier-seq identifier \terminal{.}
-  \end{bnf}
-  
-  \begin{bnf}\color{addclr}
     \nonterminal{module-name-qualifier}:\br
-      identifier
+      identifier \terminal{.}\br
+      module-name-qualifier identifier \terminal{.}
   \end{bnf}
   
   \resetalinea[0]
