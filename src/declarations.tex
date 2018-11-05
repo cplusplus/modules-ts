@@ -365,20 +365,25 @@ int n = y();
 
 \begin{codeblock}
 // TU 2
-module B:X;                     // does not implicitly import \tcode{B}
+module B:X1;                    // does not implicitly import \tcode{B}
 int &a = n;                     // error: \tcode{n} not visible here
+\end{codeblock}
+
+\begin{codeblock}
+// TU 3
+module B:X2;                    // does not implicitly import \tcode{B}
 import B;
 int &b = n;                     // OK
 \end{codeblock}
 
 \begin{codeblock}
-// TU 3
+// TU 4
 module B:Y;                     // does not implicitly import \tcode{B}
 int y();
 \end{codeblock}
 
 \begin{codeblock}
-// TU 4
+// TU 5
 module B;                       // implicitly imports \tcode{B}
 int &c = n;                     // OK
 \end{codeblock}
@@ -481,7 +486,9 @@ int &c = n;                     // OK
     \end{codeblock}
   \end{example}
   \enternote
-  Names introduced by \tcode{typedef} declarations are not so constrained.
+  Names introduced by \tcode{typedef} declarations
+  and \grammarterm{alias-declaration}{s}
+  are not so constrained.
   \begin{example}
     \begin{codeblock}
       export module M;
