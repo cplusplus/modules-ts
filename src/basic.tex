@@ -16,23 +16,6 @@ Modify paragraph 6.1/1 as follows:
   [...]
   \end{std.txt}
 
-\noindent
-Add the following two bullets to paragraph 6.1/2:
-\begin{std.txt}
-  \resetalinea[1]
-  \alinea
-  Each entity declared by a \grammarterm{declaration} is also \term{defined}
-  by that declaration unless:
-  \begin{itemize}
-    \item ...
-    \color{addclr}
-    \item \added{it is a \grammarterm{module-import-declaration},}
-    \color{black}
-    \item ...
-  \end{itemize}
-\end{std.txt}
-
-
 \rSec1[basic.def.odr]{One-definition rule}
 
 Change paragraph 6.2/1 as follows:
@@ -194,9 +177,8 @@ Modify paragraph 6.4/1 as follows:
   [...] Only after name lookup, function overload resolution (if applicable)
   and access checking have succeeded are the
   \removed{attributes}\added{semantic properties} introduced by
-  \removed{the name's declaration}
-  \added{the reachable (\ref{dcl.module.reach}) redeclarations
-  of that declaration}
+  the name's declaration
+  \added{and its reachable (\ref{dcl.module.reach}) redeclarations}
   used further in the expression processing (Clause 7).
 \end{std.txt}
 
@@ -337,47 +319,55 @@ Modify paragraph 6.4.2/4 as follows:
 Change the definition of \term{translation-unit} in paragraph 6.5/1
 to:
 
-\begin{before}
-\begin{bnf}\color{addclr}
-  \added{\nonterminal{translation-unit}\br
-     toplevel-declaration-seq\opt}
-\end{bnf}
-
-\begin{bnf}\color{addclr}
-      \added{\nonterminal{toplevel-declaration-seq}\br
-          toplevel-declaration\br
-          toplevel-declaration-seq toplevel-declaration}
-\end{bnf}
-
-\begin{bnf}\color{addclr}
-      \added{\nonterminal{toplevel-declaration}\br
-         module-declaration\br
-         declaration}
-\end{bnf}
-\end{before}
-
-\begin{after}
 \begin{bnf}
 \nonterminal{translation-unit}:\br
-    \added{preamble\opt} declaration-seq\opt \added{private-module-fragment\opt}
+    \added{top-level-}declaration-seq\opt\br
+    \added{preamble top-level-declaration-seq\opt private-module-fragment\opt}
 \end{bnf}
 
 \begin{bnf}
 \added{\nonterminal{preamble}:\br
     global-module-fragment\opt module-declaration\br
-    preamble\opt module-import-declaration}
+    preamble module-import-declaration}
 \end{bnf}
 
 \begin{bnf}
 \added{\nonterminal{private-module-fragment}:\br
-    \terminal{module} \terminal{:} \terminal{private} \terminal{;} declaration-seq\opt}
+    \terminal{module} \terminal{:} \terminal{private} \terminal{;} top-level-declaration-seq\opt}
 \end{bnf}
 
+\begin{bnf}\color{addclr}
+      \added{\nonterminal{top-level-declaration-seq}\br
+          top-level-declaration\br
+          top-level-declaration-seq top-level-declaration}
+\end{bnf}
+
+\begin{bnf}\color{addclr}
+      \added{\nonterminal{top-level-declaration}\br
+         module-import-declaration\br
+         declaration}
+\end{bnf}
+
+\noindent
+Add new paragraphs after the grammar:
+
+\begin{std.txt}
+\alinea
 \added{The \grammarterm{preamble} includes the longest possible sequence of
-\grammarterm{module-import-declaration}{s}.
-A \grammarterm{private-module-fragment} shall only appear
+\grammarterm{module-import-declaration}{s}.}
+
+\alinea
+\added{A \grammarterm{private-module-fragment} shall only appear
 in a primary module interface unit (\ref{dcl.module.unit}).}
-\end{after}
+
+\alinea
+\added{A token sequence beginning with
+\tcode{export}\opt{} \tcode{module} or
+\tcode{export}\opt{} \tcode{import}
+and not immediately followed by \tcode{::}
+is never interpreted as the \grammarterm{declaration}
+of a \grammarterm{top-level-declaration}.}
+\end{std.txt}
 
 \noindent
 Insert a new bullet between first and second bullet of paragraph 6.5/2:
@@ -396,9 +386,21 @@ Insert a new bullet between first and second bullet of paragraph 6.5/2:
 Modify bullet (3.2) of paragraph 6.5/3 as follows:
 \begin{std.txt}
   \begin{itemize}
-    \item[---] a non-inline \added{non-exported} variable of non-volatile const-qualified type 
-    that is neither explicitly declared \tcode{extern} nor
-    previously declared to have external \added{or module} linkage; or
+    \item[---]
+    %a non-inline \added{non-exported} variable of non-volatile const-qualified type 
+    %that is neither explicitly declared \tcode{extern} nor
+    %previously declared to have external \added{or module} linkage; or
+    a \removed{non-inline} variable of non-volatile const-qualified type\added{,
+    unless}
+    \begin{itemize}
+      \color{addclr}
+      \item[---] \added{it is declared \tcode{extern}, or}
+      \item[---] \added{it is inline or exported, or}
+      \item[---] \added{it was previously declared and the prior declaration did
+      not have internal linkage; or}
+    \end{itemize}
+    \removed{that is neither explicitly declared \tcode{extern} nor
+    previously declared to have external linkage; or}
   \end{itemize}
 \end{std.txt}
 
@@ -476,30 +478,22 @@ Modify 6.5/6 as follows:
 \alinea
 The name of a function declared in block scope and the name of a
 variable declared by a block scope extern declaration have linkage.
+\added{If such a declaration is attached to a named module,
+the program is ill-formed.}
 If there is a visible declaration of an entity with linkage having the
 same name and type, ignoring entities declared outside the innermost
 enclosing namespace scope, the block scope declaration declares that
 same entity and receives the linkage of the previous declaration. 
-\begin{before}
-\added{If that entity was exported by an imported module
-
-or if the containing block scope is in the purview of a named module, the program is
-ill-formed.}
-\end{before}
 If
 there is more than one such matching entity, the program is
 ill-formed. Otherwise, if no matching entity is found, the block scope
 entity receives external linkage.
-\begin{after}
-\added{If the declaration is attached to a named module,
-the program is ill-formed.}
-\end{after}
 \end{std.txt}
 
 \noindent
-Modify paragraph 6.5/9 and add /10 as follows:
+Modify paragraph 6.5/10 and add /11 as follows:
 \begin{std.txt}
-  \resetalinea[8]
+  \resetalinea[9]
   \alinea
   \addtocounter{footnote}{1}
   Two

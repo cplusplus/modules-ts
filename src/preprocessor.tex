@@ -11,7 +11,7 @@ Modify paragraph 14/5 as follows:
 The implementation can
 process and skip sections of source files conditionally,
 include other source files,
-\added{import macros from legacy header units,}
+\added{import macros from header units,}
 and replace macros.
 These capabilities are called
 \term{preprocessing},
@@ -31,16 +31,13 @@ Add a new paragraph after 14.2/6 as follows:
 \color{addclr}
 \alinea
 If the header identified by the \grammarterm{header-name}
-denotes a legacy header unit, the preprocessing directive
+denotes an importable header (\ref{dcl.module.import}),
+the preprocessing directive
 is instead replaced by the \grammarterm{preprocessing-token}{s}
 
 \begin{bnf}
 \terminal{import} header-name \terminal{;}
 \end{bnf}
-
-\color{addclr}
-How the set of headers denoting legacy header units is specified
-is implementation-defined.
 \end{std.txt}
 \end{after}
 
@@ -81,7 +78,7 @@ Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
 \color{addclr}
 \begin{bnf}
 \nonterminal{pp-import}:\br
-  \terminal{import}\opt{} header-name pp-decl-suffix\opt{} \terminal{;}
+  \terminal{import} header-name pp-decl-suffix\opt{} \terminal{;}
 \end{bnf}
 
 \begin{bnf}
@@ -110,7 +107,7 @@ Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
 \alinea
 A sequence of \grammarterm{preprocessing-token}{s} matching the form
 of a \grammarterm{pp-import}
-instructs the preprocessor to import macros from the legacy header unit
+instructs the preprocessor to import macros from the header unit
 (\ref{dcl.module.import}) denoted by the \grammarterm{header-name}.
 The \tcode{;} \grammarterm{preprocessing-token} shall not be produced by
 macro replacement (\stdref{cpp.replace}{14.3}).
@@ -122,13 +119,13 @@ immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
 A \term{macro directive} for a macro name is a \tcode{\#define} or
 \tcode{\#undef} directive naming that macro name.
 An \term{exported macro directive} is
-a macro directive occuring in a legacy header unit
+a macro directive occuring in a header unit
 \color{addclr}
 whose macro name is not lexically identical to a keyword.
 A macro directive is \term{visible} at a source location
 if it precedes that source location in the same translation unit, or
-if it is an exported macro directive whose legacy header unit,
-or a legacy header unit that
+if it is an exported macro directive whose header unit,
+or a header unit that
 \color{addclr}
 transitively imports it,
 is imported into the current translation unit by a \grammarterm{pp-import}

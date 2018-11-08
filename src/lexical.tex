@@ -40,10 +40,9 @@ Modify bullet 7 of paragraph 5.2/1 as follows:
     The process of analyzing and translating the tokens may occasionally 
     result in one token being replaced by a sequence of other tokens (17.2). 
     \exitnote
-    \added{It is implementation-defined whether the sources for}
-    \begin{before}\added{module interface units for modules}\end{before}
-    \begin{after}\added{module units}\end{after}
-    \added{on which the current translation unit has an interface
+    \added{It is implementation-defined whether the sources for
+    module units and header units
+    on which the current translation unit has an interface
     dependency (\ref{dcl.module.import}) are required to be available.}
     \enternote
     Source files, translation units and translated translation units need not
@@ -71,15 +70,24 @@ is only formed
 within a \tcode{\#include} directive (19.2)
 \added{or when the previous preprocessing token
 was lexically identical to the
-\grammarterm{identifier} \tcode{import}.}
+\grammarterm{identifier} \tcode{import}
+and the preprocessing tokens are separated by white space.}
 \end{std.txt}
 \end{after}
 
+\setcounter{section}{9}
+\Sec1[lex.name]{Identifiers}
+
+In \ref{lex.name}, add these two identifiers to Table 4,
+``Identifiers with special meaning'':
+
+\begin{std.txt}
+\added{module}\\
+\added{import}
+\end{std.txt}
+
 \setcounter{section}{10}
 \Sec1[lex.key]{Keywords}
-
-In \ref{lex.key}, add these two keywords to Table 5 in paragraph
-5.11/1: \added{module} and \added{import}.
 
 \noindent
 Modify note in paragraph \ref{lex.key}/1 as follows:

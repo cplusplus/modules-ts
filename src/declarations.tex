@@ -21,10 +21,7 @@ Add new alternatives to \term{declaration} in paragraph 9/1 as follows
       namespace-definition\br
       empty-declaration\br
       attribute-declaration\br
-      \color{addclr}
-      \added{export-declaration\br
-      module-import-declaration}\br
-      \begin{before}\added{proclaimed-ownership-declaration}\end{before}
+      \added{export-declaration}\br
   \end{bnf}
   \end{std.txt}
 
@@ -50,16 +47,17 @@ Modify paragraph 9.1.6/6 as follows
   the inline variable may be encountered before its definition appears 
   in the translation unit.
   \exitnote
-  If the definition of a\added{n inline} function or variable
-  appears in a translation unit 
-  \added{at a point where no inline declaration of it is visible}
-  \removed{before its first declaration as inline},
+  % 
+  If \removed{the} \added{a} definition of a function or variable
+  \removed{appears in a translation unit before}
+  \added{is reachable at the point of}
+  its first declaration as inline,
   the program is ill-formed. If a 
   function or variable with external \added{or module} linkage is 
   declared inline in one translation 
   unit,
   \added{there} \removed{it} shall be
-  \added{a visible} \removed{declared} inline
+  \added{a reachable} \removed{declared} inline
   \added{declaration} in all translation units in which it 
   \removed{appears}\added{is declared}; 
   no diagnostic is required. An inline function or variable with 
@@ -305,12 +303,12 @@ introduced by any \grammarterm{module-declaration}.
   \begin{after}\color{addclr}
   A declaration is \term{attached} to a module determined as follows:
   \begin{itemize}\color{addclr}
-  \item If the declaration is
+  \item If the declaration
   \begin{itemize}\color{addclr}
-  \item a replaceable global allocation or deallocation
+  \item is a replaceable global allocation or deallocation
   function (\stdref{new.delete.single}{21.6.2.1}, \stdref{new.delete.array}{21.6.2.2}), or
-  \item a \grammarterm{namespace-declaration} with external linkage, or
-  \item within a \grammarterm{linkage-specification},
+  \item is a \grammarterm{namespace-declaration} with external linkage, or
+  \item appears within a \grammarterm{linkage-specification},
   \end{itemize}\color{addclr}
   it is attached to the global module.
 
@@ -403,7 +401,7 @@ int &c = n;                     // OK
 
   \resetalinea[0]
   \alinea 
-  An \grammarterm{export-declaration} shall only appear
+  An \grammarterm{export-declaration} shall appear only
   at namespace scope and only in the purview of a module interface unit. 
   An \grammarterm{export-declaration} shall not appear directly
   or indirectly within an unnamed namespace
@@ -424,8 +422,8 @@ int &c = n;                     // OK
   \item a \grammarterm{module-import-declaration} declared with
         the \tcode{export} keyword (\ref{dcl.module.import}), or
   \item a \grammarterm{namespace-definition} that contains an
-        \grammarterm{export-declaration}, or
-  \item a declaration within a legacy header unit (\ref{dcl.module.import})
+        exported declaration, or
+  \item a declaration within a header unit (\ref{dcl.module.import})
         that satisfies the rules for an exported declaration below.
   \end{itemize}
   The \term{interface} of a module \tcode{M} is the set of all
@@ -443,7 +441,7 @@ int &c = n;                     // OK
 
   \alinea
   An exported declaration shall declare at least one name.
-  If the declaration is not within a legacy header unit,
+  If the declaration is not within a header unit,
   it shall not declare a name with internal linkage.
   %\grammarterm{decl-specifier-seq} (if any) of the
   %\grammarterm{declaration} shall not contain \tcode{static},
@@ -502,11 +500,12 @@ int &c = n;                     // OK
 
   \begin{after}\color{addclr}
   \alinea
-  An exported declaration shall not redeclare a non-exported declaration.
+  If a redeclaration is exported
+  and the first declaration was not exported,
+  the program is ill-formed.
   \begin{example}
   \begin{codeblock}
   export module M;
-  export struct S;
   struct S { int n; };
   export typedef S S;   // OK, not a redeclaration of \tcode{struct S}
   export struct S;      // error: exported declaration follows non-exported definition
@@ -560,7 +559,7 @@ int &c = n;                     // OK
       // Interface unit of M
       export module M;
       export struct X {
-        void f();
+        static void f();
         struct Y { };
       };
 
@@ -588,10 +587,10 @@ int &c = n;                     // OK
       // main program
       import M;
       int main() {
-        X{}.f();                // OK: X and X::f are exported
-        X::Y y;                 // OK: X::Y is exported as a complete type
+        X::f();                 // OK: \tcode{X} is exported and definition of \tcode{X} is reachable
+        X::Y y;                 // OK: \tcode{X::Y} is exported as a complete type
         auto f = rootFinder(2); // OK
-        return A{45}.value;     // error: A is incomplete
+        return A{45}.value;     // error: \tcode{A} is incomplete
       }
       \end{codeblock}
   \end{example}
@@ -702,35 +701,38 @@ int &c = n;                     // OK
   \alinea
   A \grammarterm{module-import-declaration} that specifies
   a \grammarterm{header-name} $H$ imports
-  a synthesized \term{legacy header unit},
+  a synthesized \term{header unit},
   which is a translation unit formed by applying
   phases 1 to 7 of translation (\stdref{lex.phases}{5.2})
   to the source file nominated by $H$,
   which shall not contain a \grammarterm{module-declaration}.
   \enternote
-  All declarations within a legacy header unit are implicitly
+  All declarations within a header unit are implicitly
   exported, and are attached to the global module.
   \exitnote
+  $H$ shall identify an importable header;
+  how the set of importable headers is specified
+  is implementation-defined.
   Two
   \grammarterm{module-import-declaration}{s}
-  import the same legacy header unit if and only if
+  import the same header unit if and only if
   their \grammarterm{header-name}{s} identify the same
   header or source file (\ref{cpp.include}).
   \enternote
   A \grammarterm{module-import-declaration} nominating
   a \grammarterm{header-name} is also recognized by the
   preprocessor, and results in macros defined at the
-  end of phase 4 of translation of the legacy header unit
+  end of phase 4 of translation of the header unit
   being made visible as described in \ref{cpp.module}.
   \exitnote
   A declaration of a name with internal linkage is
-  permitted within a legacy header unit despite all
+  permitted within a header unit despite all
   declarations being implicitly exported.
   If such a name is
-  odr-used by a translation unit outside the legacy
+  odr-used by a translation unit outside the
   header unit, or by an instantiation unit for a template
   instantiation whose point of instantiation is outside
-  the legacy header unit, the program is ill-formed.
+  the header unit, the program is ill-formed.
 
   \alinea
   When a \grammarterm{module-import-declaration} imports
@@ -963,7 +965,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
 \begin{std.txt}\color{addclr}
 \begin{bnf}
 \nonterminal{global-module-fragment}:\br
-    \terminal{module} \terminal{;} declaration-seq
+    \terminal{module} \terminal{;} top-level-declaration-seq
 \end{bnf}
 
 \resetalinea[0]
@@ -1400,7 +1402,7 @@ the instantiation context of the enclosing specialization and,
 if the template is defined in a module interface unit of a module $M$
 and the point of instantiation is not in a module interface unit of $M$,
 the point at the end of the
-\grammarterm{declaration-seq} of the
+\grammarterm{top-level-declaration-seq} of the
 primary module interface unit of $M$
 (prior to the \grammarterm{private-module-fragment},
 if one is present).
