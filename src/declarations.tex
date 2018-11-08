@@ -82,7 +82,8 @@ Add a new paragraph 9.1.6/7 as follows:
   \alinea
   \added{An exported inline function or variable
   shall be defined in the translation unit
-  containing its exported declaration.
+  containing its exported declaration,
+  outside the \grammarterm{private-module-fragment} (if any).
   \enternote
   There is no restriction on the linkage (or absence thereof)
   of entities that the function body of an exported inline function
@@ -405,7 +406,8 @@ int &c = n;                     // OK
   An \grammarterm{export-declaration} shall only appear
   at namespace scope and only in the purview of a module interface unit. 
   An \grammarterm{export-declaration} shall not appear directly
-  or indirectly within an unnamed namespace. 
+  or indirectly within an unnamed namespace
+  or a \grammarterm{private-module-fragment}.
   An \grammarterm{export-declaration}
   has the declarative effects of its \grammarterm{declaration}
   or its \grammarterm{declaration-seq} (if any).
@@ -1350,12 +1352,17 @@ by the enclosing module unit $M$ if it is
 \item
 the unique result of name lookup for an
 \grammarterm{unqualified-id} or \grammarterm{identifier} in $M$
-or in a template instantiation whose point of instantiation is in $M$, or
+or in a template instantiation whose point of instantiation is in $M$
+and is not within a \grammarterm{private-module-fragment}, or
 \item
 a function named by an expression (\ref{basic.def.odr}) in $M$
-or in a template instantiation whose point of instantiation is in $M$, or
+or in a template instantiation whose point of instantiation is in $M$
+and is not within a \grammarterm{private-module-fragment}, or
 \item
-a lookup result for a dependent name in $M$ (\stdref{temp.dep.res}{12.7.4})
+a lookup result for a dependent name that appears in $M$
+and not within a \grammarterm{private-module-fragment}
+(\stdref{temp.dep.res}{12.7.4})
+and
 that is visible at the point of definition of the enclosing template, or
 \item
 a declaration of an entity that is in the basis of a declaration referenced
@@ -1392,7 +1399,11 @@ the instantiation context is the union of
 the instantiation context of the enclosing specialization and,
 if the template is defined in a module interface unit of a module $M$
 and the point of instantiation is not in a module interface unit of $M$,
-the point at the end of the primary module interface unit of $M$.
+the point at the end of the
+\grammarterm{declaration-seq} of the
+primary module interface unit of $M$
+(prior to the \grammarterm{private-module-fragment},
+if one is present).
 
 \alinea
 During the implicit instantiation of a template
@@ -1491,8 +1502,12 @@ A declaration is \term{reachable} if, for any program point in the
 instantiation context (\ref{dcl.module.context}),
 \begin{itemize}
 \item it appears prior to that program point in the same translation unit, or
-\item it is not discarded (\ref{dcl.module.global}) and
-appears in a translation unit that is reachable from that program point.
+\item it is not discarded (\ref{dcl.module.global}),
+appears in a translation unit that is reachable from that program point,
+and
+either does not appear within a \grammarterm{private-module-fragment}
+or appears in a \grammarterm{private-module-fragment}
+of the module containing the program point.
 \end{itemize}
 \enternote
 Whether a declaration is exported has no bearing on whether it is reachable.

@@ -359,7 +359,7 @@ to:
 \begin{after}
 \begin{bnf}
 \nonterminal{translation-unit}:\br
-    \added{preamble\opt} declaration-seq\opt
+    \added{preamble\opt} declaration-seq\opt \added{private-module-fragment\opt}
 \end{bnf}
 
 \begin{bnf}
@@ -368,8 +368,15 @@ to:
     preamble\opt module-import-declaration}
 \end{bnf}
 
+\begin{bnf}
+\added{\nonterminal{private-module-fragment}:\br
+    \terminal{module} \terminal{:} \terminal{private} \terminal{;} declaration-seq\opt}
+\end{bnf}
+
 \added{The \grammarterm{preamble} includes the longest possible sequence of
-\grammarterm{module-import-declaration}{s}.}
+\grammarterm{module-import-declaration}{s}.
+A \grammarterm{private-module-fragment} shall only appear
+in a primary module interface unit (\ref{dcl.module.unit}).}
 \end{after}
 
 \noindent

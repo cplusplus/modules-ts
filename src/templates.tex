@@ -211,6 +211,25 @@ linkage declared prior to the point of instantiation of the
 template specialization in the same translation unit.}
 \end{std.txt}
 
+\noindent
+Change in paragraph \ref{temp.point}/8:
+\begin{std.txt}
+\resetalinea[7]
+\alinea
+in addition to the points of instantiation described above, for any such
+specialization that has a point of instantiation within the
+\added{\grammarterm{declaration-seq} of the}
+translation unit,
+\added{prior to the \grammarterm{private-module-fragment} (if any),
+the point after the \grammarterm{declaration-seq}
+of the \grammarterm{translation-unit}
+is also considered a point of instantiation,
+and for any such specialization that has a point of instantiation
+within the \grammarterm{private-module-fragment},}
+the end of the translation unit is also
+considered a point of instantiation.
+\end{std.txt}
+
 \rSec3[temp.dep.candidate]{Candidate functions}
 
 \noindent
