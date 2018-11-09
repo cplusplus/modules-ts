@@ -1046,16 +1046,23 @@ innermost enclosing namespace, class, or function.
 
 \item If $D$ is a \grammarterm{template-declaration},
 the basis is the union
-of the basis of its \grammarterm{declaration}, the set
-consisting of
-the entities (if any) designated by
+of
+\begin{itemize}
+\item
+the basis of its \grammarterm{declaration},
+\item
+the set of entities (if any) designated by
 the default template arguments for
 non-type template parameters and template template parameters,
+\item
 the type-bases of the default type template arguments,
-and the set containing the
-innermost enclosing namespace, class, or function.
-Furthermore, if $D$ declares a partial specialization,
-the basis also includes the primary template.
+\item
+the set containing the
+innermost enclosing namespace, class, or function, and
+\item
+if $D$ declares a partial specialization,
+the set containing the primary template.
+\end{itemize}
 
 \item If $D$ is an \grammarterm{explicit-instantiation}
 or an \grammarterm{explicit-specialization}, the basis includes
@@ -1140,28 +1147,36 @@ S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \m
 \end{note}
 
 \alinea
-A declaration from a global module fragment is \term{referenced}
-by the enclosing module unit $M$ if it is
+The \term{interface purview} of a module unit
+is its purview excluding any \grammarterm{private-module-fragment}.
+
+\alinea
+Certain declarations in a global module fragment are \term{referenced}.
+Given an
+\grammarterm{identifier},
+\grammarterm{unqualified-id},
+or expression
+in an interface purview or
+in a template instantiation whose point of instantiation is in that interface purview:
 \begin{itemize}
 \item
-the unique result of name lookup for an
-\grammarterm{unqualified-id} or \grammarterm{identifier} in $M$
-or in a template instantiation whose point of instantiation is in $M$
-and is not within a \grammarterm{private-module-fragment}, or
+For an \grammarterm{identifier} or \grammarterm{unqualified-id},
+if name lookup for it finds a unique result,
+the declaration found is referenced.
 \item
-a function named by an expression (\ref{basic.def.odr}) in $M$
-or in a template instantiation whose point of instantiation is in $M$
-and is not within a \grammarterm{private-module-fragment}, or
+For an expression,
+the declarations of any function named by it are referenced.
 \item
-a lookup result for a dependent name that appears in $M$
-and not within a \grammarterm{private-module-fragment}
-(\stdref{temp.dep.res}{12.7.4})
-and
-that is visible at the point of definition of the enclosing template, or
-\item
-a declaration of an entity that is in the basis of a declaration referenced
-by $M$, recursively.
+For an expression that governs name lookup for a dependent name,
+consider an expression synthesized from it
+by replacing each type-dependent argument
+with a value of a placeholder type
+with no associated namespaces or entities.
+All declarations found by name lookup
+for the corresponding name
+in the synthesized expression are referenced.
 \end{itemize}
+The declarations of entities in the basis of a referenced declaration are referenced, recursively.
 \end{std.txt}
 
 \rSec2[dcl.module.context]{Instantiation context}
