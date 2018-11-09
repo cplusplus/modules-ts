@@ -180,18 +180,18 @@ void i() {
 }
 
 // module interface unit of \tcode{C2}
-export module C1;
+export module C2;
 import B;
 import <string>;
 export template<typename T>
-void h(T t) {
+void j(T t) {
   g(std::string{ }, t);
 }
 
 // translation unit
-import C1;
-void i() {
-   h(0);        // OK, '+' found in instantiation context:
+import C2;
+void k() {
+   j(0);        // OK, '+' found in instantiation context:
                 // visible at end of module interface unit of \tcode{C2}
 }
 \end{codeblock}
