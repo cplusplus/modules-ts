@@ -981,12 +981,15 @@ in the global module fragment (\ref{cpp.glob.frag}).
 
 \alinea
 Declarations in the global module fragment are \term{discarded} if they
-are not referenced by the module unit. A discarded declaration is only
-available to name lookup and reachable within the module unit
-and template instantiations whose points of instantiation
-(\stdref{temp.point}{12.7.4.1}) are within the module,
+are not referenced by the module unit.
+\begin{note}
+A discarded declaration is neither reachable
+nor visible to name lookup outside the module unit,
+nor in template instantiations whose points of instantiation
+(\stdref{temp.point}{12.7.4.1}) are outside the module unit,
 even when the instantiation context (\ref{dcl.module.context})
 includes the module unit.
+\end{note}
 \begin{example}
 \begin{codeblock}
 // header "foo.h"
