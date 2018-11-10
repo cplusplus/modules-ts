@@ -43,7 +43,8 @@ Modify bullet 7 of paragraph 5.2/1 as follows:
     \added{It is implementation-defined whether the sources for
     module units and header units
     on which the current translation unit has an interface
-    dependency (\ref{dcl.module.import}) are required to be available.}
+    dependency (\ref{dcl.module.unit}, \ref{dcl.module.import})
+    are required to be available.}
     \enternote
     Source files, translation units and translated translation units need not
      necessarily be stored as files, nor need there be any one-to-one 
@@ -57,6 +58,10 @@ Modify bullet 7 of paragraph 5.2/1 as follows:
 \begin{after}
 \setcounter{section}{3}
 \Sec1[lex.pptoken]{Preprocessing tokens}
+
+\textbf{\color{red}FIXME: The following change is a placeholder; the final rule for
+context-sensitive lexing of \grammarterm{header-name} tokens
+after \tcode{import} tokens is still under development.}
 
 Modify bullet 3 of paragraph 5.4/3 as follows:
 
@@ -82,8 +87,8 @@ In \ref{lex.name}, add these two identifiers to Table 4,
 ``Identifiers with special meaning'':
 
 \begin{std.txt}
-\added{module}\\
-\added{import}
+\added{\tcode{module}}\\
+\added{\tcode{import}}
 \end{std.txt}
 
 \setcounter{section}{10}

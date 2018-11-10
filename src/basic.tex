@@ -18,6 +18,10 @@ Modify paragraph 6.1/1 as follows:
 
 \rSec1[basic.def.odr]{One-definition rule}
 
+\textbf{\color{red}FIXME: Incidental reachability (allowed
+by the semantic boundaries rule) should not render a program
+ill-formed.}
+
 Change paragraph 6.2/1 as follows:
 \begin{std.txt}
   \resetalinea[0]
@@ -29,6 +33,24 @@ Change paragraph 6.2/1 as follows:
   \added{shall not be defined where a prior definition is reachable
   (\ref{dcl.module.reach})}.
 \end{std.txt}
+
+\textbf{\color{red}FIXME: Should we allow multiple definitions
+of entities with module linkage now that we have module partitions?}
+
+\begin{example}
+\begin{codeblock}
+// TU 1
+module A;
+class X {};
+void f(X x) { /*...*/ }
+
+// TU 2
+module A;
+class X {};
+void f(X x);
+void g() { X x; f(x); }
+\end{codeblock}
+\end{example}
 
 Modify opening of paragraph 6.2/6 as follows
 
@@ -63,7 +85,7 @@ Modify opening of paragraph 6.2/6 as follows
 \begin{after}
   \added{There shall not be more than one definition
   of an entity with external linkage
-  that is attached to a named module;
+  that is attached to a named module (\ref{dcl.module.unit});
   no diagnostic is required unless a prior definition
   is reachable at a point where a later definition appears.}
 \end{after}
@@ -108,7 +130,7 @@ Modify paragraph 6.3.6/1 as follows:
 \end{before}
 \begin{after}
 \added{%
-If a translation unit $M$ is imported into a translation unit $N$,
+If a translation unit $M$ is imported into a translation unit $N$ (\ref{dcl.module.import}),
 the potential scope of a name $X$ declared with namespace scope in $M$
 is extended to include the portion of the corresponding namespace
 scope in $N$ following the first \grammarterm{module-import-declaration}
@@ -117,8 +139,8 @@ in $N$ that directly or indirectly imports $M$ if
 } \color{addclr}
 \begin{itemize}
 \item \added{$X$ does not have internal linkage, and}
-\item \added{$X$ is declared after the \grammarterm{module-declaration} in $M$, and}
-\item \added{either $M$ and $N$ are part of the same module or $X$ is exported.}
+\item \added{$X$ is declared after the \grammarterm{module-declaration} in $M$ (if any), and}
+\item \added{either $X$ is exported or $M$ and $N$ are part of the same module.}
 \end{itemize}
 \end{after}
   \color{addclr}
@@ -130,9 +152,8 @@ in $N$ that directly or indirectly imports $M$ if
     A \grammarterm{module-import-declaration} imports both the named
     translation unit(s) and any modules named by exported
     \grammarterm{module-import-declaration}{s} within them,
-    recursively (\ref{dcl.module.import}).
-   \exitnote}
-   \enterexample
+    recursively.
+   \enterexample}
    \begin{codeblock}
     // Translation unit \#1
     export module M;
@@ -144,9 +165,11 @@ in $N$ that directly or indirectly imports $M$ if
 
     // Translation unit \#3
     import N;
-    int main() { return sq(9); }       // OK: 'sq' from module M
+    int main() { return sq(9); }       // OK: \tcode{sq} from module \tcode{M}
     \end{codeblock}
+    \added{
     \exitexample
+   \exitnote}
 \end{std.txt}
 
 
@@ -164,16 +187,7 @@ Modify paragraph 6.4/1 as follows:
   wherever the grammar allows such names in the context discussed by a 
   particular rule.
   Name lookup associates the use of a name with a set of declarations (6.1)
-\begin{before}
-  \added{or citations (\ref{dcl.module.import})}
-\end{before}
   of that name.
-\begin{before}
-%%% FIXME: If we keep this, fix the typo "intent" -> "intents"
-  \added{For all intent and purposes of further semantic processing
-  requiring declarations, 
-  a citation is replaced with the declarations contained in its declset.}
-\end{before}
   [...] Only after name lookup, function overload resolution (if applicable)
   and access checking have succeeded are the
   \removed{attributes}\added{semantic properties} introduced by
@@ -296,9 +310,9 @@ Modify paragraph 6.4.2/4 as follows:
      \item[---]
      \added{Any function or function template in the interface of
      a named module \tcode{M} (\ref{dcl.module}) that has
-     the same innermost enclosing non-inline namespace as some entity
-     attached to \tcode{M} in the set of associated entities is visible
-     within its namespace
+     the same innermost enclosing non-inline namespace as
+     some associated entity attached to \tcode{M}
+     is visible within its namespace
      to a lookup that does not occur within a module unit of \tcode{M},
      even if it is not visible during an ordinary lookup.}
 
@@ -309,6 +323,8 @@ Modify paragraph 6.4.2/4 as follows:
     excluding discarded declarations (\ref{dcl.module.global}) and
     internal linkage declarations attached to the global module.}
   \end{itemize}
+
+\textbf{\color{red}FIXME: Add an example.}
 \end{std.txt}
 
 \setcounter{section}{4}
@@ -322,13 +338,7 @@ to:
 \begin{bnf}
 \nonterminal{translation-unit}:\br
     \added{top-level-}declaration-seq\opt\br
-    \added{preamble top-level-declaration-seq\opt private-module-fragment\opt}
-\end{bnf}
-
-\begin{bnf}
-\added{\nonterminal{preamble}:\br
-    global-module-fragment\opt module-declaration\br
-    preamble module-import-declaration}
+    \added{global-module-fragment\opt module-declaration top-level-declaration-seq\opt private-module-fragment\opt}
 \end{bnf}
 
 \begin{bnf}
@@ -337,13 +347,13 @@ to:
 \end{bnf}
 
 \begin{bnf}\color{addclr}
-      \added{\nonterminal{top-level-declaration-seq}\br
+      \added{\nonterminal{top-level-declaration-seq}:\br
           top-level-declaration\br
           top-level-declaration-seq top-level-declaration}
 \end{bnf}
 
 \begin{bnf}\color{addclr}
-      \added{\nonterminal{top-level-declaration}\br
+      \added{\nonterminal{top-level-declaration}:\br
          module-import-declaration\br
          declaration}
 \end{bnf}
@@ -353,11 +363,7 @@ Add new paragraphs after the grammar:
 
 \begin{std.txt}
 \alinea
-\added{The \grammarterm{preamble} includes the longest possible sequence of
-\grammarterm{module-import-declaration}{s}.}
-
-\alinea
-\added{A \grammarterm{private-module-fragment} shall only appear
+\added{A \grammarterm{private-module-fragment} shall appear only
 in a primary module interface unit (\ref{dcl.module.unit}).}
 
 \alinea
@@ -394,7 +400,7 @@ Modify bullet (3.2) of paragraph 6.5/3 as follows:
     unless}
     \begin{itemize}
       \color{addclr}
-      \item[---] \added{it is declared \tcode{extern}, or}
+      \item[---] \added{it is explicitly declared \tcode{extern}, or}
       \item[---] \added{it is inline or exported, or}
       \item[---] \added{it was previously declared and the prior declaration did
       not have internal linkage; or}
@@ -459,7 +465,8 @@ Modify paragraph 6.5/4 as follows:
       \item \added{if the enclosing namespace has internal linkage,
       the name has internal linkage;}
       \item \added{otherwise, if
-      the declaration of the name is attached to a named module
+      the declaration of the name is
+      attached to a named module (\ref{dcl.module.unit})
       and is not exported (\ref{dcl.module.interface}),
       %and is not declared in a
       %\grammarterm{proclaimed-ownership-declaration} or a
@@ -531,12 +538,15 @@ Modify paragraph 6.5/10 and add /11 as follows:
   \color{addclr}
   \begin{example}
     \begin{codeblock}
-      // module interface of M
-      module;
-      int f();            // \#1
+      // \tcode{"decls.h"}
+      int f();            // \#1, attached to the global module
       int g();            // \#2, attached to the global module
+
+      // module interface of \tcode{M}
+      module;
+      #include "decls.h"
       export module M;
-      export using ::f;   // OK: does not declare an entity
+      export using ::f;   // OK: does not declare an entity, exports \#1
       int g();            // error: matches \#2, but attached to M
       export int h();     // \#3
       export int k();     // \#4
@@ -548,28 +558,35 @@ Modify paragraph 6.5/10 and add /11 as follows:
     \end{codeblock}
   \end{example}
   \added{As a consequence of these rules,
-  all declarations of an entity are attached to the same module;
+  all declarations of an entity are \term{attached} to the same module;
   the entity is said to be attached to that module.}
 \end{std.txt}
 
 
-\setcounter{section}{5}
-\rSec1[basic.start]{Start and termination}
+\setcounter{section}{7}
+\rSec1[basic.exec]{Program execution}
 
-\setcounter{subsection}{0}
-\rSec2[basic.start.main]{\tcode{main} function}
+\setcounter{subsection}{2}
+\rSec2[basic.start]{Start and termination}
 
-Modify paragraph 6.6.1/1 as follows:
+\setcounter{subsubsection}{0}
+\rSec3[basic.start.main]{\tcode{main} function}
+
+Modify paragraph 6.8.3.1/1 as follows:
 \begin{std.txt}
   \resetalinea[0]
   \alinea
   A program shall contain a global function called \tcode{main}
-  % This is a semantic requirement not a syntactic one, so should use ownership not purview.
-  \begin{before}
-  \added{declared in the purview of the global module}.
-  \end{before}
-  \begin{after}
   \added{attached to the global module}.
-  \end{after}
 \end{std.txt}
 
+Modify paragraph 6.8.3.1/3 as follows:
+\begin{std.txt}
+  \resetalinea[2]
+  \alinea
+  ...
+  A program that declares a variable \tcode{main} at global scope\added{,
+  or that declares a function \tcode{main} at global scope attached to a named module,}
+  or that declares the name \tcode{main} with C language linkage (in any namespace)
+  is ill-formed.
+\end{std.txt}

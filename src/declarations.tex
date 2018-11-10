@@ -37,11 +37,15 @@ Modify paragraph 9.1.6/6 as follows
 \begin{std.txt}
   \resetalinea[5]
   \alinea
-  \added{Some definition for}
-  \removed{A}\added{a}n inline function or variable shall be 
-  \removed{defined}\added{reachable} in every translation 
-  unit in which it is odr-used and \added{the function or variable} shall have exactly 
-  the same definition in every case (\ref{basic.link}).
+  \removed{An}
+  \added{If an}
+  inline function or variable
+  \added{is odr-used in a}
+  \removed{shall be defined in every}
+  translation unit\added{,
+  a definition of it shall be reachable from the end of that translation unit,}
+  \removed{in which it is odr-used} and \added{it} shall have exactly 
+  the same definition in every \added{such translation unit} \removed{case} (\ref{basic.link}).
   \enternote
   A call to the inline function or a use of 
   the inline variable may be encountered before its definition appears 
@@ -143,6 +147,8 @@ Add a new paragraph after 9.7/1 as follows:
 
 \noindent
 Add a new subclause 9.11 titled ``\textbf{Modules}'' as follows:
+
+\textbf{\color{red}FIXME: Move to a top-level clause, per CWG request}
 
 \setcounter{section}{10}
 \rSec1[dcl.module]{Modules}%
@@ -435,8 +441,12 @@ int &c = n;                     // OK
   \begin{example}
   \begin{after}\color{addclr}
     \begin{codeblock}
-      module;
+      // \tcode{"a.h"}
       export int x;             // error: not in the purview of a module interface unit
+
+      // TU 1
+      module;
+      #include "a.h"
       export module M;
       namespace {
         export int a;           // error: export within unnamed namespace
@@ -654,8 +664,10 @@ int &c = n;                     // OK
   \alinea
   A \grammarterm{module-import-declaration} shall appear only at
   global scope, and not in a \grammarterm{linkage-specification}.
-  In a module unit, a \grammarterm{module-import-declaration} shall
-  appear only within the \grammarterm{preamble}.
+  In a module unit, all \grammarterm{module-import-declaration}{s}
+  shall precede all other \grammarterm{top-level-declaration}{s} in
+  the \grammarterm{top-level-declaration-seq} of the
+  \grammarterm{translation-unit}.
 
   \alinea
   A \grammarterm{module-import-declaration} \term{imports} a set of
@@ -947,7 +959,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
 \begin{std.txt}\color{addclr}
 \begin{bnf}
 \nonterminal{global-module-fragment}:\br
-    \terminal{module} \terminal{;} top-level-declaration-seq
+    \terminal{module} \terminal{;} top-level-declaration-seq\opt
 \end{bnf}
 
 \resetalinea[0]
@@ -974,7 +986,7 @@ includes the module unit.
 \end{note}
 \begin{example}
 \begin{codeblock}
-// header "foo.h"
+// \tcode{"foo.h"}
 namespace N {
   struct X {};
   int f(X);
@@ -982,7 +994,7 @@ namespace N {
   int h(X);
 }
 
-// module M interface
+// module \tcode{M} interface
 module;
 #include "foo.h"
 export module M;
@@ -997,7 +1009,7 @@ template<typename T> int use_g() { N::X x; g((T(), x)); }
 template<typename T> int use_h() { N::X x; h((T(), x)); }
 int k = use_h<int>();
 
-// module M implementation
+// module \tcode{M} implementation
 module M;
 int a = use_f<int>(); // ok
 int b = use_g<int>(); // error: no viable function for call to \tcode{g}
