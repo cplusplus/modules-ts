@@ -31,7 +31,7 @@ Change paragraph 6.2/1 as follows:
   \added{A}
   variable, function, class type, enumeration type, or template
   \added{shall not be defined where a prior definition is reachable
-  (\ref{dcl.module.reach})}.
+  (\ref{module.reach})}.
 \end{std.txt}
 
 \textbf{\color{red}FIXME: Should we allow multiple definitions
@@ -69,7 +69,7 @@ Modify opening of paragraph 6.2/6 as follows
   specified (12.8, 12.6.5) in a program provided that
   \removed{each definition appears 
   in a different translation unit}
-  \added{no prior definition is reachable (\ref{dcl.module.reach})
+  \added{no prior definition is reachable (\ref{module.reach})
   at the point where a definition appears}, 
   and provided the definitions satisfy the 
   following requirements. 
@@ -85,7 +85,7 @@ Modify opening of paragraph 6.2/6 as follows
 \begin{after}
   \added{There shall not be more than one definition
   of an entity with external linkage
-  that is attached to a named module (\ref{dcl.module.unit});
+  that is attached to a named module (\ref{module.unit});
   no diagnostic is required unless a prior definition
   is reachable at a point where a later definition appears.}
 \end{after}
@@ -130,7 +130,7 @@ Modify paragraph 6.3.6/1 as follows:
 \end{before}
 \begin{after}
 \added{%
-If a translation unit $M$ is imported into a translation unit $N$ (\ref{dcl.module.import}),
+If a translation unit $M$ is imported into a translation unit $N$ (\ref{module.import}),
 the potential scope of a name $X$ declared with namespace scope in $M$
 is extended to include the portion of the corresponding namespace
 scope in $N$ following the first \grammarterm{module-import-declaration}
@@ -192,11 +192,11 @@ Modify paragraph 6.4/1 as follows:
   and access checking have succeeded are the
   \removed{attributes}\added{semantic properties} introduced by
   the name's declaration
-  \added{and its reachable (\ref{dcl.module.reach}) redeclarations}
+  \added{and its reachable (\ref{module.reach}) redeclarations}
   used further in the expression processing (Clause 7).
 \end{std.txt}
 
-% Moved to dcl.module.reach with some changes.
+% Moved to module.reach with some changes.
 \begin{before}
 Add new paragraph 6.4/5 as follows:
 \begin{std.txt}\color{addclr}
@@ -309,7 +309,7 @@ Modify paragraph 6.4.2/4 as follows:
      \color{addclr}
      \item[---]
      \added{Any function or function template in the interface of
-     a named module \tcode{M} (\ref{dcl.module}) that has
+     a named module \tcode{M} (\ref{module}) that has
      the same innermost enclosing non-inline namespace as
      some associated entity attached to \tcode{M}
      is visible within its namespace
@@ -318,9 +318,9 @@ Modify paragraph 6.4.2/4 as follows:
 
     \item[---]
     \added{All declarations that are visible at any point in the instantiation
-    context (\ref{dcl.module.context}) of the lookup are visible
+    context (\ref{module.context}) of the lookup are visible
     even if they are not visible during an ordinary lookup,
-    excluding discarded declarations (\ref{dcl.module.global}) and
+    excluding discarded declarations (\ref{module.global}) and
     internal linkage declarations attached to the global module.}
   \end{itemize}
 
@@ -364,7 +364,7 @@ Add new paragraphs after the grammar:
 \begin{std.txt}
 \alinea
 \added{A \grammarterm{private-module-fragment} shall appear only
-in a primary module interface unit (\ref{dcl.module.unit}).}
+in a primary module interface unit (\ref{module.unit}).}
 
 \alinea
 \added{A token sequence beginning with
@@ -382,7 +382,7 @@ Insert a new bullet between first and second bullet of paragraph 6.5/2:
   \begin{itemize}
     \item[---] \added{When a name has \term{module linkage}, the entity it denotes
       can be referred to by names
-      from other scopes of the same module unit (\ref{dcl.module.unit}) 
+      from other scopes of the same module unit (\ref{module.unit}) 
       or from scopes of
       other module units of that same module.}
   \end{itemize}
@@ -452,10 +452,10 @@ Modify paragraph 6.5/4 as follows:
   \added{has the same linkage as the enclosing namespace if}
     \begin{itemize}
       \item \added{said namespace has internal linkage, or}
-      \item \added{the name is exported (\ref{dcl.module.interface}), or}
+      \item \added{the name is exported (\ref{module.interface}), or}
       \added{is declared in a \grammarterm{proclaimed-ownership-declaration},
       or is not being declared in the purview of
-      a named module (\ref{dcl.module.unit});}
+      a named module (\ref{module.unit});}
     \end{itemize}
     \added{otherwise, the name has module linkage.}
   \end{before}
@@ -466,8 +466,8 @@ Modify paragraph 6.5/4 as follows:
       the name has internal linkage;}
       \item \added{otherwise, if
       the declaration of the name is
-      attached to a named module (\ref{dcl.module.unit})
-      and is not exported (\ref{dcl.module.interface}),
+      attached to a named module (\ref{module.unit})
+      and is not exported (\ref{module.interface}),
       %and is not declared in a
       %\grammarterm{proclaimed-ownership-declaration} or a
       %\grammarterm{linkage-specification},
