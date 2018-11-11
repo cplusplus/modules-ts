@@ -93,6 +93,30 @@ Add a new paragraph 9.1.6/7 as follows:
   \exitnote}
 \end{std.txt}
 
+\setcounter{subsection}{6}
+\rSec2[dcl.type]{Type specifiers}%
+
+\setcounter{subsubsection}{3}
+\rSec3[dcl.spec.auto]{The \tcode{auto} specifier}%
+
+\noindent
+Add a new paragraph before 9.1.7.4/9 (``If the name of an entity with an
+undeduced placeholder type appears in an expression, the program is
+ill-formed.'') as follows:
+\begin{std.txt}
+\resetalinea[8]
+\alinea
+\added{An exported function
+with a declared return type that uses a placeholder type
+shall be defined in the translation unit
+containing its exported declaration,
+outside the \grammarterm{private-module-fragment} (if any).
+\enternote
+There is no restriction on the linkage of
+the deduced return type.
+\exitnote}
+\end{std.txt}
+
 \setcounter{section}{6}
 \rSec1[basic.namespace]{Namespaces}%
 %\indextext{namespaces|(}
@@ -108,24 +132,7 @@ Add a new paragraph after 9.7/1 as follows:
   regions, the definition of a namespace can be split over several
   parts of one or more translation units.
 
-  %\begin{before}
-  %\added{A namespace with external linkage is always 
-  %  exported regardless of whether any of its \term{namespace-definition}{s} is
-  %  introduced by \tcode{export}.
-  %  \enternote
-  %  There is no way to define a namespace with module linkage.
-  %  \exitnote
-  %}\color{addclr}
-  %\begin{example}
-  %\begin{codeblock}
-  %  export module M;
-  %  namespace N {    // N has external linkage and is exported
-  %  }
-  %\end{codeblock}
-  %\end{example}
-  %\end{before}
   \alinea
-  \begin{after}
   \added{\enternote A namespace name with external linkage is exported
   if any of its \term{namespace-definition}{s} is
   exported, or if it contains any
@@ -142,5 +149,4 @@ Add a new paragraph after 9.7/1 as follows:
     namespace N3 { export int n; }      // \tcode{N3} is exported
   \end{codeblock}
   \end{example}
-  \end{after}
 \end{std.txt}
