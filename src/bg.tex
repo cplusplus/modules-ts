@@ -354,6 +354,48 @@ and process each legacy header unit independently.
 
 \rSec0[vs]{Comparison to prior proposals}
 
+\rSec1[vs.r1]{Changes since R1}
+
+\pnum
+This section lists changes to the design of the merged modules proposal
+since P1103R1.
+
+\rSec2[vs.r1.p1299r2]{P1299R2: Module preamble is unnecessarily fragile}
+
+\pnum
+Prior revisions of this proposal prohibited macros imported from header
+units from affecting the set of imports of a module. However, the
+complexity of the resulting rule -- for both users and implementations
+-- was not considered to be justified by the expected benefit for
+tools wishing to perform dependency extraction, so this rule has been
+removed.
+
+\pnum
+In this proposal, macros imported from a header unit become available
+immediately after the import as described in \ref{vs.r0.preamble},
+but unlike in R0, such macros can be expanded prior to later
+imports in the preamble of a module unit.
+
+\rSec2[vs.r1.p1242r1]{P1242R1: Single-file modules}
+
+\pnum
+As described in \ref{vs.ts}, this proposal removes the
+Modules TS ``attendant entities'' rule.
+This left a feature vacuum:
+there was no longer a way to define a module entirely in a single file
+without module implementation details being available outside the module.
+
+\pnum
+In this proposal, a complete module
+(with both interface and implementation)
+can be defined in a single source file
+by separating the interface from the implementation
+with a
+\begin{codeblock}
+module :private;
+\end{codeblock}
+marker.
+
 \rSec1[vs.r0]{Changes since R0}
 
 \pnum
@@ -500,15 +542,6 @@ different from what was expected, and imports in a preamble would
 behave differently from imports in non-modular code).
 This proposal uses a simpler rule:
 imported macros become visible immediately after the import declaration.
-
-\pnum
-In order to make it practical to determine the set of imports of a
-module unit without first compiling the imported legacy header units
-(at least for a module unit with no global module fragment),
-an additional restriction is imposed:
-the program is ill-formed if, after reaching the preamble,
-an imported macro is expanded
-and then another import declaration is encountered.
 
 \rSec1[vs.ts]{Changes to the Modules TS}
 
