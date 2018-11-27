@@ -1,0 +1,65 @@
+%!TEX root = std.tex
+\setcounter{chapter}{2}
+\rSec0[diff]{Compatibility}%
+
+\setcounter{section}{4}
+\rSec1[diff.cpp17]{C++ and ISO C++ 2017}%
+
+\setcounter{subsection}{0}
+\rSec2[diff.cpp17.lex]{Clause 5: lexical conventions}%
+
+\noindent
+Add new entry as follows:
+\begin{std.txt}
+\color{addclr}
+\textbf{Affected subclauses:} 5.8\\
+\textbf{Change:} \grammarterm{header-name} tokens are formed in more contexts.\\
+\textbf{Rationale:} Required for new features.\\
+\textbf{Effect on original feature:}
+When the identifier \tcode{import}
+is followed by a \tcode{<} or \tcode{"} character
+with intervening whitespace,
+a \grammarterm{header-name} token may be formed.
+\begin{example}
+\begin{codeblock}
+template<typename> class import {};
+void f(import <int>);           // ill-formed; previously well-formed
+void f(import<int>);            // OK
+
+#define import "foo"
+const char *p = import "bar";   // ill-formed: cannot concatenate \grammarterm{header-name} tokens
+
+#define EMPTY
+#define import EMPTY "foo"
+const char *q = import"bar";    // OK
+\end{codeblock}
+\end{example}
+\end{std.txt}
+
+\setcounter{subsection}{2}
+\rSec2[diff.cpp17.dcl]{Clause 9: declarations}%
+
+\noindent
+Add new entry as follows:
+\begin{std.txt}
+\color{addclr}
+\textbf{Affected subclauses:} 9.11.1, 9.11.3\\
+\textbf{Change:} New identifiers with special meaning.\\
+\textbf{Rationale:} Required for new features.\\
+\textbf{Effect on original feature:}
+Top-level declarations beginning with
+\tcode{module} or \tcode{import} may
+either be ill-formed or interpreted differently
+in this International Standard.
+\begin{example}
+\begin{codeblock}
+class module;
+module *m;        // ill-formed; previously well-formed
+::module *m;      // OK
+
+class import;
+import j;         // was variable declaration; now \grammarterm{import-declaration}
+::import j;       // variable declaration
+\end{codeblock}
+\end{example}
+\end{std.txt}
