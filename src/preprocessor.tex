@@ -20,6 +20,61 @@ before translation of the resulting translation unit.
 \end{std.txt}
 \end{after}
 
+\setcounter{section}{0}
+\rSec1[cpp.cont]{Conditional inclusion}%
+
+Modify the grammar before 14.1/1 as follows:
+
+\begin{std.txt}
+\begin{bnf}
+\added{\nonterminal{header-name-tokens}:}\br
+  \added{string-literal}\br
+  \added{\terminal{<} h-pp-tokens \terminal{>}}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{has-include-expression}:\br
+  % FIXME: Need \textunderscore: underscore package does not work inside \added / \removed!
+  \removed{\terminal{\xname{has\textunderscore{}include}} \terminal{(} \terminal{<} h-char-sequence \terminal{>} \terminal{)}}\br
+  \removed{\terminal{\xname{has\textunderscore{}include}} \terminal{(} \terminal{"} q-char-sequence \terminal{"} \terminal{)}}\br
+  \added{\terminal{\xname{has\textunderscore{}include}} \terminal{(} header-name \terminal{)}}\br
+  \removed{\terminal{\xname{has\textunderscore{}include}} \terminal{(} string-literal \terminal{)}}\br
+  \removed{\terminal{\xname{has\textunderscore{}include}} \terminal{(} \terminal{<} h-pp-tokens \terminal{>} \terminal{)}}\br
+  \added{\terminal{\xname{has\textunderscore{}include}} \terminal{(} header-name-tokens \terminal{)}}\br
+\end{bnf}
+\end{std.txt}
+
+Modify paragraph 14.1/2 as follows:
+
+\begin{std.txt}
+\resetalinea[1]
+\alinea
+A \grammarterm{defined-macro-expression} evaluates to \tcode{1}
+if the identifier is currently defined as a macro name
+(that is, if it is predefined or if
+\added{it has one or more active macro definitions (\ref{cpp.module}),
+for example because}
+it has been the subject of a \tcode{\#define} preprocessing directive
+without an intervening \tcode{\#undef} directive with the same subject
+identifier),
+\tcode{0} if it is not.
+
+\end{std.txt}
+
+Modify paragraph 14.1/3 as follows:
+
+\begin{std.txt}
+\resetalinea[2]
+\alinea
+The \removed{third and fourth forms}
+\added{second form}
+of \grammarterm{has-include-expression}
+\removed{are} \added{is} considered
+only if \removed{neither of} the first \removed{or second forms matches}
+\added{form does not match},
+in which case the preprocessing tokens are processed just as in normal text.
+\end{std.txt}
+
 \setcounter{section}{1}
 \rSec1[cpp.include]{Source file inclusion}%
 
@@ -77,30 +132,52 @@ Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
 \begin{std.txt}
 \color{addclr}
 \begin{bnf}
+\nonterminal{import-seq}:\br
+  \grammarterm{top-level-token-seq}\opt{} \terminal{export}\opt{} \terminal{import}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{top-level-token-seq}:\br
+  \descr{any \nonterminal{pp-balanced-token-seq} ending in \terminal{;} or \terminal{\}}}
+\end{bnf}
+
+\begin{bnf}
 \nonterminal{pp-import}:\br
-  \terminal{import} header-name pp-decl-suffix\opt{} \terminal{;}
+  \terminal{import} header-name pp-import-suffix\opt{} \terminal{;}\br
+  \terminal{import} header-name-tokens pp-import-suffix\opt{} \terminal{;}
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-decl-suffix}:\br
-  pp-decl-suffix\opt{} pp-decl-suffix-token\br
-  pp-decl-suffix\opt{} \terminal{[} pp-bracketed-tokens \terminal{]}
+\nonterminal{pp-import-suffix}:\br
+  pp-import-suffix-token\br
+  pp-import-suffix pp-import-suffix-token
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-decl-suffix-token}:\br
-  \descr{any \grammarterm{preprocessing-token} other than \terminal{[}, \terminal{]}, or \terminal{;}}
+\nonterminal{pp-import-suffix-token}:\br
+  \descr{any \grammarterm{pp-balanced-token} other than \terminal{;}}
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-bracketed-tokens}:\br
-  pp-bracketed-tokens\opt{} pp-bracketed-token\br
-  pp-bracketed-tokens\opt{} \terminal{[} pp-bracketed-tokens \terminal{]}
+\nonterminal{pp-balanced-token-seq}:\br
+  pp-balanced-token\br
+  pp-balanced-token-seq pp-balanced-token
 \end{bnf}
 
 \begin{bnf}
-\nonterminal{pp-bracketed-token}:\br
-  \descr{any \grammarterm{preprocessing-token} other than \terminal{[} or \terminal{]}}
+\nonterminal{pp-balanced-token}:\br
+  pp-ldelim pp-balanced-token-seq\opt{} pp-rdelim\br
+  \descr{any \grammarterm{preprocessing-token} other than a \nonterminal{pp-ldelim} or \nonterminal{pp-rdelim}}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-ldelim:} \descr{one of}\br
+  \terminal{(    [    \{    <:    <\%}
+\end{bnf}
+
+\begin{bnf}
+\nonterminal{pp-rdelim:} \descr{one of}\br
+  \terminal{)    ]    \}    :>    \%>}
 \end{bnf}
 
 \color{addclr}
@@ -109,6 +186,10 @@ A sequence of \grammarterm{preprocessing-token}{s} matching the form
 of a \grammarterm{pp-import}
 instructs the preprocessor to import macros from the header unit
 (\ref{module.import}) denoted by the \grammarterm{header-name}.
+A \grammarterm{pp-import} is only recognized when the sequence of tokens
+produced by phase 4 of translation up to the \tcode{import} token
+forms a \grammarterm{import-seq}, and the \tcode{import} token is not
+within the \grammarterm{pp-import-suffix} of another \grammarterm{pp-import}.
 The \tcode{;} \grammarterm{preprocessing-token} shall not be produced by
 macro replacement (\stdref{cpp.replace}{14.3}).
 The \term{point of macro import} for a \grammarterm{pp-import} is
@@ -116,48 +197,89 @@ immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
 
 \color{addclr}
 \alinea
-A \term{macro directive} for a macro name is a \tcode{\#define} or
-\tcode{\#undef} directive naming that macro name.
-An \term{exported macro directive} is
-a macro directive occuring in a header unit
-\color{addclr}
-whose macro name is not lexically identical to a keyword.
-A macro directive is \term{visible} at a source location
-if it precedes that source location in the same translation unit, or
-if it is an exported macro directive whose header unit,
-or a header unit that
-\color{addclr}
-transitively imports it,
-is imported into the current translation unit by a \grammarterm{pp-import}
-whose point of macro import precedes that source location.
+In the second form of \grammarterm{pp-import},
+a \grammarterm{header-name} token is formed as if
+the \grammarterm{header-name-tokens}
+were the \grammarterm{pp-tokens} of a \tcode{\#include} directive.
+The \grammarterm{header-name-tokens} are replaced by
+the \grammarterm{header-name} token.
+\begin{note}
+This ensures that imports are treated consistently by
+the preprocessor and later phases of translation.
+\end{note}
 
+\color{addclr}
 \alinea
-Multiple macro directives for a macro name may be visible at the same
-source location.
-The interpretation of a macro name is determined as follows:
+Each \tcode{\#define} directive encountered when preprocessing
+each translation unit in a program results in a distinct
+\term{macro definition}.
+Importing macros from a header unit makes macro definitions
+from a translation unit visible in other translation units.
+Each macro definition has at most one point of definition in
+each translation unit and at most one point of undefinition, as follows:
 \begin{itemize}
 \item
-\color{addclr}
-A macro directive \term{overrides} all macro directives for the same name
-that are visible at the point of the directive.
+The \term{point of definition} of a macro definition within a translation unit
+is the point at which its \tcode{\#define} directive occurs (in the translation
+unit containing the \tcode{\#define} directive), or,
+if the macro name is not lexically identical to a keyword (\stdref{lex.key}{5.11})
+or to the \grammarterm{identifier}{s} \tcode{module} or \tcode{import},
+the first point
+of macro import of a translation unit containing a point of definition for the
+macro definition, if any (in any other translation unit).
+
 \item
-\color{addclr}
-A macro directive is \term{active} if it is visible and
-no visible macro directive overrides it.
-\item
-\color{addclr}
-A set of macro directives is \term{consistent} if it consists of only
-\tcode{\#undef} directives or if all \tcode{\#define} directives in the set
-are valid as redefinitions of the same macro.
+The \term{point of undefinition} of a macro definition within a translation unit
+is the first point at which a \tcode{\#undef} directive naming the macro occurs
+after its point of definition, or the first point
+of macro import of a translation unit containing a point of undefinition for the
+macro definition, whichever (if any) occurs first.
 \end{itemize}
-\color{addclr}
-When a \grammarterm{preprocessing-token} matching the macro name of a visible
-macro directive is encountered, the set of active macro directives for that
-macro name shall be consistent, and semantics of the active macro directives
-determine whether the macro name is defined and the behavior of macro
-replacement.
+
+\alinea
+A macro directive is \term{active} at a source location
+if it has a point of definition in that translation unit preceding the location,
+and does not have a point of undefinition in that translation unit preceding
+the location.
+
+\alinea
+If a macro would be replaced or redefined, and multiple macro definitions
+are active for that macro name, the active macro definitions shall all be
+valid redefinitions of the same macro (\stdref{cpp.replace}{14.3}).
 \enternote
 The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
 particular macro definition is active.
 \exitnote
+
+\alinea
+\begin{example}
+\begin{codeblock}
+// translation unit a.h
+#define X 123 // \#1
+#define Y 45  // \#2
+#define Z a   // \#3
+#undef X      // point of undefinition of \#1 in \tcode{a.h}
+\end{codeblock}
+
+\begin{codeblock}
+// translation unit b.h
+import "a.h"; // point of definition of \#1, \#2, and \#3, point of undefinition of \#1 in \tcode{b.h}
+#define X 456 // OK, \#1 is not active
+#define Y 6   // ill-formed; \#2 is active
+\end{codeblock}
+
+\begin{codeblock}
+// translation unit c.h
+#define Y 45  // \#4
+#define Z c   // \#5
+\end{codeblock}
+
+\begin{codeblock}
+// translation unit d.h
+import "a.h"; // point of definition of \#1, \#2, and \#3, point of undefinition of \#1 in \tcode{d.h}
+import "c.h"; // point of definition of \#4 and \#5 in \tcode{d.h}
+int a = Y;    // OK, active macro definitions \#2 and \#3 are valid redefinitions
+int c = Z;    // ill-formed; active macro definitions \#2 and \#3 are not valid redefinitions of \tcode{Z}
+\end{codeblock}
+\end{example}
 \end{std.txt}

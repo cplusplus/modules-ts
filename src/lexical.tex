@@ -72,11 +72,20 @@ that could constitute a preprocessing token,
 even if that would cause further lexical analysis to fail,
 except that a \grammarterm{header-name} (5.8)
 is only formed
-within a \tcode{\#include} directive (19.2)
-\added{or when the previous preprocessing token
-was lexically identical to the
-\grammarterm{identifier} \tcode{import}
-and the preprocessing tokens are separated by white space.}
+\begin{itemize}
+\item
+within a \tcode{\#include} directive (19.2)\added{,}
+
+\item
+\added{within a \grammarterm{has-include-expression}, or}
+
+\item
+\added{outside of any preprocessing directive,
+if applying phase 4 of translation to the sequence
+of preprocessing tokens produced thus far
+is valid and
+results in an \grammarterm{import-seq} (\ref{cpp.module}).}
+\end{itemize}
 \end{std.txt}
 \end{after}
 
