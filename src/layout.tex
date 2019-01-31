@@ -56,30 +56,10 @@
 }}}
 \makeatother
 
-\def\pnum{\parabullnum{Paras}{0pt}}
+\newcommand{\pnum}[1][]{\ifthenelse{\equal{#1}{}}{}{\setcounter{Paras}{#1}\addtocounter{Paras}{-1}}\parabullnum{Paras}{0pt}}
 
 % Leave more room for section numbers in TOC
 \cftsetindents{section}{1.5em}{3.0em}
-
-% For compatibility only.  We no longer need this environment.
-\newenvironment{paras}{}{}
-
-
-%% This is used to number paragraphs in ISO C++ standard text, e.g.
-%%  3 blah blah ...
-%%    blah .... ...
-\newcounter{alinea}[section]
-\renewcommand{\thealinea}{\arabic{alinea}}
-\newcommand{\alinea}{%
-  \ifhmode\par\fi\vskip.5em\noindent
-  \refstepcounter{alinea}%
-  \llap{\thealinea\hspace{2ex}}%
-}
-
-\newcommand{\resetalinea}[1][0]{%
-  \setcounter{alinea}{#1}%
-}
-
 
 \lstnewenvironment{grammar}
   {\lstset{basicstyle=\rmfamily,columns=fullflexible,escapechar=@}}

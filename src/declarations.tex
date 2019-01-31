@@ -35,8 +35,7 @@ Add new alternatives to \term{declaration} in paragraph 9/1 as follows
 \noindent
 Modify paragraph 9.1.6/6 as follows
 \begin{std.txt}
-  \resetalinea[5]
-  \alinea
+  \pnum[6]
   \removed{An}
   \added{If an}
   inline function or variable
@@ -80,8 +79,7 @@ Modify paragraph 9.1.6/6 as follows
 Add a new paragraph 9.1.6/7 as follows:
 \begin{std.txt}
   \color{addclr}
-  \resetalinea[6]
-  \alinea
+  \pnum[7]
   \added{An exported inline function or variable
   shall be defined in the translation unit
   containing its exported declaration,
@@ -104,8 +102,7 @@ Add a new paragraph before 9.1.7.4/9 (``If the name of an entity with an
 undeduced placeholder type appears in an expression, the program is
 ill-formed.'') as follows:
 \begin{std.txt}
-\resetalinea[8]
-\alinea
+\pnum[9]
 \added{An exported function
 with a declared return type that uses a placeholder type
 shall be defined in the translation unit
@@ -124,15 +121,14 @@ the deduced return type.
 \noindent
 Add a new paragraph after 9.7/1 as follows:
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   A namespace is an optionally-named declarative region. The name of a
   namespace can be used to access entities declared in that namespace;
   that is, the members of the namespace. Unlike other declarative
   regions, the definition of a namespace can be split over several
   parts of one or more translation units.
 
-  \alinea
+  \pnum
   \added{\enternote A namespace name with external linkage is exported
   if any of its \term{namespace-definition}{s} is
   exported, or if it contains any

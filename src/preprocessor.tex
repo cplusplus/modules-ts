@@ -6,8 +6,7 @@
 Modify paragraph 14/5 as follows:
 
 \begin{std.txt}
-\resetalinea[4]
-\alinea
+\pnum[5]
 The implementation can
 process and skip sections of source files conditionally,
 include other source files,
@@ -47,8 +46,7 @@ Modify the grammar before 14.1/1 as follows:
 Modify paragraph 14.1/2 as follows:
 
 \begin{std.txt}
-\resetalinea[1]
-\alinea
+\pnum[2]
 A \grammarterm{defined-macro-expression} evaluates to \tcode{1}
 if the identifier is currently defined as a macro name
 (that is, if it is predefined or if
@@ -64,8 +62,7 @@ identifier),
 Modify paragraph 14.1/3 as follows:
 
 \begin{std.txt}
-\resetalinea[2]
-\alinea
+\pnum[3]
 The \removed{third and fourth forms}
 \added{second form}
 of \grammarterm{has-include-expression}
@@ -82,9 +79,8 @@ in which case the preprocessing tokens are processed just as in normal text.
 Add a new paragraph after 14.2/6 as follows:
 
 \begin{std.txt}
-\resetalinea[6]
 \color{addclr}
-\alinea
+\pnum[7]
 If the header identified by the \grammarterm{header-name}
 denotes an importable header (\ref{module.import}),
 the preprocessing directive
@@ -101,7 +97,6 @@ Add a new subclause 14.3 titled ``\textbf{Global module fragment}'' as follows:
 
 \setcounter{section}{2}
 \rSec1[cpp.glob.frag]{Global module fragment}%
-\resetalinea[0]
 
 \begin{std.txt}
 \color{addclr}
@@ -110,7 +105,7 @@ Add a new subclause 14.3 titled ``\textbf{Global module fragment}'' as follows:
   \terminal{module} \terminal{;} pp-bracketed-tokens \terminal{module}
 \end{bnf}
 
-\alinea
+\pnum
 If the first two preprocessing tokens at the start of phase 4 of translation
 are \tcode{module} \tcode{;}, the result of preprocessing shall begin with
 a \grammarterm{pp-global-module-fragment} for which all
@@ -127,7 +122,6 @@ Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
 
 \setcounter{section}{3}
 \rSec1[cpp.module]{Legacy header units}%
-\resetalinea[0]
 
 \begin{std.txt}
 \color{addclr}
@@ -181,7 +175,7 @@ Add a new subclause 14.4 titled ``\textbf{Legacy header units}'' as follows:
 \end{bnf}
 
 \color{addclr}
-\alinea
+\pnum
 A sequence of \grammarterm{preprocessing-token}{s} matching the form
 of a \grammarterm{pp-import}
 instructs the preprocessor to import macros from the header unit
@@ -196,7 +190,7 @@ The \term{point of macro import} for a \grammarterm{pp-import} is
 immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
 
 \color{addclr}
-\alinea
+\pnum
 In the second form of \grammarterm{pp-import},
 a \grammarterm{header-name} token is formed as if
 the \grammarterm{header-name-tokens}
@@ -209,7 +203,7 @@ the preprocessor and later phases of translation.
 \end{note}
 
 \color{addclr}
-\alinea
+\pnum
 Each \tcode{\#define} directive encountered when preprocessing
 each translation unit in a program results in a distinct
 \term{macro definition}.
@@ -236,13 +230,13 @@ of macro import of a translation unit containing a point of undefinition for the
 macro definition, whichever (if any) occurs first.
 \end{itemize}
 
-\alinea
+\pnum
 A macro directive is \term{active} at a source location
 if it has a point of definition in that translation unit preceding the location,
 and does not have a point of undefinition in that translation unit preceding
 the location.
 
-\alinea
+\pnum
 If a macro would be replaced or redefined, and multiple macro definitions
 are active for that macro name, the active macro definitions shall all be
 valid redefinitions of the same macro (\stdref{cpp.replace}{14.3}).
@@ -251,7 +245,7 @@ The relative order of \grammarterm{pp-import}{s} has no bearing on whether a
 particular macro definition is active.
 \exitnote
 
-\alinea
+\pnum
 \begin{example}
 \begin{codeblock}
 // translation unit a.h

@@ -7,8 +7,7 @@
 Modify paragraph 6.1/1 as follows:
 
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   A declaration (Clause \ref{dcl.dcl}) may introduce one or more names into a
   translation unit or redeclare names introduced by previous declarations.
   If so, the declaration specifies the interpretation and
@@ -24,8 +23,7 @@ ill-formed.}
 
 Change paragraph 6.2/1 as follows:
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   \removed{No translation unit shall contain more than one definition
   of any}
   \added{A}
@@ -55,8 +53,7 @@ void g() { X x; f(x); }
 Modify opening of paragraph 6.2/6 as follows
 
 \begin{std.txt}
-  \resetalinea[5]
-  \alinea
+  \pnum[6]
   There can be more than one definition of a class type (Clause 10), 
   enumeration type (9.6), inline function with external \added{or module} 
   linkage (9.1.6), 
@@ -101,8 +98,7 @@ Modify opening of paragraph 6.2/6 as follows
 \noindent
 Modify paragraph 6.3.6/1 as follows:
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   The declarative region of a \grammarterm{namespace-definition} is its
   \grammarterm{namespace-body}. 
   Entities declared in a \grammarterm{namespace-body}
@@ -178,8 +174,7 @@ in $N$ that directly or indirectly imports $M$ if
 
 Modify paragraph 6.4/1 as follows:
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   The name lookup rules apply uniformly to all names
   (including \grammarterm{typedef-name}{s} (9.1.3),
   \grammarterm{namespace-name}{s} (9.7), and 
@@ -200,8 +195,7 @@ Modify paragraph 6.4/1 as follows:
 \begin{before}
 Add new paragraph 6.4/5 as follows:
 \begin{std.txt}\color{addclr}
-  \resetalinea[4]
-  \alinea
+  \pnum[5]
   \added{A declaration is \term{reachable} from a program point if it can be found
   by unqualified name lookup in its scope.}
 \end{std.txt}
@@ -213,8 +207,7 @@ Add new paragraph 6.4/5 as follows:
 \noindent
 Modify paragraph 6.4.2/2 as follows:
 \begin{std.txt}
-  \resetalinea[1]
-  \alinea
+  \pnum[2]
   For each argument type \tcode{T} in the function call, there is a
   set of zero or more \term{associated namespaces} and a set of
   zero or more \term{associated \removed{classes} \added{entities}}
@@ -288,8 +281,7 @@ Modify paragraph 6.4.2/2 as follows:
 \noindent
 Modify paragraph 6.4.2/4 as follows:
 \begin{std.txt}
-  \resetalinea[3]
-  \alinea
+  \pnum[4]
   When considering an associated namespace, the lookup is the same as
   the lookup performed when the associated namespace is used as a
   qualifier (6.4.3.2) except that:
@@ -330,8 +322,6 @@ Modify paragraph 6.4.2/4 as follows:
 \setcounter{section}{4}
 \rSec1[basic.link]{Program and linkage}%
 
-\resetalinea[0]
-
 Change the definition of \term{translation-unit} in paragraph 6.5/1
 to:
 
@@ -362,11 +352,11 @@ to:
 Add new paragraphs after the grammar:
 
 \begin{std.txt}
-\alinea
+\pnum[1]
 \added{A \grammarterm{private-module-fragment} shall appear only
 in a primary module interface unit (\ref{module.unit}).}
 
-\alinea
+\pnum
 \added{A token sequence beginning with
 \tcode{export}\opt{} \tcode{module} or
 \tcode{export}\opt{} \tcode{import}
@@ -412,36 +402,20 @@ Modify bullet (3.2) of paragraph 6.5/3 as follows:
 
 \noindent
 Modify paragraph 6.5/4 as follows:
-%\begin{std.txt}
-%  \resetalinea[3]
-%  \alinea
-%  An unnamed namespace or a namespace declared directly or 
-%  indirectly within an unnamed namespace has internal linkage. All other 
-%  namespaces have external linkage. 
-%  \added{A name declared at namespace scope in the purview of a named module
-%  that does not have internal linkage by the previous rules and that
-%  is not exported has module
-%  linkage. The name of any class member where the enclosing class has
-%  a name with module linkage also has module linkage.}
-%  A name having namespace scope that has 
-%  not been given internal \added{or module} linkage above has the same linkage as the enclosing 
-%  namespace if it is the name of
-%\end{std.txt}
-%% New wording suggested by Hubert Tong, on December 17, 2017.
+
 \begin{std.txt}
-  \resetalinea[3]
-  \alinea
-  An unnamed namespace or a namespace declared directly or 
-  indirectly within an unnamed namespace has internal linkage. All other 
-  namespaces have external linkage. 
-  A name having namespace scope that has 
-  not been given internal linkage above \removed{has the same linkage as the enclosing 
+  \pnum[4]
+  An unnamed namespace or a namespace declared directly or
+  indirectly within an unnamed namespace has internal linkage. All other
+  namespaces have external linkage.
+  A name having namespace scope that has
+  not been given internal linkage above \removed{has the same linkage as the enclosing
   namespace if it}\added{and that} is the name of
   \begin{itemize}
     \item a variable; or
     \item a function; or
-    \item a named class (Clause 10), or an unnamed class defined in a 
-    typedef declaration in which the class has the typedef name for 
+    \item a named class (Clause 10), or an unnamed class defined in a
+    typedef declaration in which the class has the typedef name for
     linkage purposes (9.1.3); or
     \item a named enumeration (9.6), or an unnamed enumeration defined in
     a typedef declaration in which the enumeration has the typedef name for
@@ -468,9 +442,6 @@ Modify paragraph 6.5/4 as follows:
       the declaration of the name is
       attached to a named module (\ref{module.unit})
       and is not exported (\ref{module.interface}),
-      %and is not declared in a
-      %\grammarterm{proclaimed-ownership-declaration} or a
-      %\grammarterm{linkage-specification},
       the name has module linkage;}
       \item \added{otherwise, the name has external linkage}.
     \end{itemize}
@@ -481,8 +452,7 @@ Modify paragraph 6.5/4 as follows:
 \noindent
 Modify 6.5/6 as follows:
 \begin{std.txt}
-\resetalinea[5]
-\alinea
+\pnum[6]
 The name of a function declared in block scope and the name of a
 variable declared by a block scope extern declaration have linkage.
 \added{If such a declaration is attached to a named module,
@@ -500,8 +470,7 @@ entity receives external linkage.
 \noindent
 Modify paragraph 6.5/10 and add /11 as follows:
 \begin{std.txt}
-  \resetalinea[9]
-  \alinea
+  \pnum[10]
   \addtocounter{footnote}{1}
   Two
   names that are the same (Clause 6) and that are declared in different scopes
@@ -532,7 +501,7 @@ Modify paragraph 6.5/10 and add /11 as follows:
   do not declare entities.
   \exitnote}
 
-  \alinea
+  \pnum
   \added{If a declaration would redeclare a reachable declaration
   attached to a different module, the program is ill-formed.}
   \color{addclr}
@@ -574,16 +543,14 @@ Modify paragraph 6.5/10 and add /11 as follows:
 
 Modify paragraph 6.8.3.1/1 as follows:
 \begin{std.txt}
-  \resetalinea[0]
-  \alinea
+  \pnum[1]
   A program shall contain a global function called \tcode{main}
   \added{attached to the global module}.
 \end{std.txt}
 
 Modify paragraph 6.8.3.1/3 as follows:
 \begin{std.txt}
-  \resetalinea[2]
-  \alinea
+  \pnum[3]
   ...
   A program that declares a variable \tcode{main} at global scope\added{,
   or that declares a function \tcode{main} at global scope attached to a named module,}

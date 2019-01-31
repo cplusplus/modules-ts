@@ -6,8 +6,7 @@
 \noindent
 Modify paragraph 12/4 as follows:
 \begin{std.txt}
-  \resetalinea[1]
-  \alinea
+  \pnum[4]
   A \grammarterm{template-declaration} can appear only as a 
   namespace scope or class scope declaration.
   \added{Its \grammarterm{declaration} shall not be an
@@ -43,8 +42,7 @@ Modify paragraph 12/4 as follows:
 Change in 12.7.4/1:
 
 \begin{std.txt}
-\resetalinea[0]
-\alinea
+\pnum[1]
 In resolving dependent names, names from the following sources are considered:
 \begin{itemize}
 \item
@@ -93,7 +91,7 @@ void h(Q::X x) {
 Add new paragraphs to 12.7.4:
 \begin{std.txt}
 \color{addclr}
-\alinea
+\pnum
 \enterexample
 \begin{codeblock}
 // interface unit of \tcode{Std}
@@ -119,7 +117,7 @@ void f(S* p, S* q)
 \end{codeblock}
 \exitexample
 
-\alinea
+\pnum
 \enterexample
 \begin{codeblock}
 // header file \tcode{"X.h"}
@@ -145,7 +143,7 @@ void g(X x) {
 \end{codeblock}
 \exitexample
 
-\alinea
+\pnum
 \enterexample
 \begin{codeblock}
 // module interface unit of \tcode{A}
@@ -203,8 +201,7 @@ void k() {
 \noindent
 Delete paragraph 12.7.4.1/7:
 \begin{std.txt}
-\resetalinea[6]
-\alinea
+\pnum[7]
 \removed{The instantiation context of an expression that depends on
 the template arguments is the set of declarations with external
 linkage declared prior to the point of instantiation of the
@@ -214,8 +211,7 @@ template specialization in the same translation unit.}
 \noindent
 Change in paragraph \ref{temp.point}/8:
 \begin{std.txt}
-\resetalinea[7]
-\alinea
+\pnum[8]
 in addition to the points of instantiation described above, for any such
 specialization that has a point of instantiation within the
 \added{\grammarterm{declaration-seq} of the}
@@ -235,8 +231,7 @@ considered a point of instantiation.
 \noindent
 Modify paragraph 12.7.4.2/1 as follows
 \begin{std.txt}
-\resetalinea[0]
-\alinea
+\pnum[1]
 \ldots
 If the call would be ill-formed or would find a better match had the 
 lookup within the associated namespaces considered all the function 

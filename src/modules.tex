@@ -32,8 +32,8 @@ Add a new clause between 9 and 10 titled ``\textbf{Modules}'' with contents as f
       module-name-qualifier identifier \terminal{.}
   \end{bnf}
   
-  \resetalinea[0]
-\alinea A \term{module unit} is a translation unit that contains
+\pnum
+A \term{module unit} is a translation unit that contains
 a \grammarterm{module-declaration}. A \term{named module} is the
 collection of module units with the same \grammarterm{module-name}.
 %Two \grammarterm{module-name}{s} are the same if they are
@@ -44,7 +44,7 @@ in a \grammarterm{module-name} or \grammarterm{module-partition}.
 The optional \grammarterm{attribute-specifier-seq}
 appertains to the \grammarterm{module-declaration}.
 
-\alinea
+\pnum
 A \term{module interface unit} is a module unit whose
 \grammarterm{module-declaration} contains the \texttt{export} keyword;
 any other module unit is a \term{module implementation unit}.
@@ -53,7 +53,7 @@ with no \grammarterm{module-partition}, known as the
 \term{primary module interface unit} of the module;
 no diagnostic is required.
 
-\alinea
+\pnum
 A \term{module partition} is
 a module unit whose \grammarterm{module-declaration} contains
 a \grammarterm{module-partition}.
@@ -73,7 +73,7 @@ is not visible outside the module.
 \exitnote
 
 \begin{after}\color{addclr}
-\alinea
+\pnum
 \begin{example}
 \begin{codeblock}
 // TU 1
@@ -118,13 +118,13 @@ it does not have a partition name.
 \end{example}
 \end{after}
 
-\alinea
+\pnum
 A \term{module unit purview} starts at the \grammarterm{module-declaration}
 and extends to the end of the translation unit.
 The \term{purview} of a named module \tcode{M} is the set of module unit purviews
 of \tcode{M}'s module units. 
 
-\alinea
+\pnum
 The \term{global module} is the collection of all
 \grammarterm{global-module-fragment}{s}
 and all translation units that are not module units.
@@ -135,7 +135,7 @@ The global module has no name, no module interface unit, and is not
 introduced by any \grammarterm{module-declaration}.
 \exitnote
 
-\alinea
+\pnum
   A \term{module} is either a named module or the global module.
   A declaration is \term{attached} to a module as follows:
   \begin{itemize}\color{addclr}
@@ -153,7 +153,7 @@ introduced by any \grammarterm{module-declaration}.
   \end{itemize}
 
 % Notion of 'ownership' is unused; removed.
-%  \alinea
+%  \pnum
 %  \begin{before}\color{addclr}
 %For a namespace-scope declaration $D$ of an entity (other than a
 %namespace), if $D$ is within a \grammarterm{proclaimed-ownership-declaration}
@@ -166,7 +166,7 @@ introduced by any \grammarterm{module-declaration}.
 %module to which its first declaration is attached.
 %\end{after}
 
-  \alinea
+  \pnum
 \color{addclr}
 A \grammarterm{module-declaration}
 that contains neither \tcode{export}
@@ -217,8 +217,7 @@ int &c = n;                     // OK
       \terminal{export} \terminal{\{} declaration-seq${}_{opt}$ \terminal{\}} 
   \end{bnf}
 
-  \resetalinea[0]
-  \alinea 
+  \pnum
   An \grammarterm{export-declaration} shall appear only
   at namespace scope and only in the purview of a module interface unit. 
   An \grammarterm{export-declaration} shall not appear directly
@@ -232,7 +231,7 @@ int &c = n;                     // OK
   or \grammarterm{declaration-seq}
   shall not contain an \grammarterm{export-declaration}.
 
-  \alinea
+  \pnum
   A declaration is \term{exported} if it is
   \begin{itemize}\color{addclr}
   \item a namespace-scope declaration declared within an
@@ -261,7 +260,7 @@ int &c = n;                     // OK
 with EWG; it forbids (for example) \tcode{static_assert} within
 an \tcode{export} block.}
 
-  \alinea
+  \pnum
   An exported declaration shall declare at least one name.
   If the declaration is not within a header unit,
   it shall not declare a name with internal linkage.
@@ -270,7 +269,7 @@ an \tcode{export} block.}
   %and the \grammarterm{declaration} shall not be an
   %\grammarterm{unnamed-namespace-definition}.
 
-  \alinea
+  \pnum
   \begin{example}
     \begin{codeblock}
       // \tcode{"a.h"}
@@ -295,7 +294,7 @@ an \tcode{export} block.}
     \end{codeblock}
   \end{example}
 
-  \alinea
+  \pnum
   If the declaration is a \grammarterm{using-declaration}
   (9.8 [namespace.udecl]), all entities to which all of the
   \grammarterm{using-declarator}{s} ultimately refer (if any)
@@ -341,7 +340,7 @@ export using N::h;              // error: \#1 has internal linkage
   \end{example}
   \exitnote
 
-  \alinea
+  \pnum
   A redeclaration of an exported declaration of an entity
   is implicitly exported.
   An exported redeclaration of a non-exported declaration
@@ -355,7 +354,7 @@ export using N::h;              // error: \#1 has internal linkage
   \end{codeblock}
   \end{example}
 
-  \alinea
+  \pnum
   A name is \term{exported} by a module
   if it is introduced or redeclared
   by an exported declaration in the purview of that module.
@@ -407,7 +406,7 @@ export using N::h;              // error: \#1 has internal linkage
       \end{codeblock}
   \end{example}
 
-  \alinea
+  \pnum
   \enternote
   Redeclaring a name in an \grammarterm{export-declaration}
   cannot change the linkage of the name (\ref{basic.link}).
@@ -438,12 +437,12 @@ export using N::h;              // error: \#1 has internal linkage
 %% non-internal members of the corresponding current instantiation shall
 %% contain only types with external linkage.
 
-%%   \alinea
+%%   \pnum
 %%   In a \grammarterm{exported-fragment-group},
 %%    each \grammarterm{fragment} is processed
 %%   as an exported declaration.
 
-\alinea
+\pnum
 \begin{note}
 Declarations in an exported \grammarterm{namespace-definition} 
 or in an exported \grammarterm{linkage-specification} (10.5)
@@ -479,8 +478,7 @@ export namespace N {
   \end{bnf}
 \end{after}
 
-  \resetalinea[0]
-  \alinea
+  \pnum
   In a module unit, all \grammarterm{module-import-declaration}{s}
   shall precede all other \grammarterm{top-level-declaration}{s} in
   the \grammarterm{top-level-declaration-seq} of the
@@ -488,7 +486,7 @@ export namespace N {
 The optional \grammarterm{attribute-specifier-seq}
 appertains to the \grammarterm{module-import-declaration}.
 
-  \alinea
+  \pnum
   A \grammarterm{module-import-declaration} \term{imports} a set of
   translation units determined as described below.
   \enternote
@@ -501,12 +499,12 @@ appertains to the \grammarterm{module-import-declaration}.
   after the import declaration.
   \exitnote
 
-  \alinea
+  \pnum
   A \grammarterm{module-import-declaration} that specifies
   a \grammarterm{module-name} $M$
   imports all module interface units of $M$.
 
-  \alinea
+  \pnum
   A \grammarterm{module-import-declaration} that specifies
   a \grammarterm{module-partition} shall only appear after
   the \grammarterm{module-declaration} in a module unit in
@@ -514,7 +512,7 @@ appertains to the \grammarterm{module-import-declaration}.
   Such a declaration imports the so-named
   module partition of $M$.
 
-  \alinea
+  \pnum
   A \grammarterm{module-import-declaration} that specifies
   a \grammarterm{header-name} $H$ imports
   a synthesized \term{header unit},
@@ -550,7 +548,7 @@ appertains to the \grammarterm{module-import-declaration}.
   instantiation whose point of instantiation is outside
   the header unit, the program is ill-formed.
 
-  \alinea
+  \pnum
   When a \grammarterm{module-import-declaration} imports
   a translation unit $T$, it also imports
   all translation units imported by
@@ -565,7 +563,7 @@ appertains to the \grammarterm{module-import-declaration}.
   These rules may in turn lead to the importation of yet more
   translation units.
 
-  \alinea
+  \pnum
   \color{addclr}
   A module implementation unit shall not be exported.
   \begin{example}
@@ -579,7 +577,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
   \end{Program}
   \end{example}
 
-  \alinea
+  \pnum
   A module implementation unit of a module \tcode{M}
   that is not a module partition
   shall not contain a \grammarterm{module-import-declaration}
@@ -591,7 +589,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
   \end{codeblock} 
   \end{example}
 
-  \alinea
+  \pnum
 \begin{before}\color{addclr}
   A module \tcode{M1} \term{has an interface dependency} on a module
   \tcode{M2} if the module interface of \tcode{M1} contains a
@@ -625,7 +623,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
   \end{example}
 
 \begin{before}\color{addclr}
-\alinea
+\pnum
   A translation unit has an interface dependency on a module \tcode{M} if it is
   a module implementation unit of \tcode{M}, or if it contains a
   \grammarterm{module-import-declaration} nominating \tcode{M}, or if it has
@@ -641,8 +639,7 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
     \terminal{module} \terminal{;} top-level-declaration-seq\opt
 \end{bnf}
 
-\resetalinea[0]
-\alinea
+\pnum
 A \grammarterm{global-module-fragment} specifies the contents of the
 \term{global module fragment} for a module unit.
 The global module fragment can be used to provide declarations
@@ -652,7 +649,7 @@ Before preprocessing, only preprocessing directives can appear
 in the global module fragment (\ref{cpp.glob.frag}).
 \exitnote
 
-\alinea
+\pnum
 Declarations in the global module fragment are \term{discarded} if they
 are not referenced by the module unit.
 \begin{note}
@@ -699,7 +696,7 @@ int c = use_h<int>(); // ok
 %% Changes: entities now include their declaration context in their basis.
 %% We need to retain those contexts so we can mangle the entity.
 
-\alinea
+\pnum
 The \term{basis} of a declaration $D$ is a set of entites determined as follows:
 \begin{itemize}
 \item If $D$ declares a \grammarterm{typedef-name}, the basis is the
@@ -797,7 +794,7 @@ that is not value-dependent designates the entity that the argument
 denotes.
 Other non-type template arguments do not designate an entity.
 
-\alinea
+\pnum
 \begin{note}
 The basis of a declaration
 does not include entities used in expressions,
@@ -819,11 +816,11 @@ S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \m
 \end{example}
 \end{note}
 
-\alinea
+\pnum
 The \term{interface purview} of a module unit
 is its purview excluding any \grammarterm{private-module-fragment}.
 
-\alinea
+\pnum
 Certain declarations in a global module fragment are \term{referenced}.
 Given an
 \grammarterm{identifier},
@@ -855,8 +852,7 @@ The declarations of entities in the basis of a referenced declaration are refere
 \rSec1[module.context]{Instantiation context}
 
 \begin{std.txt}\color{addclr}
-\resetalinea[0]
-\alinea
+\pnum
 The \term{instantiation context} is a set of locations within the program
 that determines which names are visible to argument-dependent name lookup
 (\ref{basic.lookup.argdep})
@@ -865,7 +861,7 @@ in the context of a particular declaration or template instantiation.
 The instantiation context depends on how the declaration was formed,
 or where the template instantiation was referenced.
 
-\alinea
+\pnum
 During the implicit definition of a defaulted special member function
 (\stdref{special}{10.2.3}),
 the instantiation context is the union of
@@ -873,7 +869,7 @@ the instantiation context from the definition of the class and
 the instantiation context of the program construct that
 resulted in the implicit definition of the special member function.
 
-\alinea
+\pnum
 During the implicit instantiation of a template
 whose point of instantiation is specified as
 that of an enclosing specialization (\stdref{temp.point}{12.7.4.1}),
@@ -887,23 +883,23 @@ primary module interface unit of $M$
 (prior to the \grammarterm{private-module-fragment},
 if one is present).
 
-\alinea
+\pnum
 During the implicit instantiation of a template
 that is implicitly instantiated because it is referenced
 from within the implicit definition of a defaulted special member function,
 the instantiation context is the instantiation context of
 the defaulted special member function.
 
-\alinea
+\pnum
 During the instantiation of any other template specialization,
 the instantiation context comprises the point of instantiation
 of the template.
 
-\alinea
+\pnum
 In any other case, the instantiation context at a program point comprises
 that program point.
 
-\alinea
+\pnum
 \begin{example}
 \begin{codeblock}
 // translation unit \#1
@@ -954,8 +950,7 @@ void test() {
 \rSec1[module.reach]{Reachability}
 
 \begin{std.txt}\color{addclr}
-\resetalinea[0]
-\alinea
+\pnum
 A translation unit is \term{reachable} from a program point if
 it is a module interface unit on which the translation unit containing the
 program point has an interface dependency, or
@@ -969,7 +964,7 @@ namespace-scope names from such module interface units are not visible
 to name lookup (\ref{basic.scope.namespace}).
 \exitnote
 
-\alinea
+\pnum
 It is unspecified whether additional translation units on which the
 program point has an interface dependency are considered reachable,
 and under what circumstances.%
@@ -979,7 +974,7 @@ observed.}
 Programs intended to be portable should avoid
 depending on the reachability of any additional translation units.
 
-\alinea
+\pnum
 A declaration is \term{reachable} if, for any program point in the
 instantiation context (\ref{module.context}),
 \begin{itemize}
@@ -995,7 +990,7 @@ of the module containing the program point.
 Whether a declaration is exported has no bearing on whether it is reachable.
 \exitnote
 
-\alinea
+\pnum
 The \term{reachable semantic properties} of an entity within a context
 are the accumulated properties of all reachable declarations of
 that entity, and determine the behavior of the entity within
@@ -1040,7 +1035,7 @@ B b3;                     // error: no reachable definition of \tcode{struct B}
 \end{example}
 \exitnote
 
-\alinea
+\pnum
 \enternote
 The reachable semantic properties for an entity attached to a module $M$
 are the same for all contexts outside that module in which the entity
@@ -1048,7 +1043,7 @@ can be referenced, irrespective of whether $M$ is directly or indirectly
 imported.
 \exitnote
 
-\alinea
+\pnum
 \enternote
 An entity can have reachable declarations and therefore
 reachable semantic properties even if it is not visible
@@ -1068,7 +1063,7 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
 \end{example}
 
 \begin{before}\color{addclr}
-  \alinea
+  \pnum
   Within a module interface unit, it is necessary to determine that the
   declarations being exported collectively present a coherent view of 
   the semantic properties of the entities they reference.  This determination
@@ -1228,7 +1223,7 @@ X x;            // ill-formed: \tcode{X} not visible to unqualified lookup
     \end{codeblock}
   \end{example}
 \end{before}\begin{before}\color{addclr}
-  \alinea
+  \pnum
   If $X$ is an attendant entity of two exported declarations
   designating two distinct entities,
   %\begin{after}\color{addclr}
