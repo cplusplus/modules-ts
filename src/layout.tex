@@ -56,7 +56,7 @@
 }}}
 \makeatother
 
-\newcommand{\pnum}[1][]{\ifthenelse{\equal{#1}{}}{}{\setcounter{Paras}{#1}\addtocounter{Paras}{-1}}\parabullnum{Paras}{0pt}}
+\newcommand{\pnum}[1][]{\ifthenelse{\equal{#1}{}}{}{\setcounter{Paras}{#1}\addtocounter{Paras}{-1}}\parabullnum{Paras}{0pt}\ignorespaces}
 
 % Leave more room for section numbers in TOC
 \cftsetindents{section}{1.5em}{3.0em}

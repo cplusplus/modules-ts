@@ -543,7 +543,8 @@ appertains to the \grammarterm{module-import-declaration}.
   A declaration of a name with internal linkage is
   permitted within a header unit despite all
   declarations being implicitly exported (\ref{module.interface}).
-  If such a name is odr-used outside the
+  If such a declaration declares an entity
+  that is odr-used outside the
   header unit, or by a template
   instantiation whose point of instantiation is outside
   the header unit, the program is ill-formed.
@@ -589,23 +590,13 @@ export import :Part;    // error: exported partition \tcode{:Part} is an impleme
   \end{codeblock} 
   \end{example}
 
+\color{addclr}
   \pnum
-\begin{before}\color{addclr}
-  A module \tcode{M1} \term{has an interface dependency} on a module
-  \tcode{M2} if the module interface of \tcode{M1} contains a
-  \grammarterm{module-import-declaration} nominating \tcode{M2},
-  or if there exists a module \tcode{M3} such that \tcode{M1} has an
-  interface dependency on \tcode{M3} and \tcode{M3} has an interface dependency
-  on \tcode{M2}.  A module
-\end{before}
-\begin{after}\color{addclr}
   A translation unit \term{has an interface dependency} on a module unit \tcode{U}
   if it contains a \grammarterm{module-declaration} or
   \grammarterm{module-import-declaration} that imports \tcode{U} or if it has
   an interface dependency on a module unit that has an interface dependency on \tcode{U}.
-  A translation unit
-\end{after}
-  shall not have an interface dependency on itself.
+  A translation unit shall not have an interface dependency on itself.
   \begin{example}
   \begin{Program}
      // Interface unit of M1
@@ -645,13 +636,179 @@ A \grammarterm{global-module-fragment} specifies the contents of the
 The global module fragment can be used to provide declarations
 that are attached to the global module and usable within the module unit.
 \enternote
-Before preprocessing, only preprocessing directives can appear
+Prior to phase 4 of translation,
+only preprocessing directives can appear
 in the global module fragment (\ref{cpp.glob.frag}).
 \exitnote
 
+%% Changes: entities now include their declaration context in their basis.
+%% We need to retain those contexts so we can mangle the entity.
+
 \pnum
-Declarations in the global module fragment are \term{discarded} if they
-are not referenced by the module unit.
+The \term{basis} of a declaration $D$ is a set of entites determined as follows:
+\begin{itemize}
+\item If $D$ declares a \grammarterm{typedef-name}%
+\footnote{An \grammarterm{alias-declaration} declares a \grammarterm{typedef-name}.},
+the basis is the type-basis of the aliased type.
+
+\item If $D$ declares a variable or function,
+the basis is the union of
+the type-basis of the type of that variable or function
+and the set containing the
+innermost enclosing namespace, class, or function.
+
+\item If $D$ defines a class type, the basis is the union of the
+type-bases of its direct base classes (if any), and the bases of
+its \grammarterm{member-declaration}{s},
+and the set containing the
+innermost enclosing namespace, class, or function.
+
+\item If $D$ is a \grammarterm{template-declaration},
+the basis is the union
+of
+\begin{itemize}
+\item
+the basis of its \grammarterm{declaration},
+\item
+the set of entities (if any) designated by
+the default template arguments for
+non-type template parameters and template template parameters,
+\item
+the type-bases of the default type template arguments,
+\item
+the set containing the
+innermost enclosing namespace, class, or function, and
+\item
+if $D$ declares a partial specialization,
+the set containing the primary template.
+\end{itemize}
+
+\item If $D$ is an \grammarterm{explicit-instantiation}
+or an \grammarterm{explicit-specialization}, the basis is the union of
+the basis of the \grammarterm{declaration} of $D$ and
+the set containing the primary template.
+
+\item If $D$ is a \grammarterm{namespace-definition}, the basis is
+the set containing the innermost enclosing namespace, if any,
+and otherwise is the empty set.
+
+\item If $D$ is a \grammarterm{namespace-alias-definition}, the basis is
+the set containing the namespace denoted by the
+\grammarterm{qualified-namespace-specifier}.
+
+\item If $D$ is a \grammarterm{using-declaration}, the basis is the union
+of the bases of all the declarations introduced by
+the \grammarterm{using-declarator}{s}.
+
+\item Otherwise, the basis is empty.
+\end{itemize}
+
+The \term{type-basis} of a type $T$ is
+\begin{itemize}
+\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
+the unqualified type.
+\item If $T$ is a member of an unknown specialization, the type-basis
+is the type-basis of that specialization.
+\item If $T$ is a class template specialization, the type-basis
+is the set containing
+\begin{itemize}
+\item the primary template, and
+\item the entities designated by
+non-type template arguments and
+template template arguments (if any), and
+\item the elements of the type-bases
+of the type template arguments (if any).
+\end{itemize}
+\item If $T$ is a class type that is not a class template specialization
+or is an enumeration type,
+the type-basis is the set containing $T$.
+\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
+type-basis is the type-basis of $U$.
+\item If $T$ is a function type, the type-basis is the union of the
+type-basis of the return type and the type-bases of the parameter types.
+\item If $T$ is a pointer to data member of a class $X$, the type-basis is
+the union of the type-basis of $X$ and the type-basis of the member type.
+\item If $T$ is a pointer to member function type of a class $X$, the
+type-basis is the union of the type-basis of $X$ and the type-basis of
+the function type.
+\item Otherwise, the type-basis is the empty set.
+\end{itemize}
+
+A non-type template argument for a template parameter of pointer type
+that is not value-dependent designates the entity (if any) that the
+pointer points to.
+A non-type template argument for a template parameter of reference type
+that is not value-dependent designates the entity that the argument
+denotes.
+Other non-type template arguments do not designate an entity.
+
+\pnum
+\begin{note}
+The basis of a declaration
+does not include entities used in expressions,
+other than those designated by non-type template arguments.
+\begin{example}
+\begin{codeblock}
+const int size = 2;
+int ary1[size];                         // \tcode{size} not in \tcode{ary1}'s basis
+constexpr int identity(int x) { return x; }
+int ary2[identity(2)];                  // \tcode{identity} not in \tcode{ary2}'s basis
+
+template<typename> struct S;
+template<typename, int> struct S2;
+constexpr int g(int);
+
+template<typename T, int N>
+S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \mathtt{S2}, \mathtt{::} \}$ 
+\end{codeblock}
+\end{example}
+\end{note}
+
+\pnum
+The \term{interface purview} of a module unit
+is its purview excluding any \grammarterm{private-module-fragment}.
+
+% Note: don't need to handle unqualified-ids here, because the
+% "named by an expression" rule in bullet 2 covers functions.
+\pnum
+Certain declarations in a global module fragment are \term{referenced}.
+Given an
+\grammarterm{identifier}%,
+%\grammarterm{unqualified-id},
+or expression
+in an interface purview or
+in a template instantiation whose point of instantiation is in that interface purview:
+\begin{itemize}
+\item
+For an \grammarterm{identifier},% or \grammarterm{unqualified-id},
+if name lookup for it finds a unique result,
+the declarations found are referenced.
+\item
+For an expression,
+the declarations of any function
+named by the expression (\stdref{basic.def.odr}{6.2})
+are referenced.
+\item
+For an expression of the form
+\begin{ncsimplebnf}
+postfix-expression \terminal{(} \opt{expression-list} \terminal{)}
+\end{ncsimplebnf}
+whose \grammarterm{postfix-expression} denotes a dependent name,
+or for an operator expression whose operator denotes a dependent name,
+consider an expression synthesized from it
+by replacing each type-dependent argument or operand
+with a value of a placeholder type
+with no associated namespaces or entities.
+All declarations found by name lookup
+for the corresponding name
+in the synthesized expression are referenced.
+\end{itemize}
+The declarations of entities in the basis of a referenced declaration are referenced, recursively.
+\end{std.txt}
+
+\pnum
+A declaration in the global module fragment is \term{discarded} if it
+is not referenced by the module unit.
 \begin{note}
 A discarded declaration is neither reachable
 nor visible to name lookup outside the module unit,
@@ -693,162 +850,6 @@ int c = use_h<int>(); // ok
 \end{codeblock}
 \end{example}
 
-%% Changes: entities now include their declaration context in their basis.
-%% We need to retain those contexts so we can mangle the entity.
-
-\pnum
-The \term{basis} of a declaration $D$ is a set of entites determined as follows:
-\begin{itemize}
-\item If $D$ declares a \grammarterm{typedef-name}, the basis is the
-type-basis of the aliased type.
-
-\item If $D$ declares a variable or function,
-the basis is the union of
-the type-basis of the type of that variable or function
-and the set containing the
-innermost enclosing namespace, class, or function.
-
-\item If $D$ defines a class type, the basis is the union of the
-type-bases of its direct base classes (if any), and the bases of
-its \grammarterm{member-declaration}{s},
-and the set containing the
-innermost enclosing namespace, class, or function.
-
-\item If $D$ is a \grammarterm{template-declaration},
-the basis is the union
-of
-\begin{itemize}
-\item
-the basis of its \grammarterm{declaration},
-\item
-the set of entities (if any) designated by
-the default template arguments for
-non-type template parameters and template template parameters,
-\item
-the type-bases of the default type template arguments,
-\item
-the set containing the
-innermost enclosing namespace, class, or function, and
-\item
-if $D$ declares a partial specialization,
-the set containing the primary template.
-\end{itemize}
-
-\item If $D$ is an \grammarterm{explicit-instantiation}
-or an \grammarterm{explicit-specialization}, the basis includes
-the primary template and all the entities in the basis of the
-\grammarterm{declaration} of $D$.
-
-\item If $D$ is a \grammarterm{namespace-definition}, the basis comprises
-the innermost enclosing namespace, if any.
-
-\item If $D$ is a \grammarterm{namespace-alias-definition}, the basis is the 
-singleton consisting of the namespace denoted by the
-\grammarterm{qualified-namespace-specifier}.
-
-\item If $D$ is a \grammarterm{using-declaration}, the basis is the union
-of the bases of all the declarations introduced by
-the \grammarterm{using-declarator}{s}.
-
-\item If $D$ is an \grammarterm{alias-declaration},
-the basis is the type-basis of its \grammarterm{defining-type-id}.
-
-\item Otherwise, the basis is empty.
-\end{itemize}
-
-The \term{type-basis} of a type $T$ is
-\begin{itemize}
-\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
-the unqualified type.
-\item If $T$ is a member of an unknown specialization, the type-basis
-is the type-basis of that specialization.
-\item If $T$ is a class template specialization, the type-basis
-is the set consisting of
-\begin{itemize}
-\item the primary template, and
-\item the entities designated by
-non-type template arguments and
-template template arguments (if any), and
-\item the elements of the type-bases
-of the type template arguments (if any).
-\end{itemize}
-\item If $T$ is a class type or an enumeration type, 
-the type-basis is the singleton $\{ T \}$.
-\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
-type-basis is the type-basis of $U$.
-\item If $T$ is a function type, the type-basis is the union of the
-type-basis of the return type and the type-bases of the parameter types.
-\item If $T$ is a pointer to data member of a class $X$, the type-basis is
-the union of the type-basis of $X$ and the type-basis of member type.
-\item If $T$ is a pointer to member function type of a class $X$, the
-type-basis is the union of the type-basis of $X$ and the type-basis of
-the function type.
-\item Otherwise, the type-basis is the empty set.
-\end{itemize}
-
-A non-type template argument for a template parameter of pointer type 
-that is not value-dependent designates the entity (if any) that the
-pointer points to.
-A non-type template argument for a template parameter of reference type
-that is not value-dependent designates the entity that the argument
-denotes.
-Other non-type template arguments do not designate an entity.
-
-\pnum
-\begin{note}
-The basis of a declaration
-does not include entities used in expressions,
-other than those designated by non-type template arguments.
-\begin{example}
-\begin{codeblock}
-const int size = 2;
-int ary1[size];                         // \tcode{size} not in \tcode{ary1}'s basis
-constexpr int identity(int x) { return x; }
-int ary2[identity(2)];                  // \tcode{identity} not in \tcode{ary2}'s basis
-
-template<typename> struct S;
-template<typename, int> struct S2;
-constexpr int g(int);
-
-template<typename T, int N>
-S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \mathtt{S2}, \mathtt{::} \}$ 
-\end{codeblock}
-\end{example}
-\end{note}
-
-\pnum
-The \term{interface purview} of a module unit
-is its purview excluding any \grammarterm{private-module-fragment}.
-
-\pnum
-Certain declarations in a global module fragment are \term{referenced}.
-Given an
-\grammarterm{identifier},
-\grammarterm{unqualified-id},
-or expression
-in an interface purview or
-in a template instantiation whose point of instantiation is in that interface purview:
-\begin{itemize}
-\item
-For an \grammarterm{identifier} or \grammarterm{unqualified-id},
-if name lookup for it finds a unique result,
-the declaration found is referenced.
-\item
-For an expression,
-the declarations of any function named by it are referenced.
-\item
-For an expression that governs name lookup for a dependent name,
-consider an expression synthesized from it
-by replacing each type-dependent argument
-with a value of a placeholder type
-with no associated namespaces or entities.
-All declarations found by name lookup
-for the corresponding name
-in the synthesized expression are referenced.
-\end{itemize}
-The declarations of entities in the basis of a referenced declaration are referenced, recursively.
-\end{std.txt}
-
 \rSec1[module.context]{Instantiation context}
 
 \begin{std.txt}\color{addclr}
@@ -858,8 +859,6 @@ that determines which names are visible to argument-dependent name lookup
 (\ref{basic.lookup.argdep})
 and which declarations are reachable (\ref{module.reach})
 in the context of a particular declaration or template instantiation.
-The instantiation context depends on how the declaration was formed,
-or where the template instantiation was referenced.
 
 \pnum
 During the implicit definition of a defaulted special member function
@@ -880,8 +879,7 @@ and the point of instantiation is not in a module interface unit of $M$,
 the point at the end of the
 \grammarterm{top-level-declaration-seq} of the
 primary module interface unit of $M$
-(prior to the \grammarterm{private-module-fragment},
-if one is present).
+(prior to the \grammarterm{private-module-fragment}, if any).
 
 \pnum
 During the implicit instantiation of a template
@@ -1002,7 +1000,7 @@ default arguments of functions or template declarations, attributes,
 visibility of class or enumeration member names to ordinary lookup,
 etc.
 Since default arguments are evaluated in the context of the call expression,
-the reachable semantic properties of the corresponding parameter types apply in 
+the reachable semantic properties of the corresponding parameter types apply in
 that context.
 \begin{example}
 \begin{codeblock}
@@ -1026,22 +1024,25 @@ export module M;
 export import :A;
 import :B;
 B b2;
+export void f(B b = B());
 
 // translation unit \#5
 module X;
 import M;
 B b3;                     // error: no reachable definition of \tcode{struct B}
+void g() { f(); }         // error: no reachable definition of \tcode{struct B}
 \end{codeblock}
 \end{example}
 \exitnote
 
-\pnum
-\enternote
-The reachable semantic properties for an entity attached to a module $M$
-are the same for all contexts outside that module in which the entity
-can be referenced, irrespective of whether $M$ is directly or indirectly
-imported.
-\exitnote
+% This is not necessarily true due to the "semantic boundaries" rule.
+%\pnum
+%\enternote
+%The reachable semantic properties for an entity attached to a module $M$
+%are the same for all contexts outside that module in which the entity
+%can be referenced, irrespective of whether $M$ is directly or indirectly
+%imported.
+%\exitnote
 
 \pnum
 \enternote
