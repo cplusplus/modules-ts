@@ -294,7 +294,7 @@ Modify paragraph 6.4.2/2 as follows:
   template \grammarterm{template-argument}{s}.
 \end{std.txt}
 
-Modify paragraph 6.4.2/4 as follows:
+Modify paragraph 6.4.2/4 and add /5 as follows:
 \begin{std.txt}
   \pnum[4]
   When considering an associated namespace, the lookup is the same as
@@ -331,7 +331,51 @@ Modify paragraph 6.4.2/4 as follows:
     internal linkage declarations attached to the global module.}
   \end{itemize}
 
-\textbf{\color{red}FIXME: Add an example.}
+\pnum
+\color{addclr}
+\added{\enterexample}
+\begin{codeblock}
+// TU 1
+export module M;
+namespace R {
+  export struct X {};
+  export void f(X);
+}
+namespace S {
+  export void f(X, X);
+}
+\end{codeblock}
+
+\begin{codeblock}
+// TU 2
+export module N;
+import M;
+export R::X make();
+namespace R { static int g(X); }
+template<typename T, typename U> void apply(T t, U u) {
+  f(t, u);
+  g(t);
+}
+\end{codeblock}
+
+\begin{codeblock}
+// TU 3
+module Q;
+import N;
+namespace S {
+  struct Z { template<typename T> operator T(); };
+}
+void test() {
+  auto x = make(); // OK, \tcode{decltype(x)} is \tcode{R::X} in module \tcode{M}
+  R::f(x);         // ill-formed: \tcode{R} and \tcode{R::f} are not visible here
+  f(x);            // OK, calls \tcode{R::f} from interface of \tcode{M}
+  f(x, Z());       // ill-formed: \tcode{S::f} in module \tcode{M} not considered
+                   // even though \tcode{S} is an associated namespace
+  apply(x, Z());   // OK, \tcode{S::f} is visible in instantiation context, and
+                   // \tcode{R::g} is visible even though it has internal linkage
+}
+\end{codeblock}
+\added{\exitexample}
 \end{std.txt}
 
 \setcounter{section}{4}
