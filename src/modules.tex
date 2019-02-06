@@ -780,7 +780,7 @@ in an interface purview or
 in a template instantiation whose point of instantiation is in that interface purview:
 \begin{itemize}
 \item
-For an \grammarterm{identifier},% or \grammarterm{unqualified-id},
+For an \grammarterm{identifier}, % or \grammarterm{unqualified-id},
 if name lookup for it finds a unique result,
 the declarations found are referenced.
 \item
@@ -790,8 +790,9 @@ named by the expression (\stdref{basic.def.odr}{6.2})
 are referenced.
 \item
 For an expression of the form
+
 \begin{ncsimplebnf}
-postfix-expression \terminal{(} \opt{expression-list} \terminal{)}
+postfix-expression \terminal{(} expression-list\opt{} \terminal{)}
 \end{ncsimplebnf}
 whose \grammarterm{postfix-expression} denotes a dependent name,
 or for an operator expression whose operator denotes a dependent name,
@@ -804,7 +805,6 @@ for the corresponding name
 in the synthesized expression are referenced.
 \end{itemize}
 The declarations of entities in the basis of a referenced declaration are referenced, recursively.
-\end{std.txt}
 
 \pnum
 A declaration in the global module fragment is \term{discarded} if it
@@ -849,6 +849,7 @@ int b = use_g<int>(); // error: no viable function for call to \tcode{g}
 int c = use_h<int>(); // ok
 \end{codeblock}
 \end{example}
+\end{std.txt}
 
 \rSec1[module.context]{Instantiation context}
 
@@ -949,7 +950,7 @@ void test() {
 
 \begin{std.txt}\color{addclr}
 \pnum
-A translation unit is \term{reachable} from a program point if
+A translation unit is \term{necessarily reachable} from a program point if
 it is a module interface unit on which the translation unit containing the
 program point has an interface dependency, or
 it is a translation unit that the translation unit containing the
@@ -963,6 +964,7 @@ to name lookup (\ref{basic.scope.namespace}).
 \exitnote
 
 \pnum
+All translation units that are necessarily reachable are \term{reachable}.
 It is unspecified whether additional translation units on which the
 program point has an interface dependency are considered reachable,
 and under what circumstances.%
@@ -987,6 +989,8 @@ of the module containing the program point.
 \enternote
 Whether a declaration is exported has no bearing on whether it is reachable.
 \exitnote
+A declaration is \term{necessarily reachable} if it is reachable
+considering only translation units that are necessarily reachable.
 
 \pnum
 The \term{reachable semantic properties} of an entity within a context

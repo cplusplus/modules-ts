@@ -17,10 +17,6 @@ Modify paragraph 6.1/1 as follows:
 
 \rSec1[basic.def.odr]{One-definition rule}
 
-\textbf{\color{red}FIXME: Incidental reachability (allowed
-by the semantic boundaries rule) should not render a program
-ill-formed.}
-
 Change paragraph 6.2/1 as follows:
 \begin{std.txt}
   \pnum[1]
@@ -28,11 +24,12 @@ Change paragraph 6.2/1 as follows:
   of any}
   \added{A}
   variable, function, class type, enumeration type, or template
-  \added{shall not be defined where a prior definition is reachable
-  (\ref{module.reach})}.
+  \added{shall not be defined where a prior definition is necessarily reachable
+  (\ref{module.reach});
+  no diagnostic is required if the prior declaration is in another translation unit}.
 \end{std.txt}
 
-\textbf{\color{red}FIXME: Should we allow multiple definitions
+\textbf{\color{red}FIXME: Should we disallow multiple definitions
 of entities with module linkage now that we have module partitions?}
 
 \begin{example}
@@ -50,10 +47,31 @@ void g() { X x; f(x); }
 \end{codeblock}
 \end{example}
 
-Modify opening of paragraph 6.2/6 as follows
+Modify the end of paragraph 6.2/10 as follows
 
 \begin{std.txt}
-  \pnum[6]
+\pnum[10]
+[...]
+\removed{An}
+\added{A definition of an}
+inline function or variable shall be \removed{defined} \added{reachable}
+in every translation unit in which it is odr-used outside of a discarded statement.
+\end{std.txt}
+
+Modify paragraph 6.2/11 as follows
+
+\begin{std.txt}
+\pnum[11]
+\removed{Exactly one}
+\added{A} definition of a class is required \added{to be reachable}
+\removed{in a translation unit if} \added{in every context in which}
+the class is used in a way that requires the class type to be complete.
+\end{std.txt}
+
+Modify opening of paragraph 6.2/12 as follows
+
+\begin{std.txt}
+  \pnum[12]
   There can be more than one definition of a class type (Clause 10), 
   enumeration type (9.6), inline function with external \added{or module} 
   linkage (9.1.6), 
@@ -66,7 +84,7 @@ Modify opening of paragraph 6.2/6 as follows
   specified (12.8, 12.6.5) in a program provided that
   \removed{each definition appears 
   in a different translation unit}
-  \added{no prior definition is reachable (\ref{module.reach})
+  \added{no prior definition is necessarily reachable (\ref{module.reach})
   at the point where a definition appears}, 
   and provided the definitions satisfy the 
   following requirements. 
@@ -298,7 +316,7 @@ Modify paragraph 6.4.2/4 as follows:
      \color{addclr}
      \item[---]
      \added{Any function or function template in the interface of
-     a named module \tcode{M} (\ref{module}) that has
+     a named module \tcode{M} (\ref{module.interface}) that has
      the same innermost enclosing non-inline namespace as
      some associated entity attached to \tcode{M}
      is visible within its namespace
