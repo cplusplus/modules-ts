@@ -127,6 +127,32 @@ are visible to name lookup
 in contexts within the same module that import the module unit.
 All declarations in transitively-imported module units
 are reachable, whether or not they are exported.
+\begin{example}
+\begin{codeblock}
+// a.cpp
+export module A; // interface of module \tcode{A}
+int foo() { return 1; }
+export int bar();
+\end{codeblock}
+
+\begin{codeblock}
+// a-impl.cpp
+module A;        // implementation of module \tcode{A}, implicitly
+                 // considered to import the interface of \tcode{A}
+// OK; \tcode{foo()} is visible here (in the same module) even though
+// it was not exported from \tcode{A}
+int bar() { return foo() + 1; }
+\end{codeblock}
+
+\begin{codeblock}
+// unrelated.cpp
+import A;
+int main() {
+  bar();         // OK, \tcode{bar} was exported by \tcode{A} and is visible here
+  foo();         // error: \tcode{foo} is not visible here
+}
+\end{codeblock}
+\end{example}
 
 \pnum
 If a declaration within a namespace is exported,
