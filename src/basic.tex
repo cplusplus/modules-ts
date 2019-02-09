@@ -29,24 +29,6 @@ Change paragraph 6.2/1 as follows:
   no diagnostic is required if the prior declaration is in another translation unit}.
 \end{std.txt}
 
-\textbf{\color{red}FIXME: Should we disallow multiple definitions
-of entities with module linkage now that we have module partitions?}
-
-\begin{example}
-\begin{codeblock}
-// TU 1
-module A;
-class X {};
-void f(X x) { /*...*/ }
-
-// TU 2
-module A;
-class X {};
-void f(X x);
-void g() { X x; f(x); }
-\end{codeblock}
-\end{example}
-
 Modify the end of paragraph 6.2/10 as follows
 
 \begin{std.txt}
@@ -72,39 +54,28 @@ Modify opening of paragraph 6.2/12 as follows
 
 \begin{std.txt}
   \pnum[12]
-  There can be more than one definition of a class type (Clause 10), 
-  enumeration type (9.6), inline function with external \added{or module} 
-  linkage (9.1.6), 
-  inline variable with external \added{or module} linkage (9.1.6), 
-  class template (Clause 12), 
+  There can be more than one definition of a class type (Clause 10),
+  enumeration type (9.6), inline function with external
+  linkage (9.1.6),
+  inline variable with external linkage (9.1.6),
+  class template (Clause 12),
   non-static function template (12.6.6),
-  static data member of a class 
-  template (12.6.1.3), member function of a class template (12.6.1.1), or 
-  template specialization for which some template parameters are not 
+  static data member of a class
+  template (12.6.1.3), member function of a class template (12.6.1.1), or
+  template specialization for which some template parameters are not
   specified (12.8, 12.6.5) in a program provided that
-  \removed{each definition appears 
+  \removed{each definition appears
   in a different translation unit}
   \added{no prior definition is necessarily reachable (\ref{module.reach})
-  at the point where a definition appears}, 
-  and provided the definitions satisfy the 
-  following requirements. 
-\begin{before}
-  \added{For an entity with an exported declaration, there shall be only one
-   definition of that entity; a diagnostic is required only if the abstract 
-   semantics graph of the module contains a definition of the entity.}
-   \added{\enternote
-   If the definition is not in the interface unit, then at most one module unit can
-   have and make use of the definition.
-   \exitnote}
-\end{before}
-\begin{after}
+  at the point where a definition appears},
+  and provided the definitions satisfy the
+  following requirements.
   \added{There shall not be more than one definition
-  of an entity with external linkage
+  of an entity
   that is attached to a named module (\ref{module.unit});
   no diagnostic is required unless a prior definition
   is reachable at a point where a later definition appears.}
-\end{after}
-  Given such an entity named \tcode{D} defined in more than one 
+  Given such an entity named \tcode{D} defined in more than one
   translation unit, then
 \end{std.txt}
 
