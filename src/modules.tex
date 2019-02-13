@@ -833,13 +833,13 @@ module;
 export module M;
 // \tcode{N::f} is reachable via argument-dependent name lookup result
 // in context of template definition
-template<typename T> int use_f() { N::X x; f(x); }
+template<typename T> int use_f() { N::X x; return f(x); }
 // \tcode{N::g} is not reachable because \tcode{g} is a dependent name
 // in context of template definition
-template<typename T> int use_g() { N::X x; g((T(), x)); }
+template<typename T> int use_g() { N::X x; return g((T(), x)); }
 // \tcode{N::h} is reachable because \tcode{use_h<int>} has a point of
 // instantiation in the module unit \tcode{M}
-template<typename T> int use_h() { N::X x; h((T(), x)); }
+template<typename T> int use_h() { N::X x; return h((T(), x)); }
 int k = use_h<int>();
 
 // module \tcode{M} implementation
