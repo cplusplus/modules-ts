@@ -380,6 +380,44 @@ and process each header unit independently.
 
 \rSec0[vs]{Comparison to prior proposals}
 
+\rSec1[vs.r2]{Changes since R2}
+
+\pnum
+This section lists changes to the design of the merged modules proposal
+since P1103R2.
+
+\begin{itemize}
+\item
+Addressed wording feedback from CWG and other parties.
+\item
+Fixed bug where an incidentally-reachable definition could render other
+definitions of the same entity ill-formed:
+\begin{codeblock}
+// a.h
+#ifndef A_H
+#define A_H
+class X {};
+#endif
+
+// b.cc
+#include "a.h"
+export module B;
+X x;
+
+// c.cc
+export module C;
+import B; // not exported
+
+// d.cc
+import C;
+#include "a.h" // OK even if definition of X is incidentally visible
+               // due to semantic boundaries rule
+\end{codeblock}
+\item
+Fixed unintended divergence from Modules TS that permitted module linkage
+entities to have definitions in multiple module units
+\end{itemize}
+
 \rSec1[vs.r1]{Changes since R1}
 
 \pnum
