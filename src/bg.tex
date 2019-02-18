@@ -68,7 +68,7 @@ based.
 \pnum
 A \term{module unit} is a translation unit that forms part of a module.
 Such a translation unit begins with%
-\footnote{A global module fragment (\ref{merged.legacy.frag}) may optionally
+\footnote{A global module fragment (\ref{merged.global.frag}) may optionally
 precede the preamble.}
 a preamble,
 comprising a module declaration
@@ -247,7 +247,7 @@ This proposal provides several features to support
 interoperation between modular code
 and traditional non-modular code.
 
-\rSec2[merged.legacy.frag]{Global module fragment}
+\rSec2[merged.global.frag]{Global module fragment}
 
 \pnum
 The merged proposal permits Modules TS-style global module fragments,
@@ -296,10 +296,10 @@ export Y f(); // export name \tcode{f}; retain all declarations
 \end{codeblock}
 \end{example}
 
-\rSec2[merged.legacy.import]{Legacy header units}
+\rSec2[merged.header.import]{Header units}
 
 \pnum
-The merged proposal also permits Atom-style legacy header units,
+The merged proposal also permits Atom-style header units,
 which are introduced by a special \tcode{import} syntax
 that names a header file instead of a module:
 
@@ -317,11 +317,11 @@ and any macros defined by preprocessing the header are saved
 so that they can be made available to importers.
 
 \pnum
-Declarations from code in a legacy module header
+Declarations from code in a header unit
 are not owned by any module.
 In particular, the same entities can be redeclared
-by another legacy header unit or by non-modular code.
-Legacy module headers can be re-exported
+by another header unit or by non-modular code.
+Header units can be re-exported
 using the regular \tcode{export import} syntax:
 
 \begin{codeblock}
@@ -329,14 +329,14 @@ export module foo;
 export import "some-header.h";
 \end{codeblock}
 
-However, when a legacy header unit is re-exported,
+However, when a header unit is re-exported,
 macros are not exported.
-Only the legacy header import syntax can import macros.
+Only the header import syntax can import macros.
 
-\rSec2[merged.legacy.reachability]{Reachability of legacy declarations}
+\rSec2[merged.nonmodular.reachability]{Reachability of nonmodular declarations}
 
 \pnum
-A declaration in a global module fragment or legacy header unit
+A declaration in a global module fragment or header unit
 is reachable if it is visible.
 It is unspecified whether such a declaration is also reachable
 in contexts where it is not visible but is transitively
@@ -348,35 +348,35 @@ cost for some implementations, so we leave the extent to which
 this rule is enforced up to the implementation.)
 
 \pnum
-Discarded declarations (\ref{merged.legacy.frag}) from the global module
+Discarded declarations (\ref{merged.global.frag}) from the global module
 fragment are never visible nor reachable from outside that module unit.
 
 \rSec2[merged.nonmodular.use]{Module use from non-modular code}
 
 \pnum
-Modules and legacy header units can be imported into non-modular code.
+Modules and header units can be imported into non-modular code.
 Such imports can appear anywhere, and are not restricted to a preamble.
 This permits ``bottom-up'' modularization,
 whereby a library switches to providing only a modular interface
 and defining its header interface in terms of the modular interface.
-Non-modular code includes translation units other than module units,
-headers imported as legacy header units, and the global module fragment
+Non-modular code includes translation units other than module units
+(including headers imported as header units), and the global module fragment
 of a module unit.
 
 \pnum
 When a \tcode{\#include} appears within non-modular code,
-if the named header file is known to correspond to a legacy header unit,
+if the named header file is known to correspond to a header unit,
 the implementation treats the \tcode{\#include} as an import
-of the corresponding legacy header unit.
+of the corresponding header unit.
 The mechanism for discovering this correspondence
 is left implementation-defined;
 there are multiple viable strategies here
-(such as explicitly building legacy header modules and
+(such as explicitly building header units and
 providing them as input to downstream compilations, or
-introducing accompanying files describing the legacy header structure)
+introducing accompanying files describing the header unit structure)
 and we wish to encourage exploration of this space.
 An implementation is also permitted to not provide any mapping mechanism,
-and process each legacy header unit independently.
+and process each header unit independently.
 
 \rSec0[vs]{Comparison to prior proposals}
 
@@ -532,7 +532,7 @@ is on the path of instantiation.
 \end{example}
 
 \pnum
-As described above (\ref{merged.legacy.reachability}),
+As described above (\ref{merged.nonmodular.reachability}),
 implementations are permitted to treat additional declarations
 as reachable even if they would not be reachable on the
 path of instantiation,
@@ -560,7 +560,7 @@ each associated type are visible to ADL.
 
 \pnum
 In R0 of this proposal, the preprocessor was burdened with finding
-the end of the preamble, and making macros from legacy header units
+the end of the preamble, and making macros from header units
 visible at that point.
 That was problematic both for implementers (as it is a challenging rule
 to implement) and for users (as code would silently do something
