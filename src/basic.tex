@@ -207,10 +207,10 @@ Modify paragraph 6.4.2/2 as follows:
   and \removed{classes} \added{entities} are determined in the
   following way:
   \begin{itemize}
-  \item[---] If \tcode{T} is a fundamental type, its associated sets
+  \item If \tcode{T} is a fundamental type, its associated sets
   of namespaces and \removed{classes} \added{entities} are both empty.
 
-  \item[---] If \tcode{T} is a class type (including unions), its
+  \item If \tcode{T} is a class type (including unions), its
   associated \removed{classes} \added{entities} are the class itself;
   the class of which it is a member, if any; and its direct and
   indirect base classes.  Its associated namespaces are the innermost
@@ -226,23 +226,23 @@ Modify paragraph 6.4.2/2 as follows:
   template arguments are members. \enternote Non-type template
   arguments do not contribute to the set of associated namespaces. \exitnote
 
-  \item[---] If \tcode{T} is an enumeration type, its associated
+  \item If \tcode{T} is an enumeration type, its associated
   namespace is the innermost enclosing namespace of its
   declaration\added{, and its associated entities are \tcode{T} and,
   if}\removed{. If} it is a class member, \removed{its associated
   class is} the member's class\removed{; else it has no associated class}.
 
-  \item[---] If \tcode{T} is a pointer to \tcode{U} or an array
+  \item If \tcode{T} is a pointer to \tcode{U} or an array
   of \tcode{U}, its associated namespaces
   and \removed{classes} \added{entities} are those associated
   with \tcode{U}. 
 
-  \item[---] If \tcode{T} is a function type, its associated
+  \item If \tcode{T} is a function type, its associated
   namespaces and \removed{classes} \added{entities} are those
   associated with the function parameter types and those associated
   with the return type.
 
-  \item[---] If \tcode{T} is a pointer to a data member of
+  \item If \tcode{T} is a pointer to a data member of
   class \tcode{X}, its associated namespaces
   and \removed{classes} \added{entities} are those associated with the
   member type together with those associated with \tcode{X}.
@@ -272,7 +272,7 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
   the lookup performed when the associated namespace is used as a
   qualifier (6.4.3.2) except that:
   \begin{itemize}
-    \item[---] Any \grammarterm{using-directive}{s} in the associated
+    \item Any \grammarterm{using-directive}{s} in the associated
   namespace are ignored.
 
      \item Any namespace-scope friend declaration functions or friend
@@ -285,7 +285,7 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
   and function templates are ignored.
 
      \color{addclr}
-     \item[---]
+     \item
      \added{Any function or function template in the interface of
      a named module \tcode{M} (\ref{module.interface}) that has
      the same innermost enclosing non-inline namespace as
@@ -294,7 +294,7 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
      to a lookup that does not occur within a module unit of \tcode{M},
      even if it is not visible during an ordinary lookup.}
 
-    \item[---]
+    \item
     \added{All declarations that are visible at any point in the instantiation
     context (\ref{module.context}) of the lookup are visible
     even if they are not visible during an ordinary lookup,
@@ -398,7 +398,7 @@ Insert a new bullet between first and second bullet of paragraph 6.5/2:
 
 \begin{std.txt}\color{addclr}
   \begin{itemize}
-    \item[---] \added{When a name has \term{module linkage}, the entity it denotes
+    \item \added{When a name has \term{module linkage}, the entity it denotes
       can be referred to by names
       from other scopes of the same module unit (\ref{module.unit}) 
       or from scopes of
@@ -409,7 +409,7 @@ Insert a new bullet between first and second bullet of paragraph 6.5/2:
 Modify bullet (3.2) of paragraph 6.5/3 as follows:
 \begin{std.txt}
   \begin{itemize}
-    \item[---]
+    \item
     %a non-inline \added{non-exported} variable of non-volatile const-qualified type 
     %that is neither explicitly declared \tcode{extern} nor
     %previously declared to have external \added{or module} linkage; or
@@ -417,9 +417,9 @@ Modify bullet (3.2) of paragraph 6.5/3 as follows:
     unless}
     \begin{itemize}
       \color{addclr}
-      \item[---] \added{it is explicitly declared \tcode{extern}, or}
-      \item[---] \added{it is inline or exported, or}
-      \item[---] \added{it was previously declared and the prior declaration did
+      \item \added{it is explicitly declared \tcode{extern}, or}
+      \item \added{it is inline or exported, or}
+      \item \added{it was previously declared and the prior declaration did
       not have internal linkage; or}
     \end{itemize}
     \removed{that is neither explicitly declared \tcode{extern} nor
@@ -499,7 +499,7 @@ Modify paragraph 6.5/10 and add /11 as follows:
   names that are the same (Clause 6) and that are declared in different scopes
   shall denote the same variable, function, type, template or namespace if
   \begin{itemize}
-    \item[---] both names have external \added{or module} linkage
+    \item both names have external \added{or module} linkage
       \added{and are declared in declarations attached to the
       same module,}
       or else both names have internal linkage and are declared in
