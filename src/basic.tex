@@ -119,7 +119,7 @@ the potential scope of a name $X$ declared with namespace scope in $M$
 is extended to include the portion of the corresponding namespace
 scope in $N$ following the first \grammarterm{module-import-declaration}
 or \grammarterm{module-declaration}
-in $N$ that directly or indirectly imports $M$ if
+in $N$ that imports $M$ (directly or indirectly) if
 } \color{addclr}
 \begin{itemize}
 \item \added{$X$ does not have internal linkage, and}
@@ -277,7 +277,9 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
 
      \item Any namespace-scope friend declaration functions or friend
   function templates (10.7.3) declared in \removed{associated}
-  classes \added{in the set of associated entities} are visible within
+  classes \added{with reachable definitions
+  in the set of associated entities}
+  are visible within
   their respective namespaces even if they are not visible during an
   ordinary lookup (9.7.1.2).
 
@@ -295,8 +297,10 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
      even if it is not visible during an ordinary lookup.}
 
     \item
-    \added{All declarations that are visible at any point in the instantiation
-    context (\ref{module.context}) of the lookup are visible
+    \added{All namespace-scope function or function template declarations
+    that are visible to qualified name lookup (\ref{basic.lookup.qual})
+    at any point in the instantiation context (\ref{module.context}) of the lookup
+    are visible in their respective namespaces
     even if they are not visible during an ordinary lookup,
     excluding discarded declarations (\ref{module.global}) and
     internal linkage declarations attached to the global module.}
@@ -347,6 +351,30 @@ void test() {
 }
 \end{codeblock}
 \added{\exitexample}
+\end{std.txt}
+
+\setcounter{subsection}{2}
+\rSec2[basic.lookup.qual]{Qualified name lookup}
+
+\setcounter{subsubsection}{1}
+\rSec3[namespace.qual]{Namespace members}
+
+Change in paragraph 2:
+
+\begin{std.txt}
+\pnum[2]
+For a namespace \tcode{X}
+and name \tcode{m},
+the namespace-qualified lookup set \tcode{S(X,m)} is defined as follows:
+Let \tcode{S'(X,m)} be the set of all declarations of \tcode{m} in \tcode{X}
+and the inline namespace set of \tcode{X} (9.7.1)
+\added{whose potential scope (\stdref{basic.scope.namespace}{6.3.6})
+would include the namespace in which \tcode{m} is declared
+at the location of the \grammarterm{nested-name-specifier}{}}.
+If \tcode{S'(X,m)} is not empty, \tcode{S(X, m)} is \tcode{S'(X, m)};
+otherwise, \tcode{S(X, m)} is the union of \tcode{S(Ni, m)}
+for all namespaces \tcode{Ni} nominated by \grammarterm{using-directives}
+in \tcode{X} and its inline namespace set.
 \end{std.txt}
 
 \setcounter{section}{4}
