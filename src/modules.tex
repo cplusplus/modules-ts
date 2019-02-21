@@ -119,8 +119,10 @@ it does not have a partition name.
 \end{after}
 
 \pnum
-A \term{module unit purview} starts at the \grammarterm{module-declaration}
-and extends to the end of the translation unit.
+A \term{module unit purview} is
+the sequence of \grammarterm{token}{s}
+starting at the \grammarterm{module-declaration}
+and extending to the end of the translation unit.
 The \term{purview} of a named module \tcode{M} is the set of module unit purviews
 of \tcode{M}'s module units. 
 
@@ -645,6 +647,69 @@ in the global module fragment (\ref{cpp.glob.frag}).
 %% We need to retain those contexts so we can mangle the entity.
 
 \pnum
+A non-type template argument for a template parameter of pointer type
+that is not value-dependent designates the entity (if any) that the
+pointer points to.
+A non-type template argument for a template parameter of reference type
+that is not value-dependent designates the entity that the argument
+denotes.
+Other non-type template arguments do not designate an entity.
+
+\pnum
+The \term{template-specialization-basis} of a template specialization is
+the set comprising
+\begin{itemize}
+\item the primary template, and
+\item the entities designated by
+non-type template arguments and
+template template arguments (if any), and
+\item the elements of the type-bases
+of the type template arguments (if any).
+\end{itemize}
+
+\pnum
+The \term{type-basis} of a type $T$ is
+\begin{itemize}
+\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
+the unqualified type.
+\item If $T$ is a member of an unknown specialization, the type-basis
+is the type-basis of that specialization.
+\item If $T$ is a class template specialization, the type-basis
+is the template-specialization-basis of $T$.
+%is the set comprising
+%\begin{itemize}
+%\item the primary template, and
+%\item the entities designated by
+%non-type template arguments and
+%template template arguments (if any), and
+%\item the elements of the type-bases
+%of the type template arguments (if any).
+%\end{itemize}
+\item If $T$ is a class type that is not a class template specialization
+or is an enumeration type,
+the type-basis is the set comprising $T$.
+\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
+type-basis is the type-basis of $U$.
+\item If $T$ is a function type, the type-basis is the union of the
+type-basis of the return type and the type-bases of the parameter types.
+\item If $T$ is a pointer to data member of a class $X$, the type-basis is
+the union of the type-basis of $X$ and the type-basis of the member type.
+\item If $T$ is a pointer to member function type of a class $X$, the
+type-basis is the union of the type-basis of $X$ and the type-basis of
+the function type.
+\item Otherwise, the type-basis is the empty set.
+\begin{note}
+This applies to template type parameters and to fundamental types.
+\end{note}
+\end{itemize}
+
+\pnum
+The \term{enclosing context} of a declaration $D$ is the set comprising
+the functions and namespaces enclosing $D$,
+the namespace, class, or class template of which $D$ is a member (if any),
+and the closure types of any \grammarterm{lambda-expression}{s} enclosing $D$.
+
+\pnum
 The \term{basis} of a declaration $D$ is a set of entites determined as follows:
 \begin{itemize}
 \item If $D$ declares a \grammarterm{typedef-name}%
@@ -654,14 +719,12 @@ the basis is the type-basis of the aliased type.
 \item If $D$ declares a variable or function,
 the basis is the union of
 the type-basis of the type of that variable or function
-and the set containing the
-innermost enclosing namespace, class, or function.
+and the enclosing context of $D$.
 
 \item If $D$ defines a class type, the basis is the union of the
 type-bases of its direct base classes (if any), and the bases of
 its \grammarterm{member-declaration}{s},
-and the set containing the
-innermost enclosing namespace, class, or function.
+and the enclosing context of $D$.
 
 \item If $D$ is a \grammarterm{template-declaration},
 the basis is the union
@@ -676,24 +739,24 @@ non-type template parameters and template template parameters,
 \item
 the type-bases of the default type template arguments,
 \item
-the set containing the
-innermost enclosing namespace, class, or function, and
+the enclosing context of $D$, and
 \item
 if $D$ declares a partial specialization,
-the set containing the primary template.
+the set comprising the primary template.
 \end{itemize}
 
 \item If $D$ is an \grammarterm{explicit-instantiation}
 or an \grammarterm{explicit-specialization}, the basis is the union of
 the basis of the \grammarterm{declaration} of $D$ and
-the set containing the primary template.
+%the set comprising the primary template.
+the template-specialization-basis of the specialization.
 
 \item If $D$ is a \grammarterm{namespace-definition}, the basis is
-the set containing the innermost enclosing namespace, if any,
+the set comprising the innermost enclosing namespace, if any,
 and otherwise is the empty set.
 
 \item If $D$ is a \grammarterm{namespace-alias-definition}, the basis is
-the set containing the namespace denoted by the
+the set comprising the namespace denoted by the
 \grammarterm{qualified-namespace-specifier}.
 
 \item If $D$ is a \grammarterm{using-declaration}, the basis is the union
@@ -702,45 +765,6 @@ the \grammarterm{using-declarator}{s}.
 
 \item Otherwise, the basis is empty.
 \end{itemize}
-
-The \term{type-basis} of a type $T$ is
-\begin{itemize}
-\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
-the unqualified type.
-\item If $T$ is a member of an unknown specialization, the type-basis
-is the type-basis of that specialization.
-\item If $T$ is a class template specialization, the type-basis
-is the set containing
-\begin{itemize}
-\item the primary template, and
-\item the entities designated by
-non-type template arguments and
-template template arguments (if any), and
-\item the elements of the type-bases
-of the type template arguments (if any).
-\end{itemize}
-\item If $T$ is a class type that is not a class template specialization
-or is an enumeration type,
-the type-basis is the set containing $T$.
-\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
-type-basis is the type-basis of $U$.
-\item If $T$ is a function type, the type-basis is the union of the
-type-basis of the return type and the type-bases of the parameter types.
-\item If $T$ is a pointer to data member of a class $X$, the type-basis is
-the union of the type-basis of $X$ and the type-basis of the member type.
-\item If $T$ is a pointer to member function type of a class $X$, the
-type-basis is the union of the type-basis of $X$ and the type-basis of
-the function type.
-\item Otherwise, the type-basis is the empty set.
-\end{itemize}
-
-A non-type template argument for a template parameter of pointer type
-that is not value-dependent designates the entity (if any) that the
-pointer points to.
-A non-type template argument for a template parameter of reference type
-that is not value-dependent designates the entity that the argument
-denotes.
-Other non-type template arguments do not designate an entity.
 
 \pnum
 \begin{note}
@@ -760,6 +784,9 @@ constexpr int g(int);
 
 template<typename T, int N>
 S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \mathtt{S2}, \mathtt{::} \}$ 
+
+template<int N>
+void h() noexcept(g(N) == N);           // \tcode{h}'s basis: $\{ \mathtt{::} \}$
 \end{codeblock}
 \end{example}
 \end{note}
@@ -771,21 +798,26 @@ is its purview excluding any \grammarterm{private-module-fragment}.
 % Note: don't need to handle unqualified-ids here, because the
 % "named by an expression" rule in bullet 2 covers functions.
 \pnum
-Certain declarations in a global module fragment are \term{referenced}.
-Given an
-\grammarterm{identifier}%,
-%\grammarterm{unqualified-id},
-or expression
+Certain declarations in a global module fragment are \term{referenced}
+as described below.
+Except for declarations of functions and function templates,
+all declarations
+named by
+\grammarterm{id-expression}{s},
+\grammarterm{namespace-name}{s},
+\grammarterm{type-name}{s},
+\grammarterm{template-name}{s}, and
+\grammarterm{concept-name}{s}
+appearing
+in an interface purview or
+in a template instantiation whose point of instantiation is in that interface purview
+are referenced.
+Given an expression
 in an interface purview or
 in a template instantiation whose point of instantiation is in that interface purview:
 \begin{itemize}
 \item
-For an \grammarterm{identifier}, % or \grammarterm{unqualified-id},
-if name lookup for it finds a unique result,
-the declarations found are referenced.
-\item
-For an expression,
-the declarations of any function
+The declarations of any function
 named by the expression (\stdref{basic.def.odr}{6.2})
 are referenced.
 \item
@@ -803,11 +835,15 @@ with no associated namespaces or entities.
 All declarations found by name lookup
 for the corresponding name
 in the synthesized expression are referenced.
+\item
+For an expression that takes the address of an overloaded function (\stdref{over.over}{11.4})
+for which the overload cannot be resolved because the target type is dependent,
+all members of the set of overload functions are referenced.
 \end{itemize}
 The declarations of entities in the basis of a referenced declaration are referenced, recursively.
 
 \pnum
-A declaration in the global module fragment is \term{discarded} if it
+A declaration \tcode{D} in the global module fragment is \term{discarded} if \tcode{D}
 is not referenced by the module unit.
 \begin{note}
 A discarded declaration is neither reachable
@@ -831,16 +867,16 @@ namespace N {
 module;
 #include "foo.h"
 export module M;
-// \tcode{N::f} is reachable via argument-dependent name lookup result
-// in context of template definition
 template<typename T> int use_f() { N::X x; return f(x); }
-// \tcode{N::g} is not reachable because \tcode{g} is a dependent name
-// in context of template definition
+  // \tcode{N::f} is reachable via argument-dependent name lookup result
+  // in context of template definition
 template<typename T> int use_g() { N::X x; return g((T(), x)); }
-// \tcode{N::h} is reachable because \tcode{use_h<int>} has a point of
-// instantiation in the module unit \tcode{M}
+  // \tcode{N::g} is not reachable because \tcode{g} is a dependent name
+  // in context of template definition
 template<typename T> int use_h() { N::X x; return h((T(), x)); }
 int k = use_h<int>();
+  // \tcode{N::h} is reachable because \tcode{use_h<int>} has a point of
+  // instantiation in the module unit \tcode{M}
 
 // module \tcode{M} implementation
 module M;
