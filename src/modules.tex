@@ -643,207 +643,101 @@ only preprocessing directives can appear
 in the global module fragment (\ref{cpp.glob.frag}).
 \exitnote
 
-%% Changes: entities now include their declaration context in their basis.
-%% We need to retain those contexts so we can mangle the entity.
-
 \pnum
-A non-type template argument for a template parameter of pointer type
-that is not value-dependent designates the entity (if any) that the
-pointer points to.
-A non-type template argument for a template parameter of reference type
-that is not value-dependent designates the entity that the argument
-denotes.
-Other non-type template arguments do not designate an entity.
-
-\pnum
-The \term{template-specialization-basis} of a template specialization is
-the set comprising
-\begin{itemize}
-\item the primary template, and
-\item the entities designated by
-non-type template arguments and
-template template arguments (if any), and
-\item the elements of the type-bases
-of the type template arguments (if any).
-\end{itemize}
-
-\pnum
-The \term{type-basis} of a type $T$ is
-\begin{itemize}
-\item If $T$ is a cv-qualified type, the type-basis is the type-basis of
-the unqualified type.
-\item If $T$ is a member of an unknown specialization, the type-basis
-is the type-basis of that specialization.
-\item If $T$ is a class template specialization, the type-basis
-is the template-specialization-basis of $T$.
-%is the set comprising
-%\begin{itemize}
-%\item the primary template, and
-%\item the entities designated by
-%non-type template arguments and
-%template template arguments (if any), and
-%\item the elements of the type-bases
-%of the type template arguments (if any).
-%\end{itemize}
-\item If $T$ is a class type that is not a class template specialization
-or is an enumeration type,
-the type-basis is the set comprising $T$.
-\item If $T$ is a reference to $U$, or a pointer to $U$, or an array of $U$, the
-type-basis is the type-basis of $U$.
-\item If $T$ is a function type, the type-basis is the union of the
-type-basis of the return type and the type-bases of the parameter types.
-\item If $T$ is a pointer to data member of a class $X$, the type-basis is
-the union of the type-basis of $X$ and the type-basis of the member type.
-\item If $T$ is a pointer to member function type of a class $X$, the
-type-basis is the union of the type-basis of $X$ and the type-basis of
-the function type.
-\item Otherwise, the type-basis is the empty set.
-\begin{note}
-This applies to template type parameters and to fundamental types.
-\end{note}
-\end{itemize}
-
-\pnum
-The \term{enclosing context} of a declaration $D$ is the set comprising
-the functions and namespaces enclosing $D$,
-the namespace, class, or class template of which $D$ is a member (if any),
-and the closure types of any \grammarterm{lambda-expression}{s} enclosing $D$.
-
-\pnum
-The \term{basis} of a declaration $D$ is a set of entites determined as follows:
-\begin{itemize}
-\item If $D$ declares a \grammarterm{typedef-name}%
-\footnote{An \grammarterm{alias-declaration} declares a \grammarterm{typedef-name}.},
-the basis is the type-basis of the aliased type.
-
-\item If $D$ declares a variable or function,
-the basis is the union of
-the type-basis of the type of that variable or function
-and the enclosing context of $D$.
-
-\item If $D$ defines a class type, the basis is the union of the
-type-bases of its direct base classes (if any), and the bases of
-its \grammarterm{member-declaration}{s},
-and the enclosing context of $D$.
-
-\item If $D$ is a \grammarterm{template-declaration},
-the basis is the union
-of
+A declaration $D$ is \term{decl-reachable} from a declaration $S$ if:
 \begin{itemize}
 \item
-the basis of its \grammarterm{declaration},
+$D$ is not a function or function template and
+$S$ contains an
+\grammarterm{id-expression},
+\grammarterm{namespace-name},
+\grammarterm{type-name},
+\grammarterm{template-name}, or
+\grammarterm{concept-name}
+naming $D$, or
+
 \item
-the set of entities (if any) designated by
-the default template arguments for
-non-type template parameters and template template parameters,
+$D$ is a function or function template and
+is named by an expression (\stdref{basic.def.odr}{6.2})
+appearing in $S$, or
+
 \item
-the type-bases of the default type template arguments,
-\item
-the enclosing context of $D$, and
-\item
-if $D$ declares a partial specialization,
-the set comprising the primary template.
-\end{itemize}
-
-\item If $D$ is an \grammarterm{explicit-instantiation}
-or an \grammarterm{explicit-specialization}, the basis is the union of
-the basis of the \grammarterm{declaration} of $D$ and
-%the set comprising the primary template.
-the template-specialization-basis of the specialization.
-
-\item If $D$ is a \grammarterm{namespace-definition}, the basis is
-the set comprising the innermost enclosing namespace, if any,
-and otherwise is the empty set.
-
-\item If $D$ is a \grammarterm{namespace-alias-definition}, the basis is
-the set comprising the namespace denoted by the
-\grammarterm{qualified-namespace-specifier}.
-
-\item If $D$ is a \grammarterm{using-declaration}, the basis is the union
-of the bases of all the declarations introduced by
-the \grammarterm{using-declarator}{s}.
-
-\item Otherwise, the basis is empty.
-\end{itemize}
-
-\pnum
-\begin{note}
-The basis of a declaration
-does not include entities used in expressions,
-other than those designated by non-type template arguments.
-\begin{example}
-\begin{codeblock}
-const int size = 2;
-int ary1[size];                         // \tcode{size} not in \tcode{ary1}'s basis
-constexpr int identity(int x) { return x; }
-int ary2[identity(2)];                  // \tcode{identity} not in \tcode{ary2}'s basis
-
-template<typename> struct S;
-template<typename, int> struct S2;
-constexpr int g(int);
-
-template<typename T, int N>
-S<S2<T, g(N)>> f();                     // \tcode{f}'s basis: $\{ \mathtt{S}, \mathtt{S2}, \mathtt{::} \}$ 
-
-template<int N>
-void h() noexcept(g(N) == N);           // \tcode{h}'s basis: $\{ \mathtt{::} \}$
-\end{codeblock}
-\end{example}
-\end{note}
-
-\pnum
-The \term{interface purview} of a module unit
-is its purview excluding any \grammarterm{private-module-fragment}.
-
-\pnum
-Certain declarations in the global module fragment of a module unit $U$
-are \term{gmf-referenced}
-as described below.
-Except for declarations of functions and function templates,
-all declarations
-named by
-\grammarterm{id-expression}{s},
-\grammarterm{namespace-name}{s},
-\grammarterm{type-name}{s},
-\grammarterm{template-name}{s}, and
-\grammarterm{concept-name}{s}
-appearing
-in the interface purview of $U$ or
-in a template instantiation whose point of instantiation is in that interface purview
-are gmf-referenced.
-Given an expression
-in the interface purview of $U$ or
-in a template instantiation whose point of instantiation is in that interface purview:
-\begin{itemize}
-\item
-The declarations of any function
-named by the expression (\stdref{basic.def.odr}{6.2})
-are gmf-referenced.
-\item
-For an expression of the form
+$S$ contains an expression \tcode{E} of the form
 
 \begin{ncsimplebnf}
 postfix-expression \terminal{(} expression-list\opt{} \terminal{)}
 \end{ncsimplebnf}
 whose \grammarterm{postfix-expression} denotes a dependent name,
 or for an operator expression whose operator denotes a dependent name,
-consider an expression synthesized from it
+and $D$ is found by name lookup for the corresponding name
+in an expression synthesized from \tcode{E}
 by replacing each type-dependent argument or operand
 with a value of a placeholder type
-with no associated namespaces or entities.
-All declarations found by name lookup
-for the corresponding name
-in the synthesized expression are gmf-referenced.
+with no associated namespaces or entities, or
+
 \item
-For an expression that takes the address of an overloaded function (\stdref{over.over}{11.4})
-for which the overload cannot be resolved because the target type is dependent,
-all members of the set of overload functions are gmf-referenced.
+$S$ contains an expression that
+takes the address of an overloaded function (\stdref{over.over}{11.4})
+whose set of overloads contains $D$ and
+for which the target type is dependent, or
+
+\item
+there exists a declaration $M$, not of a namespace, for which
+$M$ is decl-reachable from $S$ and either
+\begin{itemize}
+\item
+$D$ is decl-reachable from $M$, or
+\item
+$D$ redeclares $M$ or $M$ redeclares $D$
+and $D$ is neither a friend declaration
+nor a block-scope declaration, or
+\item
+$D$ is a namespace and $M$ is a member of $D$, or
+\item
+one of $M$ and $D$ is a class or class template
+and the other is a member or friend declaration
+of that class or class template, or
+\item
+one of $D$ and $M$ is an enumeration
+and the other is an enumerator of that enumeration, or
+\item
+$D$ is a function and $M$ is declared in $D$, or
+\item
+$D$ is a closure type and $M$ is declared in
+the \grammarterm{lambda-expression} corresponding to $D$, or
+\item
+one of $M$ and $D$ is a template and the other is
+a partial or explicit specialization or
+an implicit or explicit instantiation of that template, or
+\item 
+one of $M$ and $D$ is a class or enumeration type
+and the other introduces a typedef name for linkage purposes for that type,
 \end{itemize}
-The declarations of entities in the basis of a gmf-referenced declaration are gmf-referenced, recursively.
+\end{itemize}
+except as follows:
+\begin{itemize}
+\item
+it is unspecified whether refernces to
+\grammarterm{alias-declaration}{s},
+\tcode{typedef} declarations,
+\grammarterm{using-declaration}{s}, and
+\grammarterm{namespace-alias-declaration}{s}
+are replaced by the declarations they name
+prior to this determination, and
+
+\item
+it is unspecified whether non-value-dependent
+constant expressions are replaced by the result of
+constant evaluation
+prior to this determination.
+\end{itemize}
 
 \pnum
-A declaration \tcode{D} in a global module fragment is \term{discarded} if \tcode{D}
-is not gmf-referenced.
+A declaration \tcode{D} in a global module fragment of a module unit
+is \term{discarded} if \tcode{D}
+is not decl-reachable from any \grammarterm{top-level-declaration}
+in the \grammarterm{top-level-declaration-seq}
+of the \grammarterm{translation unit}.
 \begin{note}
 A discarded declaration is neither reachable
 nor visible to name lookup outside the module unit,
@@ -852,6 +746,26 @@ nor in template instantiations whose points of instantiation
 even when the instantiation context (\ref{module.context})
 includes the module unit.
 \end{note}
+
+\pnum
+\begin{example}
+\begin{codeblock}
+const int size = 2;
+int ary1[size];                 // unspecified whether \tcode{size} is decl-reachable from \tcode{ary1}
+constexpr int identity(int x) { return x; }
+int ary2[identity(2)];          // unspecified whether \tcode{identity} is decl-reachable from \tcode{ary2}
+
+template<typename> struct S;
+template<typename, int> struct S2;
+constexpr int g(int);
+
+template<typename T, int N>
+S<S2<T, g(N)>> f();             // \tcode{S}, \tcode{S2}, \tcode{g}, and \tcode{::} are decl-reachable from \tcode{f}
+
+template<int N>
+void h() noexcept(g(N) == N);   // \tcode{g} and \tcode{::} are decl-reachable from \tcode{h}
+\end{codeblock}
+\end{example}
 
 \pnum
 \begin{example}
@@ -870,27 +784,28 @@ module;
 #include "foo.h"
 export module M;
 template<typename T> int use_f() {
-  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
-  return f(x);               // gmf-references \tcode{N::f} and \tcode{N::d}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::}
+  N::X x;                    // \tcode{N::X}, \tcode{N}, and \tcode{::} are decl-reachable from \tcode{use_f}
+  return f(x);               // \tcode{N::f} and \tcode{N::d} are decl-reachable from \tcode{use_f}
 }
 template<typename T> int use_g() {
-  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
-  return g((T(), x));        // does not gmf-reference any declarations
+  N::X x;                    // \tcode{N::X}, \tcode{N}, and \tcode{::} are decl-reachable from \tcode{use_f}
+  return g((T(), x));        // \tcode{N::g} is not decl-reachable from \tcode{use_g}
 }
 template<typename T> int use_h() {
-  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
-  return h((T(), x));        // does not gmf-reference any declarations in template definition, 
-                             // gmf-references \tcode{N::h}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::} in instantiation of \tcode{use_h<int>}
+  N::X x;                    // \tcode{N::X}, \tcode{N}, and \tcode{::} are decl-reachable from \tcode{use_h}
+  return h((T(), x));        // \tcode{N::h} is not decl-reachable from \tcode{use_h}, but
+                             // \tcode{N::h} is decl-reachable from \tcode{use_h<int>}
 }
 int k = use_h<int>();
-  // \tcode{N::h} is gmf-referenced because \tcode{use_h<int>} has a point of
-  // instantiation in the module unit \tcode{M}
+  // \tcode{use_h<int>} is decl-reachable from \tcode{k}, so
+  // \tcode{N::h} is decl-reachable from \tcode{k}
 
 // module \tcode{M} implementation
 module M;
 int a = use_f<int>(); // OK
-int b = use_g<int>(); // error: no viable function for call to \tcode{g} because
-                      // \tcode{g} is not gmf-referenced so is discarded
+int b = use_g<int>(); // error: no viable function for call to \tcode{g};
+                      // \tcode{g} is not decl-reachable from purview of
+                      // module \tcode{M}{'s} interface, so is discarded
 int c = use_h<int>(); // OK
 \end{codeblock}
 \end{example}
