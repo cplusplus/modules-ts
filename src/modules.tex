@@ -795,10 +795,9 @@ void h() noexcept(g(N) == N);           // \tcode{h}'s basis: $\{ \mathtt{::} \}
 The \term{interface purview} of a module unit
 is its purview excluding any \grammarterm{private-module-fragment}.
 
-% Note: don't need to handle unqualified-ids here, because the
-% "named by an expression" rule in bullet 2 covers functions.
 \pnum
-Certain declarations in a global module fragment are \term{gmf-referenced}
+Certain declarations in the global module fragment of a module unit $U$
+are \term{gmf-referenced}
 as described below.
 Except for declarations of functions and function templates,
 all declarations
@@ -809,11 +808,11 @@ named by
 \grammarterm{template-name}{s}, and
 \grammarterm{concept-name}{s}
 appearing
-in an interface purview or
+in the interface purview of $U$ or
 in a template instantiation whose point of instantiation is in that interface purview
 are gmf-referenced.
 Given an expression
-in an interface purview or
+in the interface purview of $U$ or
 in a template instantiation whose point of instantiation is in that interface purview:
 \begin{itemize}
 \item
@@ -843,8 +842,8 @@ all members of the set of overload functions are gmf-referenced.
 The declarations of entities in the basis of a gmf-referenced declaration are gmf-referenced, recursively.
 
 \pnum
-A declaration \tcode{D} in the global module fragment is \term{discarded} if \tcode{D}
-is not gmf-referenced by the module unit.
+A declaration \tcode{D} in a global module fragment is \term{discarded} if \tcode{D}
+is not gmf-referenced.
 \begin{note}
 A discarded declaration is neither reachable
 nor visible to name lookup outside the module unit,
@@ -853,12 +852,15 @@ nor in template instantiations whose points of instantiation
 even when the instantiation context (\ref{module.context})
 includes the module unit.
 \end{note}
+
+\pnum
 \begin{example}
 \begin{codeblock}
 // \tcode{"foo.h"}
 namespace N {
   struct X {};
-  int f(X);
+  int d();
+  int f(X, int = d());
   int g(X);
   int h(X);
 }
@@ -867,22 +869,30 @@ namespace N {
 module;
 #include "foo.h"
 export module M;
-template<typename T> int use_f() { N::X x; return f(x); }
-  // \tcode{N::f} is reachable via argument-dependent name lookup result
-  // in context of template definition
-template<typename T> int use_g() { N::X x; return g((T(), x)); }
-  // \tcode{N::g} is not reachable because \tcode{g} is a dependent name
-  // in context of template definition
-template<typename T> int use_h() { N::X x; return h((T(), x)); }
+template<typename T> int use_f() {
+  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
+  return f(x);               // gmf-references \tcode{N::f}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::}
+                             // does not gmf-reference \tcode{N::d}
+}
+template<typename T> int use_g() {
+  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
+  return g((T(), x));        // does not gmf-reference any declarations
+}
+template<typename T> int use_h() {
+  N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
+  return h((T(), x));        // does not gmf-reference any declarations in template definition, 
+                             // gmf-references \tcode{N::h}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::} in instantiation of \tcode{use_h<int>}
+}
 int k = use_h<int>();
-  // \tcode{N::h} is reachable because \tcode{use_h<int>} has a point of
+  // \tcode{N::h} is gmf-referenced because \tcode{use_h<int>} has a point of
   // instantiation in the module unit \tcode{M}
 
 // module \tcode{M} implementation
 module M;
-int a = use_f<int>(); // ok
-int b = use_g<int>(); // error: no viable function for call to \tcode{g}
-int c = use_h<int>(); // ok
+int a = use_f<int>(); // OK
+int b = use_g<int>(); // error: no viable function for call to \tcode{g} because
+                      // \tcode{g} is not gmf-referenced so is discarded
+int c = use_h<int>(); // OK
 \end{codeblock}
 \end{example}
 \end{std.txt}
@@ -891,7 +901,7 @@ int c = use_h<int>(); // ok
 
 \begin{std.txt}\color{addclr}
 \pnum
-The \term{instantiation context} is a set of locations within the program
+The \term{instantiation context} is a set of points within the program
 that determines which names are visible to argument-dependent name lookup
 (\ref{basic.lookup.argdep})
 and which declarations are reachable (\ref{module.reach})
@@ -931,8 +941,9 @@ the instantiation context comprises the point of instantiation
 of the template.
 
 \pnum
-In any other case, the instantiation context at a program point comprises
-that program point.
+In any other case, the instantiation context
+at a point within the program
+comprises that point.
 
 \pnum
 \begin{example}
@@ -986,12 +997,11 @@ void test() {
 
 \begin{std.txt}\color{addclr}
 \pnum
-A translation unit is \term{necessarily reachable} from a program point if
-it is a module interface unit on which the translation unit containing the
-program point has an interface dependency, or
-it is a translation unit that the translation unit containing the
-program point imports,
-prior to that program point (\ref{module.import}).
+A translation unit $U$ is \term{necessarily reachable} from a point $P$ if
+$U$ is a module interface unit on which the translation unit containing $P$
+has an interface dependency, or
+the translation unit containing $P$ imports $U$,
+in either case prior to $P$ (\ref{module.import}).
 \enternote
 While module interface units are reachable even when they are only
 transitively imported via a non-exported import declaration,
@@ -1007,8 +1017,11 @@ and under what circumstances.%
 \footnote{Implementations are not required to prevent the semantic effects of
 additional translation units involved in the compilation from being
 observed.}
-Programs intended to be portable should avoid
-depending on the reachability of any additional translation units.
+\begin{note}
+It is advisable to avoid
+depending on the reachability of any additional translation units
+in programs intending to be portable.
+\end{note}
 
 \pnum
 A declaration is \term{reachable} if, for any program point in the
