@@ -243,7 +243,7 @@ int &c = n;                     // OK
   \item a \grammarterm{namespace-definition} that contains an
         exported declaration, or
   \item a declaration within a header unit (\ref{module.import})
-        that satisfies the rules for an exported declaration below.
+        that introduces at least one name.
   \end{itemize}
   The \term{interface} of a module \tcode{M} is the set of all
   exported declarations within its purview.
@@ -294,7 +294,8 @@ int &c = n;                     // OK
 
   \pnum
   If the declaration is a \grammarterm{using-declaration}
-  (9.8 [namespace.udecl]), all entities to which all of the
+  (9.8 [namespace.udecl]) and is not within a header unit,
+  all entities to which all of the
   \grammarterm{using-declarator}{s} ultimately refer (if any)
   shall have been introduced with a name having external linkage.
 \begin{example}
