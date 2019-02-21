@@ -871,8 +871,7 @@ module;
 export module M;
 template<typename T> int use_f() {
   N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
-  return f(x);               // gmf-references \tcode{N::f}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::}
-                             // does not gmf-reference \tcode{N::d}
+  return f(x);               // gmf-references \tcode{N::f} and \tcode{N::d}, and indirectly \tcode{N::X}, \tcode{N}, and \tcode{::}
 }
 template<typename T> int use_g() {
   N::X x;                    // gmf-references \tcode{N::X}, \tcode{N}, and indirectly \tcode{::}
@@ -975,19 +974,17 @@ export template<typename T> void g(T t) {
 import M1;
 import M2;
 void test() {
-  // OK: the instantiation context of \tcode{foo<int, X>} comprises
-  // the point at the end of translation unit \#1,
-  // the point at the end of translation unit \#2, and
-  // the point of the call to \tcode{f(0)} below, so
-  // the definition of \tcode{X} is reachable (\ref{module.reach})
-  f(0);
+  f(0); // OK: the instantiation context of \tcode{foo<int, X>} comprises
+        // the point at the end of translation unit \#1,
+        // the point at the end of translation unit \#2, and
+        // the point of the call to \tcode{f(0)} below, so
+        // the definition of \tcode{X} is reachable (\ref{module.reach})
 
-  // the instantiation context of \tcode{foo<int, X>} comprises
-  // the point at the end of translation unit \#1,
-  // the point at the end of translation unit \#3, and
-  // the point of the call to \tcode{g(0)} below, so
-  // the definition of \tcode{X} is not necessarily reachable
-  g(0);
+  g(0); // the instantiation context of \tcode{foo<int, X>} comprises
+        // the point at the end of translation unit \#1,
+        // the point at the end of translation unit \#3, and
+        // the point of the call to \tcode{g(0)} below, so
+        // the definition of \tcode{X} is not necessarily reachable
 }
 \end{codeblock}
 \end{example}
