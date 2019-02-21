@@ -1012,7 +1012,7 @@ to name lookup (\ref{basic.scope.namespace}).
 \pnum
 All translation units that are necessarily reachable are \term{reachable}.
 It is unspecified whether additional translation units on which the
-program point has an interface dependency are considered reachable,
+point within the program has an interface dependency are considered reachable,
 and under what circumstances.%
 \footnote{Implementations are not required to prevent the semantic effects of
 additional translation units involved in the compilation from being
@@ -1024,22 +1024,22 @@ in programs intending to be portable.
 \end{note}
 
 \pnum
-A declaration is \term{reachable} if, for any program point in the
+A declaration $D$ is \term{reachable} or \term{necessarily reachable} if,
+for any point $P$ in the
 instantiation context (\ref{module.context}),
 \begin{itemize}
-\item it appears prior to that program point in the same translation unit, or
-\item it is not discarded (\ref{module.global}),
-appears in a translation unit that is reachable from that program point,
+\item $D$ appears prior to $P$ in the same translation unit, or
+\item $D$ is not discarded (\ref{module.global}),
+appears in a translation unit that is
+reachable or necessarily reachable from $P$, respectively,
 and
 either does not appear within a \grammarterm{private-module-fragment}
 or appears in a \grammarterm{private-module-fragment}
-of the module containing the program point.
+of the module containing $P$.
 \end{itemize}
 \enternote
 Whether a declaration is exported has no bearing on whether it is reachable.
 \exitnote
-A declaration is \term{necessarily reachable} if it is reachable
-considering only translation units that are necessarily reachable.
 
 \pnum
 The \term{reachable semantic properties} of an entity within a context

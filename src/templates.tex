@@ -38,21 +38,56 @@ Modify paragraph 12/4 as follows:
 \rSec1[temp.res]{Name resolution}
 \setcounter{subsection}{3}
 \rSec2[temp.dep.res]{Dependent name resolution}
+\rSec3[temp.point]{Point of instantiation}
 
-Change in 12.7.4/1:
+\noindent
+Delete paragraph 12.7.4.1/7:
+\begin{std.txt}
+\pnum[7]
+\removed{The instantiation context of an expression that depends on
+the template arguments is the set of declarations with external
+linkage declared prior to the point of instantiation of the
+template specialization in the same translation unit.}
+\end{std.txt}
 
+\noindent
+Change in paragraph \ref{temp.point}/8:
+\begin{std.txt}
+\pnum[8]
+in addition to the points of instantiation described above, for any such
+specialization that has a point of instantiation within the
+\added{\grammarterm{top-level-declaration-seq} of the}
+translation unit,
+\added{prior to the \grammarterm{private-module-fragment} (if any),
+the point after the \grammarterm{top-level-declaration-seq}
+of the \grammarterm{translation-unit}
+is also considered a point of instantiation,
+and for any such specialization that has a point of instantiation
+within the \grammarterm{private-module-fragment},}
+the end of the translation unit is also
+considered a point of instantiation.
+\end{std.txt}
+
+\rSec3[temp.dep.candidate]{Candidate functions}
+
+\noindent
+Modify paragraph 12.7.4.2/1 as follows
 \begin{std.txt}
 \pnum[1]
-In resolving dependent names, names from the following sources are considered:
-\begin{itemize}
-\item
-Declarations that are visible at the point of definition of the template.
-\item
-Declarations from namespaces associated with the types of the function
-arguments both from the instantiation context
-\removed{(12.7.4.1)} \added{(\ref{module.context})}
-and from the definition context.
-\end{itemize}
+\ldots
+If the call would be ill-formed or would find a better match had the 
+lookup within the associated namespaces considered all the function 
+declarations with external   \added{or module}
+linkage introduced in those namespaces in all
+translation units, not just considering those declarations found in the 
+template definition and template instantiation contexts, then the program 
+has undefined behavior.
+\end{std.txt}
+
+Append new paragraphs as follows:
+
+\begin{std.txt}
+\pnum[2]
 \enterexample\color{addclr}
 \begin{codeblock}
 // header file \tcode{"X.h"}
@@ -85,11 +120,7 @@ void h(Q::X x) {
 }
 \end{codeblock}
 \exitexample
-\end{std.txt}
 
-\noindent
-Add new paragraphs to 12.7.4:
-\begin{std.txt}
 \color{addclr}
 \pnum
 \enterexample
@@ -195,52 +226,3 @@ void k() {
 \end{codeblock}
 \exitexample
 \end{std.txt}
-
-\rSec3[temp.point]{Point of instantiation}
-
-\noindent
-Delete paragraph 12.7.4.1/7:
-\begin{std.txt}
-\pnum[7]
-\removed{The instantiation context of an expression that depends on
-the template arguments is the set of declarations with external
-linkage declared prior to the point of instantiation of the
-template specialization in the same translation unit.}
-\end{std.txt}
-
-\noindent
-Change in paragraph \ref{temp.point}/8:
-\begin{std.txt}
-\pnum[8]
-in addition to the points of instantiation described above, for any such
-specialization that has a point of instantiation within the
-\added{\grammarterm{top-level-declaration-seq} of the}
-translation unit,
-\added{prior to the \grammarterm{private-module-fragment} (if any),
-the point after the \grammarterm{top-level-declaration-seq}
-of the \grammarterm{translation-unit}
-is also considered a point of instantiation,
-and for any such specialization that has a point of instantiation
-within the \grammarterm{private-module-fragment},}
-the end of the translation unit is also
-considered a point of instantiation.
-\end{std.txt}
-
-\rSec3[temp.dep.candidate]{Candidate functions}
-
-\noindent
-Modify paragraph 12.7.4.2/1 as follows
-\begin{std.txt}
-\pnum[1]
-\ldots
-If the call would be ill-formed or would find a better match had the 
-lookup within the associated namespaces considered all the function 
-declarations with external   \added{or module}
-linkage introduced in those namespaces in all
-translation units, not just considering those declarations found in the 
-template definition and template instantiation contexts, then the program 
-has undefined behavior.
-\end{std.txt}
-
-
-
