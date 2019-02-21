@@ -798,7 +798,7 @@ is its purview excluding any \grammarterm{private-module-fragment}.
 % Note: don't need to handle unqualified-ids here, because the
 % "named by an expression" rule in bullet 2 covers functions.
 \pnum
-Certain declarations in a global module fragment are \term{referenced}
+Certain declarations in a global module fragment are \term{gmf-referenced}
 as described below.
 Except for declarations of functions and function templates,
 all declarations
@@ -811,7 +811,7 @@ named by
 appearing
 in an interface purview or
 in a template instantiation whose point of instantiation is in that interface purview
-are referenced.
+are gmf-referenced.
 Given an expression
 in an interface purview or
 in a template instantiation whose point of instantiation is in that interface purview:
@@ -819,7 +819,7 @@ in a template instantiation whose point of instantiation is in that interface pu
 \item
 The declarations of any function
 named by the expression (\stdref{basic.def.odr}{6.2})
-are referenced.
+are gmf-referenced.
 \item
 For an expression of the form
 
@@ -834,17 +834,17 @@ with a value of a placeholder type
 with no associated namespaces or entities.
 All declarations found by name lookup
 for the corresponding name
-in the synthesized expression are referenced.
+in the synthesized expression are gmf-referenced.
 \item
 For an expression that takes the address of an overloaded function (\stdref{over.over}{11.4})
 for which the overload cannot be resolved because the target type is dependent,
-all members of the set of overload functions are referenced.
+all members of the set of overload functions are gmf-referenced.
 \end{itemize}
-The declarations of entities in the basis of a referenced declaration are referenced, recursively.
+The declarations of entities in the basis of a gmf-referenced declaration are gmf-referenced, recursively.
 
 \pnum
 A declaration \tcode{D} in the global module fragment is \term{discarded} if \tcode{D}
-is not referenced by the module unit.
+is not gmf-referenced by the module unit.
 \begin{note}
 A discarded declaration is neither reachable
 nor visible to name lookup outside the module unit,
