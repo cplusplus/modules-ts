@@ -17,21 +17,13 @@ Add new entry as follows:
 \textbf{Rationale:} Required for new features.\\
 \textbf{Effect on original feature:}
 When the identifier \tcode{import}
-is followed by a \tcode{<} or \tcode{"} character
-with intervening whitespace,
+is followed by a \tcode{<} character,
 a \grammarterm{header-name} token may be formed.
 \begin{example}
 \begin{codeblock}
 template<typename> class import {};
-void f(import <int>);           // ill-formed; previously well-formed
-void f(import<int>);            // OK
-
-#define import "foo"
-const char *p = import "bar";   // ill-formed: cannot concatenate \grammarterm{header-name} tokens
-
-#define EMPTY
-#define import EMPTY "foo"
-const char *q = import"bar";    // OK
+import<int> f();                // ill-formed; previously well-formed
+::import<int> g();              // OK
 \end{codeblock}
 \end{example}
 \end{std.txt}
@@ -54,12 +46,12 @@ in this International Standard.
 \begin{example}
 \begin{codeblock}
 class module;
-module *m;        // ill-formed; previously well-formed
-::module *m;      // OK
+module *m1;       // ill-formed; previously well-formed
+::module *m2;     // OK
 
-class import;
-import j;         // was variable declaration; now \grammarterm{import-declaration}
-::import j;       // variable declaration
+class import {};
+import j1;        // was variable declaration; now \grammarterm{import-declaration}
+::import j2;      // variable declaration
 \end{codeblock}
 \end{example}
 \end{std.txt}

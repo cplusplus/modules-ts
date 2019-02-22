@@ -187,7 +187,7 @@ within the \grammarterm{header-name-tokens} or
 \grammarterm{pp-import-suffix} of another \grammarterm{pp-import}.
 The \tcode{;} \grammarterm{preprocessing-token}
 terminating a \grammarterm{pp-import}
-shall not be produced by
+shall not have been produced by
 macro replacement (\stdref{cpp.replace}{14.3}).
 The \term{point of macro import} for a \grammarterm{pp-import} is
 immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
@@ -262,7 +262,7 @@ particular macro definition is active.
 // translation unit b.h
 import "a.h"; // point of definition of \#1, \#2, and \#3, point of undefinition of \#1 in \tcode{b.h}
 #define X 456 // OK, \#1 is not active
-#define Y 6   // ill-formed; \#2 is active
+#define Y 6   // error: \#2 is active
 \end{codeblock}
 
 \begin{codeblock}
@@ -276,7 +276,7 @@ import "a.h"; // point of definition of \#1, \#2, and \#3, point of undefinition
 import "a.h"; // point of definition of \#1, \#2, and \#3, point of undefinition of \#1 in \tcode{d.h}
 import "c.h"; // point of definition of \#4 and \#5 in \tcode{d.h}
 int a = Y;    // OK, active macro definitions \#2 and \#3 are valid redefinitions
-int c = Z;    // ill-formed; active macro definitions \#2 and \#3 are not valid redefinitions of \tcode{Z}
+int c = Z;    // error: active macro definitions \#2 and \#3 are not valid redefinitions of \tcode{Z}
 \end{codeblock}
 \end{example}
 \end{std.txt}

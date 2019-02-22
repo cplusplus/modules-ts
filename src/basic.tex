@@ -114,17 +114,17 @@ Modify paragraph 6.3.6/1 as follows:
 \end{before}
 \begin{after}
 \added{%
-If a translation unit $M$ is imported into a translation unit $N$ (\ref{module.import}),
-the potential scope of a name $X$ declared with namespace scope in $M$
+If a translation unit $Q$ is imported into a translation unit $R$ (\ref{module.import}),
+the potential scope of a name $X$ declared with namespace scope in $Q$
 is extended to include the portion of the corresponding namespace
-scope in $N$ following the first \grammarterm{module-import-declaration}
+scope in $R$ following the first \grammarterm{module-import-declaration}
 or \grammarterm{module-declaration}
-in $N$ that imports $M$ (directly or indirectly) if
+in $R$ that imports $Q$ (directly or indirectly) if
 } \color{addclr}
 \begin{itemize}
 \item \added{$X$ does not have internal linkage, and}
-\item \added{$X$ is declared after the \grammarterm{module-declaration} in $M$ (if any), and}
-\item \added{either $X$ is exported or $M$ and $N$ are part of the same module.}
+\item \added{$X$ is declared after the \grammarterm{module-declaration} in $Q$ (if any), and}
+\item \added{either $X$ is exported or $Q$ and $R$ are part of the same module.}
 \end{itemize}
 \end{after}
   \color{addclr}
@@ -140,16 +140,16 @@ in $N$ that imports $M$ (directly or indirectly) if
    \enterexample}
    \begin{codeblock}
     // Translation unit \#1
-    export module M;
+    export module Q;
     export int sq(int i) { return i*i; }
 
     // Translation unit \#2
-    export module N;
-    export import M;
+    export module R;
+    export import Q;
 
     // Translation unit \#3
-    import N;
-    int main() { return sq(9); }       // OK: \tcode{sq} from module \tcode{M}
+    import R;
+    int main() { return sq(9); }       // OK: \tcode{sq} from module \tcode{Q}
     \end{codeblock}
     \added{
     \exitexample
