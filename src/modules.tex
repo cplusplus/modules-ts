@@ -888,8 +888,8 @@ export module M1;
 import "defn.h";        // provides \tcode{struct X \{\};}
 import stuff;
 export template<typename T> void f(T t) {
- X x;
- foo(t, x);
+  X x;
+  foo(t, x);
 }
 
 // translation unit \#3
@@ -897,27 +897,36 @@ export module M2;
 import "decl.h";        // provides \tcode{struct X;} (not a definition)
 import stuff;
 export template<typename T> void g(T t) {
- X *x;
- bar(t, x);
+  X *x;
+  bar(t, x);
 }
 
 // translation unit \#4
 import M1;
 import M2;
 void test() {
-  f(0); // OK: the instantiation context of \tcode{foo<int, X>} comprises
-        // the point at the end of translation unit \#1,
-        // the point at the end of translation unit \#2, and
-        // the point of the call to \tcode{f(0)} below, so
-        // the definition of \tcode{X} is reachable (\ref{module.reach})
-
-  g(0); // the instantiation context of \tcode{foo<int, X>} comprises
-        // the point at the end of translation unit \#1,
-        // the point at the end of translation unit \#3, and
-        // the point of the call to \tcode{g(0)} below, so
-        // the definition of \tcode{X} is not necessarily reachable
+  f(0);
+  g(0);
 }
 \end{codeblock}
+The call to \tcode{f(0)} is valid;
+the instantiation context of \tcode{foo<int, X>} comprises
+\begin{itemize}
+\item the point at the end of translation unit \#1,
+\item the point at the end of translation unit \#2, and
+\item the point of the call to \tcode{f(0)},
+\end{itemize}
+so the definition of \tcode{X} is reachable (\ref{module.reach}).
+
+It is unspecified whether the call to \tcode{g(0)} is valid:
+the instantiation context of \tcode{bar<int, X>} comprises
+\begin{itemize}
+\item the point at the end of translation unit \#1,
+\item the point at the end of translation unit \#3, and
+\item the point of the call to \tcode{g(0)},
+\end{itemize}
+so the definition of \tcode{X} is not necessarily reachable,
+as described in \ref{module.reach}.
 \end{example}
 \end{std.txt}
 
@@ -942,8 +951,8 @@ All translation units that are necessarily reachable are \term{reachable}.
 It is unspecified whether additional translation units on which the
 point within the program has an interface dependency are considered reachable,
 and under what circumstances.%
-\footnote{Implementations are not required to prevent the semantic effects of
-additional translation units involved in the compilation from being
+\footnote{Implementations are therefore not required to prevent the semantic
+effects of additional translation units involved in the compilation from being
 observed.}
 \begin{note}
 It is advisable to avoid
@@ -952,7 +961,7 @@ in programs intending to be portable.
 \end{note}
 
 \pnum
-A declaration $D$ is \term{reachable} or \term{necessarily reachable} if,
+A declaration $D$ is \term{reachable} or \term{necessarily reachable}, respectively, if,
 for any point $P$ in the
 instantiation context (\ref{module.context}),
 \begin{itemize}
@@ -970,10 +979,9 @@ Whether a declaration is exported has no bearing on whether it is reachable.
 \exitnote
 
 \pnum
-The \term{reachable semantic properties} of an entity within a context
-are the accumulated properties of all reachable declarations of
-that entity, and determine the behavior of the entity within
-that context.
+The accumulated properties of all reachable declarations of
+an entity within a context
+determine the behavior of the entity within that context.
 \enternote
 These reachable semantic properties include type completeness,
 type definitions, initializers,
@@ -1027,9 +1035,8 @@ void g() { f(); }         // error: no reachable definition of \tcode{struct B}
 
 \pnum
 \enternote
-An entity can have reachable declarations and therefore
-reachable semantic properties even if it is not visible
-to name lookup.
+An entity can have reachable declarations
+even if it is not visible to name lookup.
 \exitnote
 \begin{example}
 \begin{codeblock}

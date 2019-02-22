@@ -268,14 +268,16 @@ Modify paragraph 6.4.2/2 as follows:
 Modify paragraph 6.4.2/4 and add /5 as follows:
 \begin{std.txt}
   \pnum[4]
-  When considering an associated namespace, the lookup is the same as
-  the lookup performed when the associated namespace is used as a
+  When considering an associated namespace \added{\tcode{N}},
+  the lookup is the same as
+  the lookup performed when \removed{the associated namespace}
+  \added{\tcode{N}} is used as a
   qualifier (6.4.3.2) except that:
   \begin{itemize}
-    \item Any \grammarterm{using-directive}{s} in the associated
-  namespace are ignored.
+    \item Any \grammarterm{using-directive}{s} in \removed{the associated
+  namespace} \added{\tcode{N}} are ignored.
 
-     \item Any namespace-scope friend declaration functions or friend
+     \item Any namespace-scope friend functions or friend
   function templates (10.7.3) declared in \removed{associated}
   classes \added{with reachable definitions
   in the set of associated entities}
@@ -288,22 +290,22 @@ Modify paragraph 6.4.2/4 and add /5 as follows:
 
      \color{addclr}
      \item
-     \added{Any function or function template in the interface of
-     a named module \tcode{M} (\ref{module.interface}) that has
-     the same innermost enclosing non-inline namespace as
-     some associated entity attached to \tcode{M}
-     is visible within its namespace
-     to a lookup that does not occur within a module unit of \tcode{M},
-     even if it is not visible during an ordinary lookup.}
+     \added{Any declaration \tcode{D} in \tcode{N}
+     that is in the interface of
+     a named module \tcode{M} (\ref{module.interface})
+     is visible
+     if there is an associated entity attached to \tcode{M}
+     with the same innermost enclosing non-inline namespace as \tcode{D}.}
 
     \item
-    \added{Any namespace-scope function or function template declarations
-    that are visible to qualified name lookup (\ref{basic.lookup.qual})
-    at any point in the instantiation context (\ref{module.context}) of the lookup
-    are visible in their respective namespaces
-    even if they are not visible during an ordinary lookup,
-    excluding discarded declarations (\ref{module.global}) and
-    internal linkage declarations attached to the global module.}
+    \added{If the lookup is for a dependent name
+    (\stdref{temp.dep}{12.7.2}, \ref{temp.dep.candidate}),
+    any declaration \tcode{D} in \tcode{N}
+    is visible
+    if \tcode{D} would be visible to qualified name lookup (\ref{namespace.qual})
+    at any point in the instantiation context (\ref{module.context}) of the lookup,
+    unless \tcode{D} is declared in another translation unit, attached to the global module,
+    and is either discarded (\ref{module.global}) or has internal linkage.}
   \end{itemize}
 
 \pnum
@@ -341,13 +343,13 @@ namespace S {
   struct Z { template<typename T> operator T(); };
 }
 void test() {
-  auto x = make(); // OK, \tcode{decltype(x)} is \tcode{R::X} in module \tcode{M}
-  R::f(x);         // ill-formed: \tcode{R} and \tcode{R::f} are not visible here
-  f(x);            // OK, calls \tcode{R::f} from interface of \tcode{M}
-  f(x, Z());       // ill-formed: \tcode{S::f} in module \tcode{M} not considered
-                   // even though \tcode{S} is an associated namespace
-  apply(x, Z());   // OK, \tcode{S::f} is visible in instantiation context, and
-                   // \tcode{R::g} is visible even though it has internal linkage
+  auto x = make();    // OK, \tcode{decltype(x)} is \tcode{R::X} in module \tcode{M}
+  R::f(x);            // ill-formed: \tcode{R} and \tcode{R::f} are not visible here
+  f(x);               // OK, calls \tcode{R::f} from interface of \tcode{M}
+  f(x, S::Z());       // ill-formed: \tcode{S::f} in module \tcode{M} not considered
+                      // even though \tcode{S} is an associated namespace
+  apply(x, S::Z());   // OK, \tcode{S::f} is visible in instantiation context, and
+                      // \tcode{R::g} is visible even though it has internal linkage
 }
 \end{codeblock}
 \added{\exitexample}

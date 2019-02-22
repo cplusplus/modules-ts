@@ -102,14 +102,14 @@ Add a new subclause 14.3 titled ``\textbf{Global module fragment}'' as follows:
 \color{addclr}
 \begin{bnf}
 \nonterminal{pp-global-module-fragment}:\br
-  \terminal{module} \terminal{;} pp-bracketed-tokens \terminal{module}
+  \terminal{module} \terminal{;} pp-balanced-token-seq \terminal{module}
 \end{bnf}
 
 \pnum
 If the first two preprocessing tokens at the start of phase 4 of translation
 are \tcode{module} \tcode{;}, the result of preprocessing shall begin with
 a \grammarterm{pp-global-module-fragment} for which all
-\grammarterm{preprocessing-token}{s} in the \grammarterm{pp-bracketed-tokens}
+\grammarterm{preprocessing-token}{s} in the \grammarterm{pp-balanced-token-seq}
 were produced directly or indirectly by source file inclusion
 (\ref{cpp.include}), and for which the second \tcode{module}
 \grammarterm{preprocessing-token} was not produced by source file inclusion or
@@ -182,9 +182,12 @@ instructs the preprocessor to import macros from the header unit
 (\ref{module.import}) denoted by the \grammarterm{header-name}.
 A \grammarterm{pp-import} is only recognized when the sequence of tokens
 produced by phase 4 of translation up to the \tcode{import} token
-forms a \grammarterm{import-seq}, and the \tcode{import} token is not
-within the \grammarterm{pp-import-suffix} of another \grammarterm{pp-import}.
-The \tcode{;} \grammarterm{preprocessing-token} shall not be produced by
+forms an \grammarterm{import-seq}, and the \tcode{import} token is not
+within the \grammarterm{header-name-tokens} or
+\grammarterm{pp-import-suffix} of another \grammarterm{pp-import}.
+The \tcode{;} \grammarterm{preprocessing-token}
+terminating a \grammarterm{pp-import}
+shall not be produced by
 macro replacement (\stdref{cpp.replace}{14.3}).
 The \term{point of macro import} for a \grammarterm{pp-import} is
 immediately after the \tcode{;} terminating the \grammarterm{pp-import}.
