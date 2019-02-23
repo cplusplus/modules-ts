@@ -66,7 +66,7 @@ shall be directly or indirectly exported
 by the primary module interface unit (\ref{module.import}).
 No diagnostic is required for a violation of these rules.
 \enternote
-Module partitions can only be imported by
+Module partitions can be imported only by
 other module units in the same module.
 The division of a module into module units
 is not visible outside the module.
@@ -348,8 +348,9 @@ export using N::h;              // error: \#1 has internal linkage
   \begin{codeblock}
   export module M;
   struct S { int n; };
-  export typedef S S;   // OK, not a redeclaration of \tcode{struct S}
-  export struct S;      // error: exported declaration follows non-exported definition
+  typedef S S;
+  export typedef S S;   // OK, does not redeclare an entity
+  export struct S;      // error: exported declaration follows non-exported declaration
   \end{codeblock}
   \end{example}
 
@@ -481,7 +482,8 @@ export namespace N {
   In a module unit, all \grammarterm{module-import-declaration}{s}
   shall precede all other \grammarterm{top-level-declaration}{s} in
   the \grammarterm{top-level-declaration-seq} of the
-  \grammarterm{translation-unit}.
+  \grammarterm{translation-unit}
+  and of the \grammarterm{private-module-fragment} (if any).
 The optional \grammarterm{attribute-specifier-seq}
 appertains to the \grammarterm{module-import-declaration}.
 
@@ -506,7 +508,7 @@ appertains to the \grammarterm{module-import-declaration}.
   \pnum
   A \grammarterm{module-import-declaration} that specifies
   a \grammarterm{module-partition} shall only appear after
-  the \grammarterm{module-declaration} in a module unit in
+  the \grammarterm{module-declaration} in a module unit of
   some module $M$.
   Such a declaration imports the so-named
   module partition of $M$.
